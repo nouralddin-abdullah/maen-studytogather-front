@@ -1,0 +1,119 @@
+/**
+ * Application-wide constants.
+ */
+export const APP_NAME = "معاً";
+export const APP_NAME_EN = "Maen";
+export const APP_TAGLINE = "ادرس مع أصدقائك";
+export const APP_DESCRIPTION = "منصة للدراسة الجماعية — تواصل، تعاون، تفوّق";
+
+export const STORAGE_KEYS = {
+  ACCESS_TOKEN: "access_token",
+  USER: "user",
+  THEME: "theme",
+};
+
+export const ROUTES = {
+  HOME: "/",
+  LOGIN: "/auth/login",
+  REGISTER: "/auth/register",
+  DISCOVER: "/discover",
+  ROOM: (id) => `/room/${id}`,
+};
+
+/**
+ * Enums matching backend shared types.
+ */
+export const FIELDS = {
+  PHYSICS: "PHYSICS",
+  CHEMISTRY: "CHEMISTRY",
+  BIOLOGY: "BIOLOGY",
+  MATHEMATICS: "MATHEMATICS",
+  MEDICINE: "MEDICINE",
+  DENTISTRY: "DENTISTRY",
+  NURSING: "NURSING",
+  PHARMACY: "PHARMACY",
+  ENGINEERING: "ENGINEERING",
+  COMPUTER_SCIENCE: "COMPUTER_SCIENCE",
+  LAW: "LAW",
+  VETERINARY_MEDICINE: "VETERINARY_MEDICINE",
+  BUSINESS: "BUSINESS",
+  POLITICS: "POLITICS",
+  PUBLIC_ADMINISTRATION: "PUBLIC_ADMINISTRATION",
+  JOURNALISM: "JOURNALISM",
+  PSYCHOLOGY: "PSYCHOLOGY",
+  EDUCATION: "EDUCATION",
+  ARTS: "ARTS",
+  SCHOOL: "SCHOOL",
+};
+
+export const FIELD_LABELS = {
+  PHYSICS: "⚛️  الفيزياء",
+  CHEMISTRY: "🧪  الكيمياء",
+  BIOLOGY: "🧬  الأحياء",
+  MATHEMATICS: "📐  الرياضيات",
+  MEDICINE: "🩺  الطب",
+  DENTISTRY: "🦷  طب الأسنان",
+  NURSING: "💉  التمريض",
+  PHARMACY: "💊  الصيدلة",
+  ENGINEERING: "⚙️  الهندسة",
+  COMPUTER_SCIENCE: "💻  علوم الحاسب",
+  LAW: "⚖️  القانون",
+  VETERINARY_MEDICINE: "🐾  الطب البيطري",
+  BUSINESS: "📊  إدارة الأعمال",
+  POLITICS: "🏛️  العلوم السياسية",
+  PUBLIC_ADMINISTRATION: "🏢  الإدارة العامة",
+  JOURNALISM: "📰  الإعلام",
+  PSYCHOLOGY: "🧠  علم النفس",
+  EDUCATION: "📚  التعليم",
+  ARTS: "🎨  الفنون",
+  SCHOOL: "🏫  مدرسة",
+};
+
+export const SEX = {
+  MALE: "male",
+  FEMALE: "female",
+};
+
+export const SEX_LABELS = {
+  male: "👨  ذكر",
+  female: "👩  أنثى",
+};
+
+/**
+ * Countries list — curated Arabic-speaking & common countries with flag emojis.
+ * ISO 3166-1 alpha-2 codes.
+ */
+export const COUNTRIES = [
+  { value: "SA", label: "🇸🇦  السعودية" },
+  { value: "EG", label: "🇪🇬  مصر" },
+  { value: "AE", label: "🇦🇪  الإمارات" },
+  { value: "JO", label: "🇯🇴  الأردن" },
+  { value: "KW", label: "🇰🇼  الكويت" },
+  { value: "BH", label: "🇧🇭  البحرين" },
+  { value: "QA", label: "🇶🇦  قطر" },
+  { value: "OM", label: "🇴🇲  عُمان" },
+  { value: "IQ", label: "🇮🇶  العراق" },
+  { value: "SY", label: "🇸🇾  سوريا" },
+  { value: "LB", label: "🇱🇧  لبنان" },
+  { value: "PS", label: "🇵🇸  فلسطين" },
+  { value: "YE", label: "🇾🇪  اليمن" },
+  { value: "LY", label: "🇱🇾  ليبيا" },
+  { value: "TN", label: "🇹🇳  تونس" },
+  { value: "DZ", label: "🇩🇿  الجزائر" },
+  { value: "MA", label: "🇲🇦  المغرب" },
+  { value: "SD", label: "🇸🇩  السودان" },
+  { value: "MR", label: "🇲🇷  موريتانيا" },
+  { value: "SO", label: "🇸🇴  الصومال" },
+  { value: "DJ", label: "🇩🇯  جيبوتي" },
+  { value: "KM", label: "🇰🇲  جزر القمر" },
+  { value: "TR", label: "🇹🇷  تركيا" },
+  { value: "PK", label: "🇵🇰  باكستان" },
+  { value: "MY", label: "🇲🇾  ماليزيا" },
+  { value: "ID", label: "🇮🇩  إندونيسيا" },
+  { value: "US", label: "🇺🇸  الولايات المتحدة" },
+  { value: "GB", label: "🇬🇧  المملكة المتحدة" },
+  { value: "CA", label: "🇨🇦  كندا" },
+  { value: "DE", label: "🇩🇪  ألمانيا" },
+  { value: "FR", label: "🇫🇷  فرنسا" },
+  { value: "AU", label: "🇦🇺  أستراليا" },
+];
