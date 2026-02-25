@@ -107,9 +107,13 @@ function RoomCard({ room, onJoin }) {
             <div className="absolute top-3 start-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
               <span className="relative flex h-2 w-2">
                 {phase.ping && (
-                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${phase.dotColor} opacity-75`} />
+                  <span
+                    className={`animate-ping absolute inline-flex h-full w-full rounded-full ${phase.dotColor} opacity-75`}
+                  />
                 )}
-                <span className={`relative inline-flex rounded-full h-2 w-2 ${phase.dotColor}`} />
+                <span
+                  className={`relative inline-flex rounded-full h-2 w-2 ${phase.dotColor}`}
+                />
               </span>
               <span className="text-[11px] font-mono font-bold text-white tracking-wider">
                 {phase.label}
@@ -120,7 +124,9 @@ function RoomCard({ room, onJoin }) {
 
         {/* Ambient sound badge */}
         {ambientSound && (
-          <div className={`absolute top-3 end-3 ${ambientBg} backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold text-white shadow-lg`}>
+          <div
+            className={`absolute top-3 end-3 ${ambientBg} backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold text-white shadow-lg`}
+          >
             {ambientLabel}
           </div>
         )}

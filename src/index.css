@@ -176,6 +176,24 @@
   }
 }
 
+@keyframes drawer-slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes drawer-backdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @layer utilities {
   .animate-fade-in {
     animation: fade-in 0.4s ease-out forwards;
@@ -187,5 +205,13 @@
 
   .animate-slide-in-right {
     animation: slide-in-right 0.4s ease-out forwards;
+  }
+
+  .animate-drawer-slide-in {
+    animation: drawer-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-drawer-backdrop {
+    animation: drawer-backdrop 0.25s ease-out forwards;
   }
 }

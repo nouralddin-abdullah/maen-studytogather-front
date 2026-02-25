@@ -9,6 +9,7 @@ const ENDPOINTS = {
     ME: "/users/me",
     PROFILE: (id) => `/users/${id}`,
     UPDATE: "/users/me",
+    HEATMAP: (id) => `/users/${id}/heatmap`,
   },
 
   // Rooms

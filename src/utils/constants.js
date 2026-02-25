@@ -17,8 +17,48 @@ export const ROUTES = {
   LOGIN: "/auth/login",
   REGISTER: "/auth/register",
   DISCOVER: "/discover",
+  PROFILE: (id) => `/user/${id}`,
+  MY_PROFILE: "/user/me",
   ROOM: (id) => `/room/${id}`,
 };
+
+/**
+ * Country code → label lookup (for display on profile etc.).
+ */
+export const COUNTRY_LABELS = Object.fromEntries([
+  ["SA", "🇸🇦 السعودية"],
+  ["EG", "🇪🇬 مصر"],
+  ["AE", "🇦🇪 الإمارات"],
+  ["JO", "🇯🇴 الأردن"],
+  ["KW", "🇰🇼 الكويت"],
+  ["BH", "🇧🇭 البحرين"],
+  ["QA", "🇶🇦 قطر"],
+  ["OM", "🇴🇲 عُمان"],
+  ["IQ", "🇮🇶 العراق"],
+  ["SY", "🇸🇾 سوريا"],
+  ["LB", "🇱🇧 لبنان"],
+  ["PS", "🇵🇸 فلسطين"],
+  ["YE", "🇾🇪 اليمن"],
+  ["LY", "🇱🇾 ليبيا"],
+  ["TN", "🇹🇳 تونس"],
+  ["DZ", "🇩🇿 الجزائر"],
+  ["MA", "🇲🇦 المغرب"],
+  ["SD", "🇸🇩 السودان"],
+  ["MR", "🇲🇷 موريتانيا"],
+  ["SO", "🇸🇴 الصومال"],
+  ["DJ", "🇩🇯 جيبوتي"],
+  ["KM", "🇰🇲 جزر القمر"],
+  ["TR", "🇹🇷 تركيا"],
+  ["PK", "🇵🇰 باكستان"],
+  ["MY", "🇲🇾 ماليزيا"],
+  ["ID", "🇮🇩 إندونيسيا"],
+  ["US", "🇺🇸 الولايات المتحدة"],
+  ["GB", "🇬🇧 المملكة المتحدة"],
+  ["CA", "🇨🇦 كندا"],
+  ["DE", "🇩🇪 ألمانيا"],
+  ["FR", "🇫🇷 فرنسا"],
+  ["AU", "🇦🇺 أستراليا"],
+]);
 
 /**
  * Enums matching backend shared types.

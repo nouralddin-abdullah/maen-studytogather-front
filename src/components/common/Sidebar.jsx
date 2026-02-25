@@ -162,15 +162,15 @@ function Sidebar() {
         <div className="w-8 h-px bg-border" />
 
         {/* User avatar */}
-        <div className="group relative">
+        <Link to={ROUTES.MY_PROFILE} className="group relative">
           {user?.avatar ? (
             <img
               src={user.avatar}
               alt={user.nickName}
-              className="w-9 h-9 rounded-full border border-border object-cover"
+              className="w-9 h-9 rounded-full border border-border object-cover hover:border-brand-500 transition-colors"
             />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-brand-100 dark:bg-brand-900/30 border border-border flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-brand-100 dark:bg-brand-900/30 border border-border hover:border-brand-500 flex items-center justify-center transition-colors">
               <span className="text-sm font-bold text-brand-600">
                 {(user?.nickName || user?.username || "م").charAt(0)}
               </span>
@@ -179,7 +179,7 @@ function Sidebar() {
           <span className="absolute start-full ms-3 px-2.5 py-1 rounded-lg bg-surface-elevated border border-border text-xs font-medium text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-elevated z-[100]">
             {user?.nickName || user?.username || "المستخدم"}
           </span>
-        </div>
+        </Link>
       </div>
     </aside>
   );
