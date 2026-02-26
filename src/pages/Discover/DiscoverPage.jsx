@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useRoomsStore } from "@/stores";
 import { ROUTES } from "@/utils/constants";
 import RoomCard from "@/components/ui/RoomCard";
+import { Link } from "react-router-dom";
 
 /**
  * Sort options for the room list.
@@ -122,7 +123,10 @@ function DiscoverPage() {
         </div>
 
         {/* Create room button */}
-        <button className="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm hover:shadow-md transition-all cursor-pointer ms-auto">
+        <Link
+          to={ROUTES.CREATE_ROOM}
+          className="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm hover:shadow-md transition-all cursor-pointer ms-auto"
+        >
           <svg
             className="w-4.5 h-4.5"
             fill="none"
@@ -137,7 +141,7 @@ function DiscoverPage() {
             />
           </svg>
           إنشاء غرفة
-        </button>
+        </Link>
       </header>
 
       {/* ══════ Room Grid ══════ */}

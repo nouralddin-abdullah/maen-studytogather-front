@@ -157,7 +157,6 @@ function RoomPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inviteCode]);
 
-  // ── Cleanup on unmount ──
   useEffect(() => {
     return () => {
       // Disconnect SSE when navigating away.
@@ -917,7 +916,7 @@ function RoomPage() {
             )}
             {!isHost && phase === TIMER_PHASES.PAUSED && (
               <p className="text-center text-orange-300/60 text-xs">
-                ⏸️ الجلسة متوقفة مؤقتاً
+                الجلسة متوقفة مؤقتاً
               </p>
             )}
           </div>

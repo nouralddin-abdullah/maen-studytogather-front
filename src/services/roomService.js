@@ -32,11 +32,31 @@ const roomService = {
   },
 
   /**
-   * Create a new room.
-   * @param {Object} data - Room data
+   * Create a new room (multipart/form-data for wallpaper upload).
+   * @param {Object} data - Room fields + wallpaper File
    */
   async create(data) {
-    const response = await apiClient.post(ENDPOINTS.ROOMS.CREATE, data);
+    const formData = new FormData();
+
+    // Required fields
+    formData.append("name", data.name);
+    formData.append("description", data.description);
+    formData.append("focusDuration", String(data.focusDuration));
+    formData.append("breakDuration", String(data.breakDuration));
+    formData.append("wallpaper", data.wallpaper); // File
+
+    // Optional fields
+    if (data.theme) formData.append("theme", data.theme);
+    if (data.ambientSound) formData.append("ambientSound", data.ambientSound);
+    if (data.isPublic !== undefined)
+      formData.append("isPublic", String(data.isPublic));
+    if (data.passCode) formData.append("passCode", data.passCode);
+    if (data.maxCapacity)
+      formData.append("maxCapacity", String(data.maxCapacity));
+
+    const response = await apiClient.post(ENDPOINTS.ROOMS.CREATE, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return response.data;
   },
 

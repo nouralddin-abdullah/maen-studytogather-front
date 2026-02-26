@@ -16,6 +16,7 @@ import RegisterPage from "@/pages/Auth/RegisterPage";
 import DiscoverPage from "@/pages/Discover/DiscoverPage";
 import ProfilePage from "@/pages/Profile/ProfilePage";
 import RoomPage from "@/pages/Room/RoomPage";
+import CreateRoomPage from "@/pages/CreateRoom/CreateRoomPage";
 import NotFoundPage from "@/pages/NotFound/NotFoundPage";
 
 /**
@@ -38,6 +39,7 @@ function AppRouter() {
         }
       >
         <Route path="/discover" element={<DiscoverPage />} />
+        <Route path="/create-room" element={<CreateRoomPage />} />
         <Route path="/user/:id" element={<ProfilePage />} />
       </Route>
 

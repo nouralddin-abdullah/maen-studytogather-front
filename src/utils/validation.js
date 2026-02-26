@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FIELDS, SEX } from "./constants";
+import { FIELDS, SEX, ROOM_THEMES, AMBIENT_SOUNDS } from "./constants";
 
 /**
  * Validation schemas for forms.
@@ -107,3 +107,68 @@ export const editProfileSchema = z.object({
     .optional()
     .or(z.literal("")),
 });
+
+/**
+ * Create room schema — mirrors backend CreateRoomDTO with Arabic messages.
+ */
+export const createRoomSchema = z
+  .object({
+    name: z
+      .string()
+      .min(10, "اسم الغرفة يجب أن يكون 10 أحرف على الأقل")
+      .max(100, "اسم الغرفة يجب أن يكون 100 حرف كحد أقصى"),
+    description: z
+      .string()
+      .min(10, "وصف الغرفة يجب أن يكون 10 أحرف على الأقل")
+      .max(500, "وصف الغرفة يجب أن يكون 500 حرف كحد أقصى"),
+    theme: z
+      .enum(Object.values(ROOM_THEMES), {
+        message: "اختر ثيم صالح",
+      })
+      .optional(),
+    ambientSound: z
+      .enum(Object.values(AMBIENT_SOUNDS), {
+        message: "اختر صوت محيط صالح",
+      })
+      .optional(),
+    isPublic: z.boolean().optional().default(true),
+    passCode: z
+      .string()
+      .min(3, "رمز الدخول يجب أن يكون 3 أحرف على الأقل")
+      .max(15, "رمز الدخول يجب أن يكون 15 حرف كحد أقصى")
+      .optional()
+      .or(z.literal("")),
+    maxCapacity: z.coerce
+      .number()
+      .int()
+      .min(2, "الحد الأقصى يجب أن يكون 2 على الأقل")
+      .max(20, "الحد الأقصى يجب أن يكون 20 كحد أقصى")
+      .optional()
+      .default(10),
+    focusDuration: z.coerce
+      .number()
+      .int()
+      .min(5, "مدة التركيز 5 دقائق على الأقل")
+      .max(360, "مدة التركيز 360 دقيقة كحد أقصى"),
+    breakDuration: z.coerce
+      .number()
+      .int()
+      .min(5, "مدة الاستراحة 5 دقائق على الأقل")
+      .max(360, "مدة الاستراحة 360 دقيقة كحد أقصى"),
+    wallpaper: z
+      .instanceof(File, { message: "صورة الخلفية مطلوبة" })
+      .refine((f) => f.size > 0, "صورة الخلفية مطلوبة")
+      .refine(
+        (f) => f.size <= 5 * 1024 * 1024,
+        "حجم الصورة يجب أن يكون أقل من 5 ميجابايت",
+      )
+      .refine(
+        (f) => ["image/jpeg", "image/png", "image/webp"].includes(f.type),
+        "صيغة الصورة يجب أن تكون JPEG أو PNG أو WebP",
+      ),
+  })
+  .refine((data) => {
+    // If room is not public and passCode is provided, that's fine
+    // If room is not public, passCode is optional per backend
+    return true;
+  }, {});
