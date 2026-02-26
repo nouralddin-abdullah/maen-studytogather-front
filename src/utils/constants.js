@@ -119,6 +119,41 @@ export const SEX_LABELS = {
   female: "👩  أنثى",
 };
 
+// ── Room Enums ──────────────────────────────────
+
+export const ROOM_THEMES = {
+  CLASSIC: "CLASSIC",
+  NIGHT_CITY: "NIGHT_CITY",
+};
+
+export const TIMER_PHASES = {
+  IDLE: "IDLE",
+  FOCUS: "FOCUS",
+  BREAK: "BREAK",
+  PAUSED: "PAUSED",
+};
+
+export const TIMER_PHASE_LABELS = {
+  IDLE: "في الانتظار",
+  FOCUS: "تركيز",
+  BREAK: "استراحة",
+  PAUSED: "متوقف مؤقتاً",
+};
+
+export const AMBIENT_SOUNDS = {
+  RAIN: "RAIN",
+  LOFIC_MUSIC: "LOFIC_MUSIC",
+  SEA: "SEA",
+  NONE: "NONE",
+};
+
+export const AMBIENT_SOUND_LABELS = {
+  RAIN: "🌧️ مطر",
+  LOFIC_MUSIC: "🎵 لوفي",
+  SEA: "🌊 بحر",
+  NONE: "🔇 بدون صوت",
+};
+
 /**
  * Countries list — curated Arabic-speaking & common countries with flag emojis.
  * ISO 3166-1 alpha-2 codes.

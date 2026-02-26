@@ -34,8 +34,10 @@ apiClient.interceptors.response.use(
   (error) => {
     const { response } = error;
 
-    // Handle 401 — token expired / invalid
-    if (response?.status === 401) {
+    // Handle 401 — token expired / invalid.
+    // Requests can set `_skipAuthRedirect: true` to opt out
+    // (e.g. room-join uses 401 for "invalid passcode", not expired JWT).
+    if (response?.status === 401 && !error.config?._skipAuthRedirect) {
       localStorage.removeItem("access_token");
       localStorage.removeItem("user");
 

@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useRoomsStore } from "@/stores";
+import { ROUTES } from "@/utils/constants";
 import RoomCard from "@/components/ui/RoomCard";
 
 /**
@@ -18,6 +20,7 @@ const SORT_OPTIONS = [
 function DiscoverPage() {
   const { rooms, meta, isLoading, error, fetchRooms, filters } =
     useRoomsStore();
+  const navigate = useNavigate();
 
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const [activeSort, setActiveSort] = useState(0);
@@ -50,8 +53,14 @@ function DiscoverPage() {
 
   // ── Join room handler ── //
   const handleJoinRoom = (room) => {
-    // TODO: implement join logic (navigate to room, handle passcode modal)
-    console.log("Join room:", room.id, room.name);
+    navigate(`/room/${room.inviteCode}`, {
+      state: {
+        roomPreview: {
+          name: room.name,
+          hasPassCode: room.hasPassCode,
+        },
+      },
+    });
   };
 
   // ── Pagination ── //

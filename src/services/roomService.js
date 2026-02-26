@@ -41,20 +41,67 @@ const roomService = {
   },
 
   /**
-   * Join a room.
-   * @param {string} id
+   * Join a room via invite code.
+   * @param {string} inviteCode
+   * @param {string|null} passCode - optional passcode for protected rooms
    */
-  async join(id) {
-    const response = await apiClient.post(ENDPOINTS.ROOMS.JOIN(id));
+  async join(inviteCode, passCode = null) {
+    const response = await apiClient.post(
+      ENDPOINTS.ROOMS.JOIN(inviteCode),
+      { passCode: passCode || "" },
+      { _skipAuthRedirect: true },
+    );
     return response.data;
   },
 
   /**
-   * Leave a room.
-   * @param {string} id
+   * Leave the current active room.
    */
-  async leave(id) {
-    const response = await apiClient.post(ENDPOINTS.ROOMS.LEAVE(id));
+  async leave() {
+    const response = await apiClient.post(ENDPOINTS.ROOMS.LEAVE);
+    return response.data;
+  },
+
+  /**
+   * Build the full SSE URL for the given room (no token in query).
+   * @param {string} roomId
+   * @returns {string}
+   */
+  getSSEUrl(roomId) {
+    const base =
+      import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+    return `${base}${ENDPOINTS.ROOMS.SSE(roomId)}`;
+  },
+
+  // ── Timer controls (host only) ──
+
+  async startTimer(roomId) {
+    const response = await apiClient.post(ENDPOINTS.ROOMS.START_TIMER(roomId));
+    return response.data;
+  },
+
+  async pauseTimer(roomId) {
+    const response = await apiClient.post(ENDPOINTS.ROOMS.PAUSE_TIMER(roomId));
+    return response.data;
+  },
+
+  async resumeTimer(roomId) {
+    const response = await apiClient.post(ENDPOINTS.ROOMS.RESUME_TIMER(roomId));
+    return response.data;
+  },
+
+  async restartTimer(roomId) {
+    const response = await apiClient.post(
+      ENDPOINTS.ROOMS.RESTART_TIMER(roomId),
+    );
+    return response.data;
+  },
+
+  async changePomodoro(roomId, { focusDuration, breakDuration }) {
+    const response = await apiClient.patch(
+      ENDPOINTS.ROOMS.CHANGE_POMODORO(roomId),
+      { focusDuration, breakDuration },
+    );
     return response.data;
   },
 };

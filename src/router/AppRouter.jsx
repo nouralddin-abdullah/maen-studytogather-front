@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 
 // Layouts
 import MainLayout from "@/layouts/MainLayout";
@@ -15,6 +15,7 @@ import LoginPage from "@/pages/Auth/LoginPage";
 import RegisterPage from "@/pages/Auth/RegisterPage";
 import DiscoverPage from "@/pages/Discover/DiscoverPage";
 import ProfilePage from "@/pages/Profile/ProfilePage";
+import RoomPage from "@/pages/Room/RoomPage";
 import NotFoundPage from "@/pages/NotFound/NotFoundPage";
 
 /**
@@ -38,6 +39,17 @@ function AppRouter() {
       >
         <Route path="/discover" element={<DiscoverPage />} />
         <Route path="/user/:id" element={<ProfilePage />} />
+      </Route>
+
+      {/* Room page — standalone full-screen (no sidebar) */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <Outlet />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/room/:inviteCode" element={<RoomPage />} />
       </Route>
 
       {/* Auth pages with auth layout */}

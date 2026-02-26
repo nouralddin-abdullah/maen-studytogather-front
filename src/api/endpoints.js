@@ -18,8 +18,14 @@ const ENDPOINTS = {
     DISCOVER: "/rooms/discover",
     CREATE: "/rooms",
     DETAIL: (id) => `/rooms/${id}`,
-    JOIN: (id) => `/rooms/${id}/join`,
-    LEAVE: (id) => `/rooms/${id}/leave`,
+    JOIN: (inviteCode) => `/rooms/join/${inviteCode}`,
+    LEAVE: "/rooms/leave",
+    SSE: (roomId) => `/rooms/sse/${roomId}`,
+    START_TIMER: (roomId) => `/rooms/${roomId}/start-timer`,
+    PAUSE_TIMER: (roomId) => `/rooms/${roomId}/pause-timer`,
+    RESUME_TIMER: (roomId) => `/rooms/${roomId}/resume-timer`,
+    RESTART_TIMER: (roomId) => `/rooms/${roomId}/restart-timer`,
+    CHANGE_POMODORO: (roomId) => `/rooms/${roomId}/change-pomodoro`,
   },
 };
 
