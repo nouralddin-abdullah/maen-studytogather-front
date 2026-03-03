@@ -61,6 +61,36 @@ const roomService = {
   },
 
   /**
+   * Update an existing room (multipart/form-data for wallpaper upload).
+   * @param {string} roomId
+   * @param {Object} data - Room fields + optional wallpaper File
+   */
+  async update(roomId, data) {
+    const formData = new FormData();
+
+    // Optional fields
+    if (data.name) formData.append("name", data.name);
+    if (data.description) formData.append("description", data.description);
+    if (data.theme) formData.append("theme", data.theme);
+    if (data.ambientSound) formData.append("ambientSound", data.ambientSound);
+    if (data.isPublic !== undefined)
+      formData.append("isPublic", String(data.isPublic));
+    if (data.passCode !== undefined) formData.append("passCode", data.passCode || "");
+    if (data.maxCapacity)
+      formData.append("maxCapacity", String(data.maxCapacity));
+      
+    // File
+    if (data.wallpaper && data.wallpaper instanceof File) {
+      formData.append("wallpaper", data.wallpaper);
+    }
+
+    const response = await apiClient.patch(ENDPOINTS.ROOMS.UPDATE(roomId), formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  },
+
+  /**
    * Join a room via invite code.
    * @param {string} inviteCode
    * @param {string|null} passCode - optional passcode for protected rooms

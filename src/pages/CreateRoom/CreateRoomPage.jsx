@@ -334,18 +334,15 @@ function CreateRoomPage() {
             </div>
           </div>
 
-          {/* ── PassCode (only when private) ── */}
-          {!isPublic && (
-            <div className="animate-fade-in">
-              <Input
-                label="رمز الدخول (اختياري)"
-                id="passCode"
-                placeholder="رمز سري للانضمام"
-                error={errors.passCode?.message}
-                {...register("passCode")}
-              />
-            </div>
-          )}
+
+          {/* ── PassCode (اختياري — لأي غرفة) ── */}
+          <Input
+            label="رمز الدخول (اختياري)"
+            id="passCode"
+            placeholder="رمز سري للانضمام"
+            error={errors.passCode?.message}
+            {...register("passCode")}
+          />
 
           {/* ── Max Capacity ── */}
           <Input

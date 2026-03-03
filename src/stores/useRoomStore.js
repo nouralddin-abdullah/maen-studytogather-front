@@ -283,6 +283,21 @@ const useRoomStore = create((set, get) => ({
         break;
       }
 
+      case "ROOM_SETTINGS_CHANGED": {
+        set((state) => ({
+          room: state.room
+            ? {
+                ...state.room,
+                name: payload.name ?? state.room.name,
+                theme: payload.theme ?? state.room.theme,
+                ambientSound: payload.ambientSound ?? state.room.ambientSound,
+                wallPaperUrl: payload.wallPaperUrl ?? state.room.wallPaperUrl,
+              }
+            : null,
+        }));
+        break;
+      }
+
       default:
         break;
     }

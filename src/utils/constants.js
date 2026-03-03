@@ -155,6 +155,23 @@ export const AMBIENT_SOUND_LABELS = {
   NONE: "🔇 بدون صوت",
 };
 
+// ── Sound Tracks (R2 hosted) ────────────────────
+export const R2_SOUNDS_BASE =
+  "https://pub-2da766ccb48c485895ae36b58be35142.r2.dev/assets/sounds";
+
+export const SOUND_TRACKS = {
+  RAIN: [
+    { id: "rain-1", label: "🌧️ مطر هادئ", file: "chilling-rain-sound.mp3" },
+    { id: "rain-2", label: "🌧️ مطر لطيف", file: "gentle-rain.mp3" },
+    { id: "rain-3", label: "🌙 مطر منتصف الليل", file: "midnight-rainsound.mp3" },
+    { id: "rain-4", label: "⛈️ مطر غزير", file: "rain-sound.mp3" },
+  ],
+  SEA: [
+    { id: "sea-1", label: "🌊 أمواج المحيط", file: "ocean-waves.mp3" },
+    { id: "sea-2", label: "🌊 أمواج متكسرة", file: "crachsing-waves.mp3" },
+  ],
+};
+
 /**
  * Countries list — curated Arabic-speaking & common countries with flag emojis.
  * ISO 3166-1 alpha-2 codes.

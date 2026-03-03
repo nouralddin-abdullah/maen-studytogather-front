@@ -17,6 +17,7 @@ const ENDPOINTS = {
     LIST: "/rooms",
     DISCOVER: "/rooms/discover",
     CREATE: "/rooms/create-room",
+    UPDATE: (id) => `/rooms/${id}`,
     DETAIL: (id) => `/rooms/${id}`,
     JOIN: (inviteCode) => `/rooms/join/${inviteCode}`,
     LEAVE: "/rooms/leave",

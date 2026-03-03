@@ -8,6 +8,8 @@ import {
   TIMER_PHASE_LABELS,
   AMBIENT_SOUND_LABELS,
 } from "@/utils/constants";
+import { EditRoomModal } from "@/components/ui";
+import useAmbientSound from "@/hooks/useAmbientSound";
 
 /* ═══════════════════════════════════════════════════
    Theme config — CLASSIC uses site brand (blue),
@@ -125,9 +127,17 @@ function RoomPage() {
   const [showInviteToast, setShowInviteToast] = useState(false);
   const [showParticipants, setShowParticipants] = useState(false);
   const [showPomodoroSettings, setShowPomodoroSettings] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showSoundPicker, setShowSoundPicker] = useState(false);
   const [editFocus, setEditFocus] = useState(25);
   const [editBreak, setEditBreak] = useState(5);
   const notifEndRef = useRef(null);
+  const soundPickerRef = useRef(null);
+
+  // ── Ambient sound engine ──
+  const { currentTrack, availableTracks, changeTrack, isLoadingLofi } =
+    useAmbientSound(room?.ambientSound, volume, isMuted);
 
   // ── Derived ──
   const isHost = room?.hostId === user?.id;
@@ -164,6 +174,27 @@ function RoomPage() {
       useRoomStore.getState().disconnectSSE();
     };
   }, []);
+
+  // ── ESC to exit fullscreen focus mode ──
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape" && isFullscreen) setIsFullscreen(false);
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isFullscreen]);
+
+  // ── Close sound picker on outside click ──
+  useEffect(() => {
+    if (!showSoundPicker) return;
+    const handleClick = (e) => {
+      if (soundPickerRef.current && !soundPickerRef.current.contains(e.target)) {
+        setShowSoundPicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [showSoundPicker]);
 
   // ── Timer countdown ──
   useEffect(() => {
@@ -498,6 +529,29 @@ function RoomPage() {
                   </span>
                 )}
               </div>
+
+              {/* Edit Room button (Host only) */}
+              {isHost && (
+                <button
+                  onClick={() => setShowEditModal(true)}
+                  className={`${themeCfg.accentBg} text-white px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 shadow-sm border border-white/10 transition-all hover:bg-white/10 cursor-pointer`}
+                >
+                  <svg
+                    className="w-3.5 h-3.5 text-white/80"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
+                    />
+                  </svg>
+                  تعديل
+                </button>
+              )}
             </div>
           </header>
 
@@ -506,23 +560,107 @@ function RoomPage() {
             <div
               className={`${glassClass} px-5 py-3 rounded-2xl flex items-center gap-5`}
             >
-              {/* Ambient sound info */}
-              <div className="flex items-center gap-3 pe-4 border-e border-white/10">
-                <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-lg">
-                  {room.ambientSound === "RAIN"
-                    ? "🌧️"
-                    : room.ambientSound === "LOFIC_MUSIC"
-                      ? "🎵"
-                      : room.ambientSound === "SEA"
-                        ? "🌊"
-                        : "🔇"}
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-white">
-                    {ambientLabel}
-                  </span>
-                  <span className="text-[10px] text-white/50">صوت محيطي</span>
-                </div>
+              {/* Ambient sound info — clickable to open variant picker */}
+              <div className="relative" ref={soundPickerRef}>
+                <button
+                  onClick={() =>
+                    room.ambientSound && room.ambientSound !== "NONE"
+                      ? setShowSoundPicker((v) => !v)
+                      : null
+                  }
+                  className={`flex items-center gap-3 pe-4 border-e border-white/10 transition-colors ${
+                    room.ambientSound && room.ambientSound !== "NONE"
+                      ? "cursor-pointer hover:bg-white/5 rounded-lg px-3 py-1.5 -mx-1"
+                      : ""
+                  }`}
+                >
+                  <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-lg">
+                    {room.ambientSound === "RAIN"
+                      ? "🌧️"
+                      : room.ambientSound === "LOFIC_MUSIC"
+                        ? "🎵"
+                        : room.ambientSound === "SEA"
+                          ? "🌊"
+                          : "🔇"}
+                  </div>
+                  <div className="flex flex-col text-start">
+                    <span className="text-xs font-bold text-white">
+                      {currentTrack?.label || ambientLabel}
+                    </span>
+                    <span className="text-[10px] text-white/50">صوت محيطي</span>
+                  </div>
+                  {room.ambientSound && room.ambientSound !== "NONE" && (
+                    <svg
+                      className={`w-3.5 h-3.5 text-white/40 transition-transform ms-1 ${
+                        showSoundPicker ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                    </svg>
+                  )}
+                </button>
+
+                {/* Sound variant picker popover */}
+                {showSoundPicker && (
+                  <div className="absolute bottom-full mb-2 start-0 min-w-[220px] max-w-[280px] bg-black/80 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl overflow-hidden animate-fade-in z-50">
+                    <div className="px-3 py-2 border-b border-white/10 flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-white/70">
+                        {room.ambientSound === "RAIN"
+                          ? "🌧️ أنواع صوت المطر"
+                          : room.ambientSound === "SEA"
+                            ? "🌊 أنواع صوت البحر"
+                            : "🎵 محطات لوفي"}
+                      </span>
+                      {isLoadingLofi && (
+                        <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-transparent rounded-full animate-spin" />
+                      )}
+                    </div>
+                    <div className="max-h-[200px] overflow-y-auto custom-scrollbar py-1">
+                      {availableTracks.length === 0 && isLoadingLofi && (
+                        <p className="text-white/30 text-xs text-center py-4">
+                          جاري تحميل المحطات...
+                        </p>
+                      )}
+                      {availableTracks.length === 0 && !isLoadingLofi && room.ambientSound === "LOFIC_MUSIC" && (
+                        <p className="text-white/30 text-xs text-center py-4">
+                          لم يتم العثور على محطات
+                        </p>
+                      )}
+                      {availableTracks.map((track) => {
+                        const isActive = currentTrack?.id === track.id;
+                        return (
+                          <button
+                            key={track.id}
+                            onClick={() => {
+                              changeTrack(track.id);
+                              setShowSoundPicker(false);
+                            }}
+                            className={`w-full text-start px-3 py-2 text-xs transition-colors cursor-pointer flex items-center gap-2.5 ${
+                              isActive
+                                ? "bg-white/15 text-white font-bold"
+                                : "text-white/70 hover:bg-white/10 hover:text-white"
+                            }`}
+                          >
+                            {isActive && (
+                              <span className="relative flex h-2 w-2 flex-shrink-0">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                              </span>
+                            )}
+                            {!isActive && (
+                              <span className="w-2 h-2 rounded-full bg-white/20 flex-shrink-0" />
+                            )}
+                            <span className="truncate">{track.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Volume control */}
@@ -577,11 +715,12 @@ function RoomPage() {
                 />
               </div>
 
-              {/* Divider + participants toggle (mobile helper) */}
+              {/* Divider + Fullscreen focus toggle */}
               <div className="ps-4 border-s border-white/10">
                 <button
-                  onClick={() => setShowParticipants(!showParticipants)}
-                  className={`w-9 h-9 rounded-full ${themeCfg.accent} flex items-center justify-center text-white shadow-lg ${themeCfg.accentShadow} cursor-pointer`}
+                  onClick={() => setIsFullscreen(true)}
+                  title="وضع التركيز"
+                  className={`w-9 h-9 rounded-full ${themeCfg.accent} flex items-center justify-center text-white shadow-lg ${themeCfg.accentShadow} cursor-pointer transition-all hover:scale-110`}
                 >
                   <svg
                     className="w-4 h-4"
@@ -593,7 +732,7 @@ function RoomPage() {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+                      d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"
                     />
                   </svg>
                 </button>
@@ -1041,6 +1180,117 @@ function RoomPage() {
           </div>
         </aside>
       </div>
+
+      {/* ── Modals ── */}
+      {isHost && (
+        <EditRoomModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          room={room}
+        />
+      )}
+
+      {/* ═════════════════════════════════════════
+         FULLSCREEN FOCUS MODE
+         ═════════════════════════════════════════ */}
+      {isFullscreen && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center animate-fade-in">
+          {/* Wallpaper background */}
+          <div className="absolute inset-0 z-0">
+            <img src={wallpaper} alt="" className="w-full h-full object-cover" />
+          </div>
+
+          {/* Dark overlay for readability */}
+          <div className="absolute inset-0 z-[1] bg-black/50 backdrop-blur-[2px]" />
+
+          {/* Exit button — top-start */}
+          <button
+            onClick={() => setIsFullscreen(false)}
+            className="absolute top-6 start-6 z-[3] w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer border border-white/10"
+            title="الخروج من وضع التركيز"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+            </svg>
+          </button>
+
+          {/* Main content */}
+          <div className="relative z-[2] flex flex-col items-center gap-8 select-none">
+
+            {/* Room name */}
+            <div className="flex items-center gap-3">
+              <span className="relative flex h-2.5 w-2.5">
+                {phaseStyle.ping && (
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${phaseStyle.dot} opacity-75`} />
+                )}
+                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${phaseStyle.dot} ${phaseStyle.ring}`} />
+              </span>
+              <span className="font-bold text-white/80 tracking-wide text-lg">
+                {room.name}
+              </span>
+            </div>
+
+            {/* Phase label */}
+            <div className={`px-5 py-1.5 rounded-full backdrop-blur-md border border-white/10 ${phaseStyle.text} text-sm font-bold tracking-wider uppercase`}
+              style={{ background: 'rgba(255,255,255,0.07)' }}
+            >
+              {TIMER_PHASE_LABELS[phase]}
+            </div>
+
+            {/* Giant timer */}
+            <div className="relative">
+              {/* Glow ring behind the timer */}
+              <div className={`absolute inset-0 rounded-full blur-3xl opacity-30 scale-150 ${
+                phase === TIMER_PHASES.FOCUS
+                  ? "bg-emerald-400"
+                  : phase === TIMER_PHASES.BREAK
+                    ? "bg-yellow-400"
+                    : phase === TIMER_PHASES.PAUSED
+                      ? "bg-orange-400"
+                      : "bg-white/20"
+              }`} />
+
+              <div className={`relative text-[10rem] font-mono font-bold text-white tracking-[0.15em] tabular-nums leading-none ${
+                phase === TIMER_PHASES.FOCUS
+                  ? "drop-shadow-[0_0_40px_rgba(16,185,129,.35)]"
+                  : phase === TIMER_PHASES.BREAK
+                    ? "drop-shadow-[0_0_40px_rgba(245,158,11,.35)]"
+                    : phase === TIMER_PHASES.PAUSED
+                      ? "drop-shadow-[0_0_40px_rgba(251,146,60,.35)]"
+                      : "drop-shadow-[0_0_20px_rgba(255,255,255,.15)]"
+              }`}>
+                {formatTime(timeLeft)}
+              </div>
+            </div>
+
+            {/* Pomodoro config */}
+            <p className="text-sm text-white/30 font-mono tracking-wider">
+              {room.focusDuration}د تركيز / {room.breakDuration}د استراحة
+            </p>
+
+            {/* Ambient sound badge */}
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
+              <span className="text-base">
+                {room.ambientSound === "RAIN"
+                  ? "🌧️"
+                  : room.ambientSound === "LOFIC_MUSIC"
+                    ? "🎵"
+                    : room.ambientSound === "SEA"
+                      ? "🌊"
+                      : "🔇"}
+              </span>
+              <span className="text-xs text-white/50 font-medium">
+                {currentTrack?.label || ambientLabel}
+              </span>
+            </div>
+
+            {/* Keyboard hint */}
+            <p className="text-[11px] text-white/20 font-mono mt-4">
+              ESC للخروج من وضع التركيز
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
