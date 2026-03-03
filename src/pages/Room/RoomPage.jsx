@@ -8,7 +8,7 @@ import {
   TIMER_PHASE_LABELS,
   AMBIENT_SOUND_LABELS,
 } from "@/utils/constants";
-import { EditRoomModal } from "@/components/ui";
+import { EditRoomModal, ProfilePopover } from "@/components/ui";
 import useAmbientSound from "@/hooks/useAmbientSound";
 
 /* ═══════════════════════════════════════════════════
@@ -132,8 +132,10 @@ function RoomPage() {
   const [showSoundPicker, setShowSoundPicker] = useState(false);
   const [editFocus, setEditFocus] = useState(25);
   const [editBreak, setEditBreak] = useState(5);
+  const [selectedParticipant, setSelectedParticipant] = useState(null);
   const notifEndRef = useRef(null);
   const soundPickerRef = useRef(null);
+  const selectedAvatarRef = useRef(null);
 
   // ── Ambient sound engine ──
   const { currentTrack, availableTracks, changeTrack, isLoadingLofi } =
@@ -401,14 +403,30 @@ function RoomPage() {
            LEFT — Participants sidebar
            (RTL: appears on RIGHT side)
            ════════════════════════════════════════ */}
-        <aside className="w-[88px] flex-shrink-0 flex flex-col items-center justify-center py-4">
+        <aside className="w-[88px] flex-shrink-0 flex flex-col items-center justify-center py-4 relative">
           <div
             className={`${glassClass} rounded-3xl py-3 flex flex-col items-center gap-3 overflow-y-auto overflow-x-hidden custom-scrollbar max-h-[70vh] min-h-[120px] w-[82px]`}
           >
             {participants.map((p) => {
               const isMe = p.id === user?.id;
+              const isSelected = selectedParticipant?.id === p.id;
               return (
-                <div key={p.id} className="relative group cursor-pointer">
+                <div
+                  key={p.id}
+                  className="relative group cursor-pointer"
+                  onClick={(e) => {
+                    // If clicking the same participant, toggle off
+                    if (isSelected) {
+                      setSelectedParticipant(null);
+                      selectedAvatarRef.current = null;
+                    } else {
+                      // For current user, enrich with full auth store data
+                      const data = isMe ? { ...p, ...user } : p;
+                      setSelectedParticipant(data);
+                      selectedAvatarRef.current = e.currentTarget;
+                    }
+                  }}
+                >
                   {p.avatar ? (
                     <img
                       src={p.avatar}
@@ -416,7 +434,9 @@ function RoomPage() {
                       className={`w-13 h-13 rounded-full object-cover border-2 transition-colors flex-shrink-0 ${
                         isMe
                           ? `${themeCfg.accentBorder}`
-                          : "border-transparent hover:border-white/50"
+                          : isSelected
+                            ? "border-white/70"
+                            : "border-transparent hover:border-white/50"
                       }`}
                     />
                   ) : (
@@ -424,7 +444,9 @@ function RoomPage() {
                       className={`w-13 h-13 rounded-full flex items-center justify-center text-base font-bold border-2 transition-colors flex-shrink-0 ${
                         isMe
                           ? `${themeCfg.accentBorder} ${themeCfg.accent} text-white`
-                          : "border-transparent hover:border-white/50 bg-white/20 text-white"
+                          : isSelected
+                            ? "border-white/70 bg-white/30 text-white"
+                            : "border-transparent hover:border-white/50 bg-white/20 text-white"
                       }`}
                     >
                       {(p.nickName || p.username || "؟").charAt(0)}
@@ -436,11 +458,13 @@ function RoomPage() {
                       👑
                     </span>
                   )}
-                  {/* Tooltip */}
-                  <span className="absolute start-full ms-3 px-2.5 py-1 rounded-lg bg-black/80 text-[11px] font-medium text-white whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-                    {p.nickName || p.username}
-                    {isMe && " (أنت)"}
-                  </span>
+                  {/* Tooltip — hide when popover is open for this participant */}
+                  {!isSelected && (
+                    <span className="absolute start-full ms-3 px-2.5 py-1 rounded-lg bg-black/80 text-[11px] font-medium text-white whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                      {p.nickName || p.username}
+                      {isMe && " (أنت)"}
+                    </span>
+                  )}
                 </div>
               );
             })}
@@ -452,6 +476,26 @@ function RoomPage() {
               </div>
             )}
           </div>
+
+          {/* Profile popover — vertically centered next to sidebar */}
+          {selectedParticipant && (
+            <div
+              className="absolute start-full ms-3 z-[100]"
+              style={{
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            >
+              <ProfilePopover
+                participant={selectedParticipant}
+                onClose={() => {
+                  setSelectedParticipant(null);
+                  selectedAvatarRef.current = null;
+                }}
+                glassClass={glassClass}
+              />
+            </div>
+          )}
         </aside>
 
         {/* ════════════════════════════════════════

@@ -216,6 +216,21 @@
   }
 }
 
+@keyframes popover-scale-in {
+  from {
+    transform: scale(0.95) translateY(6px);
+  }
+  to {
+    transform: scale(1) translateY(0);
+  }
+}
+
+@layer utilities {
+  .animate-popover-in {
+    animation: popover-scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
 /* ===========================
    Room glass panels — themed.
    CLASSIC = site brand (blue).

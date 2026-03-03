@@ -2,6 +2,7 @@ export { default as ActivityHeatmap } from "./ActivityHeatmap";
 export { default as Button } from "./Button";
 export { default as EditProfileDrawer } from "./EditProfileDrawer";
 export { default as EditRoomModal } from "./EditRoomModal";
+export { default as ProfilePopover } from "./ProfilePopover";
 export { default as Input } from "./Input";
 export { default as RoomCard } from "./RoomCard";
 export { default as Select } from "./Select";
