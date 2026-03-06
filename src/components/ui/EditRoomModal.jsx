@@ -35,6 +35,8 @@ const VISIBILITY_OPTIONS = [
 function EditRoomModal({ isOpen, onClose, room }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [wallpaperPreview, setWallpaperPreview] = useState(null);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(false);
+  const [roomSettings, setRoomSettings] = useState(null);
   const fileInputRef = useRef(null);
 
   const {
@@ -63,33 +65,65 @@ function EditRoomModal({ isOpen, onClose, room }) {
 
   // Track if any field actually differs from original room
   const hasChanges = (() => {
-    if (!room) return false;
+    const source = roomSettings || room;
+    if (!source) return false;
     const fieldsToCompare = ["name", "description", "theme", "ambientSound", "maxCapacity"];
     for (const key of fieldsToCompare) {
-      if (String(watchedFields[key] ?? "") !== String(room[key] ?? "")) return true;
+      if (String(watchedFields[key] ?? "") !== String(source[key] ?? "")) return true;
     }
-    if (watchedFields.isPublic !== (room.isPublic ?? true)) return true;
-    if ((watchedFields.passCode || "") !== (room.passCode || "")) return true;
+    if (watchedFields.isPublic !== (source.isPublic ?? true)) return true;
+    if ((watchedFields.passCode || "") !== (source.passCode || "")) return true;
     if (watchedFields.wallpaper) return true;
     return false;
   })();
 
-  // Keep form in sync when the initial `room` changes (or it opens)
+  // Fetch host-only settings (includes passCode) when modal opens
+  // Skip if we already have cached settings for this room
   useEffect(() => {
-    if (room) {
-      reset({
-        name: room.name || "",
-        description: room.description || "",
-        theme: room.theme || ROOM_THEMES.CLASSIC,
-        ambientSound: room.ambientSound || AMBIENT_SOUNDS.NONE,
-        isPublic: room.isPublic ?? true,
-        passCode: room.passCode || "",
-        maxCapacity: room.maxCapacity || 10,
-        wallpaper: undefined, // file inputs reset on mount
-      });
-      setWallpaperPreview(room.wallPaperUrl || null);
+    if (!isOpen || !room?.roomId) return;
+    if (roomSettings?.roomId === room.roomId) return;
+    let cancelled = false;
+
+    async function fetchSettings() {
+      setIsLoadingSettings(true);
+      try {
+        const res = await roomService.getSettings(room.roomId);
+        if (cancelled) return;
+        const settings = res.item || res.data || res;
+        setRoomSettings(settings);
+        reset({
+          name: settings.name || "",
+          description: settings.description || "",
+          theme: settings.theme || ROOM_THEMES.CLASSIC,
+          ambientSound: settings.ambientSound || AMBIENT_SOUNDS.NONE,
+          isPublic: settings.isPublic ?? true,
+          passCode: settings.passCode || "",
+          maxCapacity: settings.maxCapacity || 10,
+          wallpaper: undefined,
+        });
+        setWallpaperPreview(settings.wallPaperUrl || null);
+      } catch {
+        // Fallback to store room data if settings fetch fails
+        setRoomSettings(null);
+        reset({
+          name: room.name || "",
+          description: room.description || "",
+          theme: room.theme || ROOM_THEMES.CLASSIC,
+          ambientSound: room.ambientSound || AMBIENT_SOUNDS.NONE,
+          isPublic: room.isPublic ?? true,
+          passCode: "",
+          maxCapacity: room.maxCapacity || 10,
+          wallpaper: undefined,
+        });
+        setWallpaperPreview(room.wallPaperUrl || null);
+      } finally {
+        if (!cancelled) setIsLoadingSettings(false);
+      }
     }
-  }, [room, reset, isOpen]);
+
+    fetchSettings();
+    return () => { cancelled = true; };
+  }, [isOpen, room?.roomId, reset]);
 
   // Handle ESC or overlay click to close
   useEffect(() => {
@@ -146,6 +180,7 @@ function EditRoomModal({ isOpen, onClose, room }) {
 
       await roomService.update(room.id || room.roomId, changedData);
 
+      setRoomSettings(null); // invalidate cache so next open re-fetches
       toast.success("تم تحديث إعدادات الغرفة بنجاح! 🎉");
       onClose();
     } catch (err) {
@@ -192,6 +227,13 @@ function EditRoomModal({ isOpen, onClose, room }) {
         {/* Body */}
         <form onSubmit={handleSubmit(onSubmit, (formErrors) => console.error("Form validation errors:", formErrors))} className="flex flex-col flex-1 overflow-hidden">
           <div className="flex-1 overflow-y-auto px-5 py-6 custom-scrollbar space-y-6">
+            {isLoadingSettings ? (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <div className="w-8 h-8 border-3 border-brand-600 border-t-transparent rounded-full animate-spin" />
+                <p className="text-text-muted text-sm">جاري تحميل الإعدادات...</p>
+              </div>
+            ) : (
+            <>
             {/* ── Wallpaper Upload ── */}
             <div className="space-y-1.5">
               <label className="block text-sm font-medium text-text-secondary">
@@ -363,6 +405,8 @@ function EditRoomModal({ isOpen, onClose, room }) {
               error={errors.maxCapacity?.message}
               {...register("maxCapacity")}
             />
+            </>
+            )}
           </div>
 
           {/* Footer */}

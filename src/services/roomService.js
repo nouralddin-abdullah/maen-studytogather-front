@@ -123,6 +123,17 @@ const roomService = {
     return `${base}${ENDPOINTS.ROOMS.SSE(roomId)}`;
   },
 
+  // ── Host-only settings (includes passCode) ──
+
+  /**
+   * Fetch room settings for the host (includes passCode).
+   * @param {string} roomId
+   */
+  async getSettings(roomId) {
+    const response = await apiClient.get(ENDPOINTS.ROOMS.SETTINGS(roomId));
+    return response.data;
+  },
+
   // ── Timer controls (host only) ──
 
   async startTimer(roomId) {

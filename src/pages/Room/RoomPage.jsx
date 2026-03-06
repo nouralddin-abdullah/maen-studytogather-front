@@ -1208,6 +1208,11 @@ function RoomPage() {
                       {notif.user?.nickName || notif.user?.username || "مستخدم"}
                     </span>{" "}
                     {notif.type === "join" ? "انضم للغرفة" : "غادر الغرفة"}
+                    {notif.type === "join" && notif.user?.currentStreak > 0 && (
+                      <span className="ms-1.5 text-[10px] text-orange-400 font-bold">
+                        🔥{notif.user.currentStreak}
+                      </span>
+                    )}
                   </span>
                   <span className="text-white/30 ms-auto font-mono text-[10px]">
                     {notif.timestamp

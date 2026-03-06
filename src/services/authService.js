@@ -28,6 +28,10 @@ const authService = {
     if (data.field) formData.append("field", data.field);
     if (data.avatar) formData.append("avatar", data.avatar);
 
+    // Auto-detect browser timezone (e.g. "Africa/Cairo", "Asia/Riyadh")
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (timezone) formData.append("timezone", timezone);
+
     const response = await apiClient.post(ENDPOINTS.USERS.SIGNUP, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });

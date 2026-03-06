@@ -27,6 +27,7 @@ const ENDPOINTS = {
     RESUME_TIMER: (roomId) => `/rooms/${roomId}/resume-timer`,
     RESTART_TIMER: (roomId) => `/rooms/${roomId}/restart-timer`,
     CHANGE_POMODORO: (roomId) => `/rooms/${roomId}/change-pomodoro`,
+    SETTINGS: (roomId) => `/rooms/${roomId}/settings`,
   },
 };
 
