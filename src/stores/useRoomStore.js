@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { EventSourcePolyfill } from "event-source-polyfill";
-import { roomService } from "@/services";
+import { roomService, goalService } from "@/services";
 
 /**
  * Active room store — manages the current study room session (join, SSE, leave).
@@ -11,6 +11,8 @@ const useRoomStore = create((set, get) => ({
   room: null,
   participants: [],
   notifications: [],
+  roomGoals: [],
+  isGoalsLoading: false,
 
   // ── Connection state ──
   isJoining: false,
@@ -37,6 +39,8 @@ const useRoomStore = create((set, get) => ({
       });
       // Auto-connect to SSE
       get().connectSSE(data.room.roomId);
+      // Load room participants' goals
+      get().loadRoomGoals(data.room.roomId);
       return data;
     } catch (error) {
       const status = error.response?.status;
@@ -65,6 +69,7 @@ const useRoomStore = create((set, get) => ({
         room: null,
         participants: [],
         notifications: [],
+        roomGoals: [],
         isLeaving: false,
         isConnected: false,
         error: null,
@@ -77,6 +82,7 @@ const useRoomStore = create((set, get) => ({
         room: null,
         participants: [],
         notifications: [],
+        roomGoals: [],
         isLeaving: false,
         isConnected: false,
       });
@@ -158,6 +164,124 @@ const useRoomStore = create((set, get) => ({
       throw e;
     } finally {
       set({ isPomodoroLoading: false });
+    }
+  },
+
+  // ─────────────────────────────────────────────────
+  // Goal actions.
+  // ─────────────────────────────────────────────────
+  loadRoomGoals: async (roomId) => {
+    set({ isGoalsLoading: true });
+    try {
+      const data = await goalService.getRoomGoals(roomId);
+      // Sort goals and children oldest-first
+      const sorted = (data.items || []).map((pg) => ({
+        ...pg,
+        goals: [...pg.goals]
+          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+          .map((g) => ({
+            ...g,
+            children: g.children
+              ? [...g.children].sort(
+                  (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+                )
+              : [],
+          })),
+      }));
+      set({ roomGoals: sorted, isGoalsLoading: false });
+    } catch (e) {
+      console.error("loadRoomGoals failed:", e.response?.data?.message);
+      set({ isGoalsLoading: false });
+    }
+  },
+
+  createGoal: async (title, parentId = null) => {
+    try {
+      await goalService.create(title, parentId);
+      // The SSE event will update the goals list
+    } catch (e) {
+      console.error("createGoal failed:", e.response?.data?.message);
+      throw e;
+    }
+  },
+
+  toggleGoal: async (goalId, isCompleted) => {
+    try {
+      await goalService.update(goalId, { isCompleted });
+      // The SSE event will update the goals list
+
+      // Auto-complete parent: if we just completed a sub-goal, check if all
+      // siblings under the same parent are now complete.
+      if (isCompleted) {
+        const { roomGoals } = get();
+        for (const participant of roomGoals) {
+          for (const parentGoal of participant.goals) {
+            if (!parentGoal.children) continue;
+            const child = parentGoal.children.find((c) => c.id === goalId);
+            if (child) {
+              // Check if all siblings (including the one we just toggled) are complete
+              const allDone = parentGoal.children.every((c) =>
+                c.id === goalId ? true : c.isCompleted,
+              );
+              if (allDone && !parentGoal.isCompleted) {
+                // Auto-complete the parent
+                await goalService.update(parentGoal.id, { isCompleted: true });
+              }
+              return;
+            }
+          }
+        }
+      } else {
+        // Auto-uncomplete parent: if we just unchecked a sub-goal,
+        // the parent should no longer be completed.
+        const { roomGoals } = get();
+        for (const participant of roomGoals) {
+          for (const parentGoal of participant.goals) {
+            if (!parentGoal.children) continue;
+            const child = parentGoal.children.find((c) => c.id === goalId);
+            if (child && parentGoal.isCompleted) {
+              await goalService.update(parentGoal.id, { isCompleted: false });
+              return;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error("toggleGoal failed:", e.response?.data?.message);
+      throw e;
+    }
+  },
+
+  updateGoalTitle: async (goalId, title) => {
+    try {
+      await goalService.update(goalId, { title });
+      // The SSE event will update the goals list
+    } catch (e) {
+      console.error("updateGoalTitle failed:", e.response?.data?.message);
+      throw e;
+    }
+  },
+
+  deleteGoal: async (goalId) => {
+    try {
+      await goalService.delete(goalId);
+      // No SSE event for deletion, so remove locally
+      set((state) => ({
+        roomGoals: state.roomGoals.map((pg) => ({
+          ...pg,
+          goals: pg.goals
+            .filter((g) => g.id !== goalId)
+            .map((g) => ({
+              ...g,
+              children: g.children
+                ? g.children.filter((c) => c.id !== goalId)
+                : [],
+            })),
+        })),
+      }));
+    } catch (e) {
+      console.error("deleteGoal failed:", e.response?.data?.message);
+      throw e;
     }
   },
 
@@ -298,6 +422,99 @@ const useRoomStore = create((set, get) => ({
         break;
       }
 
+      case "USER_CREATED_GOAL": {
+        const { goal } = payload;
+        set((state) => {
+          const newRoomGoals = state.roomGoals.map((pg) => {
+            if (pg.id !== goal.userId) return pg;
+            if (goal.parentId) {
+              // Insert as child of parent goal
+              return {
+                ...pg,
+                goals: pg.goals.map((g) =>
+                  g.id === goal.parentId
+                    ? { ...g, children: [...(g.children || []), goal] }
+                    : g,
+                ),
+              };
+            }
+            // Top-level goal
+            return { ...pg, goals: [...pg.goals, { ...goal, children: [] }] };
+          });
+          // If user has no entry yet, create one
+          const hasEntry = newRoomGoals.some((pg) => pg.id === goal.userId);
+          if (!hasEntry) {
+            newRoomGoals.push({
+              id: goal.userId,
+              goals: [{ ...goal, children: goal.parentId ? undefined : [] }],
+            });
+          }
+          return { roomGoals: newRoomGoals };
+        });
+        break;
+      }
+
+      case "USER_COMPLETED_GOAL":
+      case "USER_UPDATED_GOAL":
+      case "USER_UNCHECKED_GOAL": {
+        const { goal, userId } = payload;
+        const uid = userId || goal.userId;
+        set((state) => {
+          const newRoomGoals = state.roomGoals.map((pg) => {
+            if (pg.id !== uid) return pg;
+            if (goal.parentId) {
+              // Update child goal
+              return {
+                ...pg,
+                goals: pg.goals.map((g) =>
+                  g.id === goal.parentId
+                    ? {
+                        ...g,
+                        children: (g.children || []).map((c) =>
+                          c.id === goal.id ? { ...c, ...goal } : c,
+                        ),
+                      }
+                    : g.id === goal.id
+                      ? { ...g, ...goal }
+                      : g,
+                ),
+              };
+            }
+            // Top-level goal update
+            return {
+              ...pg,
+              goals: pg.goals.map((g) =>
+                g.id === goal.id
+                  ? { ...g, ...goal, children: g.children }
+                  : g,
+              ),
+            };
+          });
+
+          // Notification for completed parent goal
+          let newNotifications = state.notifications;
+          if (
+            type === "USER_COMPLETED_GOAL" &&
+            goal.parentId === null
+          ) {
+            const participant = state.participants.find((p) => p.id === uid);
+            newNotifications = [
+              ...state.notifications,
+              {
+                id: `goal-complete-${goal.id}-${Date.now()}`,
+                type: "goal_complete",
+                user: participant || { id: uid, nickName: "مستخدم" },
+                goalTitle: goal.title,
+                timestamp: new Date(),
+              },
+            ];
+          }
+
+          return { roomGoals: newRoomGoals, notifications: newNotifications };
+        });
+        break;
+      }
+
       default:
         break;
     }
@@ -312,9 +529,11 @@ const useRoomStore = create((set, get) => ({
       room: null,
       participants: [],
       notifications: [],
+      roomGoals: [],
       isJoining: false,
       isLeaving: false,
       isConnected: false,
+      isGoalsLoading: false,
       isTimerLoading: false,
       error: null,
       passCodeRequired: false,

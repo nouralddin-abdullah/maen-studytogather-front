@@ -8,7 +8,7 @@ import {
   TIMER_PHASE_LABELS,
   AMBIENT_SOUND_LABELS,
 } from "@/utils/constants";
-import { EditRoomModal, ProfilePopover } from "@/components/ui";
+import { EditRoomModal, ProfilePopover, GoalsPanel } from "@/components/ui";
 import useAmbientSound from "@/hooks/useAmbientSound";
 
 /* ═══════════════════════════════════════════════════
@@ -116,6 +116,12 @@ function RoomPage() {
     restartTimer,
     changePomodoro,
     isPomodoroLoading,
+    roomGoals,
+    isGoalsLoading,
+    createGoal,
+    toggleGoal,
+    updateGoalTitle,
+    deleteGoal,
   } = useRoomStore();
 
   // ── Local state ──
@@ -1104,81 +1110,19 @@ function RoomPage() {
             )}
           </div>
 
-          {/* ── Goals Panel (placeholder) ── */}
-          <div
-            className={`${glassClass} flex-1 rounded-3xl flex flex-col overflow-hidden min-h-[200px]`}
-          >
-            <div
-              className={`p-4 ${themeCfg.accentBg} border-b border-white/5 flex justify-between items-center`}
-            >
-              <span className="font-bold text-white text-sm">أهدافي</span>
-              <span className="text-[11px] font-mono text-white/40">0/0</span>
-            </div>
-            <div className="p-4 flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-2.5">
-              {/* Placeholder goals */}
-              {[
-                { text: "مراجعة الفصل الثالث", done: true },
-                { text: "حل تمارين الرياضيات", done: false },
-                { text: "قراءة ٢٠ صفحة", done: false },
-              ].map((goal, i) => (
-                <div
-                  key={i}
-                  className="group flex items-start gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
-                >
-                  <button
-                    className={`mt-0.5 w-5 h-5 rounded flex items-center justify-center flex-shrink-0 transition-colors cursor-pointer ${
-                      goal.done
-                        ? "border border-emerald-400 bg-emerald-400/20 text-emerald-400"
-                        : "border border-white/30 hover:border-white/60"
-                    }`}
-                  >
-                    {goal.done && (
-                      <svg
-                        className="w-3.5 h-3.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={3}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M4.5 12.75l6 6 9-13.5"
-                        />
-                      </svg>
-                    )}
-                  </button>
-                  <p
-                    className={`text-sm ${
-                      goal.done
-                        ? "text-white/50 line-through decoration-white/30"
-                        : "text-white"
-                    }`}
-                  >
-                    {goal.text}
-                  </p>
-                </div>
-              ))}
-
-              {/* Add goal button (placeholder) */}
-              <button className="mt-2 flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors px-2 cursor-pointer">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 4.5v15m7.5-7.5h-15"
-                  />
-                </svg>
-                إضافة هدف
-              </button>
-            </div>
-          </div>
+          {/* ── Goals Panel ── */}
+          <GoalsPanel
+            glassClass={glassClass}
+            themeCfg={themeCfg}
+            userId={user?.id}
+            participants={participants}
+            roomGoals={roomGoals}
+            isGoalsLoading={isGoalsLoading}
+            createGoal={createGoal}
+            toggleGoal={toggleGoal}
+            updateGoalTitle={updateGoalTitle}
+            deleteGoal={deleteGoal}
+          />
 
           {/* ── Notifications Panel ── */}
           <div
@@ -1200,14 +1144,31 @@ function RoomPage() {
                 >
                   <span
                     className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                      notif.type === "join" ? "bg-emerald-400" : "bg-red-400"
+                      notif.type === "join"
+                        ? "bg-emerald-400"
+                        : notif.type === "goal_complete"
+                          ? "bg-amber-400"
+                          : "bg-red-400"
                     }`}
                   />
                   <span className="text-white/80">
                     <span className="font-bold text-white">
                       {notif.user?.nickName || notif.user?.username || "مستخدم"}
                     </span>{" "}
-                    {notif.type === "join" ? "انضم للغرفة" : "غادر الغرفة"}
+                    {notif.type === "join"
+                      ? "انضم للغرفة"
+                      : notif.type === "leave"
+                        ? "غادر الغرفة"
+                        : ""}
+                    {notif.type === "goal_complete" && (
+                      <>
+                        أكمل هدف:{" "}
+                        <span className="font-bold text-emerald-400">
+                          {notif.goalTitle}
+                        </span>{" "}
+                        🎯
+                      </>
+                    )}
                     {notif.type === "join" && notif.user?.currentStreak > 0 && (
                       <span className="ms-1.5 text-[10px] text-orange-400 font-bold">
                         🔥{notif.user.currentStreak}

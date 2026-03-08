@@ -29,6 +29,15 @@ const ENDPOINTS = {
     CHANGE_POMODORO: (roomId) => `/rooms/${roomId}/change-pomodoro`,
     SETTINGS: (roomId) => `/rooms/${roomId}/settings`,
   },
+
+  // Goals
+  GOALS: {
+    CREATE: "/goals",
+    MY_GOALS: "/goals",
+    UPDATE: (id) => `/goals/${id}`,
+    DELETE: (id) => `/goals/${id}`,
+    ROOM_GOALS: (roomId) => `/goals/room/${roomId}`,
+  },
 };
 
 export default ENDPOINTS;
