@@ -17,6 +17,7 @@ export const ROUTES = {
   LOGIN: "/auth/login",
   REGISTER: "/auth/register",
   DISCOVER: "/discover",
+  FRIENDS: "/friends",
   CREATE_ROOM: "/create-room",
   PROFILE: (id) => `/user/${id}`,
   MY_PROFILE: "/user/me",

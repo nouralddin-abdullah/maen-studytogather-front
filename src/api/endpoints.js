@@ -7,7 +7,7 @@ const ENDPOINTS = {
     SIGNUP: "/users/signup",
     SIGNIN: "/users/signin",
     ME: "/users/me",
-    PROFILE: (id) => `/users/${id}`,
+    PROFILE: (id) => `/users/users/${id}`,
     UPDATE: "/users/me",
     HEATMAP: (id) => `/users/${id}/heatmap`,
   },
@@ -37,6 +37,15 @@ const ENDPOINTS = {
     UPDATE: (id) => `/goals/${id}`,
     DELETE: (id) => `/goals/${id}`,
     ROOM_GOALS: (roomId) => `/goals/room/${roomId}`,
+  },
+
+  // Friendships
+  FRIENDSHIPS: {
+    LIST: "/friendships",
+    PENDING: "/friendships/requests/pending",
+    RESPOND: (id) => `/friendships/${id}/respond`,
+    REMOVE: (id) => `/friendships/${id}`,
+    LIVE: "/friendships/live",
   },
 };
 

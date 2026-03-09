@@ -4,24 +4,42 @@ import { APP_NAME, ROUTES } from "@/utils/constants";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 
 /**
- * Sidebar item link.
+ * Sidebar item — renders a Link or a button depending on props.
  */
-function SidebarItem({ to, icon, label, isActive }) {
-  return (
-    <Link
-      to={to}
-      title={label}
-      className={`relative group w-11 h-11 flex items-center justify-center rounded-xl transition-all ${
-        isActive
-          ? "bg-brand-600/15 text-brand-600 border border-brand-500/30"
-          : "hover:bg-surface-muted text-text-muted hover:text-text-primary"
-      }`}
-    >
+function SidebarItem({ to, onClick, icon, label, isActive, badge }) {
+  const inner = (
+    <>
       {icon}
+      {/* Badge */}
+      {badge > 0 && (
+        <span className="absolute -top-1 -end-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-brand-600 text-white text-[10px] font-bold px-1 leading-none">
+          {badge}
+        </span>
+      )}
       {/* Tooltip */}
       <span className="absolute start-full ms-3 px-2.5 py-1 rounded-lg bg-surface-elevated border border-border text-xs font-medium text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-elevated z-[100]">
         {label}
       </span>
+    </>
+  );
+
+  const classes = `relative group w-11 h-11 flex items-center justify-center rounded-xl transition-all ${
+    isActive
+      ? "bg-brand-600/15 text-brand-600 border border-brand-500/30"
+      : "hover:bg-surface-muted text-text-muted hover:text-text-primary"
+  }`;
+
+  if (onClick) {
+    return (
+      <button onClick={onClick} title={label} className={`${classes} cursor-pointer`}>
+        {inner}
+      </button>
+    );
+  }
+
+  return (
+    <Link to={to} title={label} className={classes}>
+      {inner}
     </Link>
   );
 }
@@ -60,8 +78,8 @@ function Sidebar() {
       ),
     },
     {
-      to: "#",
-      label: "غرفي",
+      to: ROUTES.FRIENDS,
+      label: "أصدقائي",
       icon: (
         <svg
           className="w-5 h-5"
@@ -119,8 +137,10 @@ function Sidebar() {
           <SidebarItem
             key={item.label}
             to={item.to}
+            onClick={item.onClick}
             icon={item.icon}
             label={item.label}
+            badge={item.badge}
             isActive={location.pathname === item.to}
           />
         ))}
@@ -186,3 +206,4 @@ function Sidebar() {
 }
 
 export default Sidebar;
+
