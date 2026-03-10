@@ -617,14 +617,6 @@ function RoomPageInner() {
                       )}
                     </div>
                   )}
-
-                  {/* Tooltip — hide when popover is open for this participant */}
-                  {!isSelected && (
-                    <span className="absolute start-full ms-3 px-2.5 py-1 rounded-lg bg-black/80 text-[11px] font-medium text-white whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
-                      {p.nickName || p.username}
-                      {isMe && " (أنت)"}
-                    </span>
-                  )}
                 </div>
               );
             })}
@@ -1002,7 +994,7 @@ function RoomPageInner() {
 
                   {/* Dropdown menu — anchored to button top */}
                   {showPublishMenu && (
-                    <div className="absolute bottom-full mb-2 start-1/2 -translate-x-1/2 w-44 bg-black/80 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl overflow-hidden animate-fade-in z-50">
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-44 bg-black/80 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl overflow-hidden animate-fade-in z-50">
                       <button
                         onClick={async () => {
                           setShowPublishMenu(false);
@@ -1082,7 +1074,7 @@ function RoomPageInner() {
                     }
                     className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                       showVideoGrid
-                        ? "bg-brand-600 text-white shadow-lg shadow-brand-600/30"
+                        ? `${themeCfg.accent} text-white shadow-lg ${themeCfg.accentShadow}`
                         : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
                     }`}
                   >
@@ -1106,7 +1098,7 @@ function RoomPageInner() {
                 <button
                   onClick={() => setIsFullscreen(true)}
                   title="وضع التركيز"
-                  className={`w-9 h-9 rounded-full ${themeCfg.accent} flex items-center justify-center text-white shadow-lg ${themeCfg.accentShadow} cursor-pointer transition-all hover:scale-110`}
+                  className="w-9 h-9 rounded-full bg-white/10 text-white/60 hover:bg-white/20 hover:text-white flex items-center justify-center cursor-pointer transition-all hover:scale-110"
                 >
                   <svg
                     className="w-4 h-4"
@@ -1467,7 +1459,9 @@ function RoomPageInner() {
           <div
             className={`${glassClass} h-1/4 min-h-[140px] rounded-3xl flex flex-col overflow-hidden`}
           >
-            <div className={`p-3 ${themeCfg.notifHeader} flex items-center`}>
+            <div
+              className={`p-3 ${themeCfg.accentBg} border-b border-white/5 flex items-center`}
+            >
               <span className="font-bold text-white text-sm">الإشعارات</span>
             </div>
             <div className="flex-1 overflow-y-auto custom-scrollbar p-3 flex flex-col gap-2">
@@ -1584,7 +1578,7 @@ function RoomPageInner() {
                 onClick={() => setShowVideoGrid((v) => !v)}
                 className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
                   showVideoGrid
-                    ? "bg-brand-600 text-white"
+                    ? `${themeCfg.accent} text-white`
                     : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
                 }`}
                 title={showVideoGrid ? "إخفاء بث الفيديو" : "عرض بث الفيديو"}
