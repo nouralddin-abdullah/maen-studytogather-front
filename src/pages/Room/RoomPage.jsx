@@ -8,8 +8,15 @@ import {
   TIMER_PHASE_LABELS,
   AMBIENT_SOUND_LABELS,
 } from "@/utils/constants";
-import { EditRoomModal, ProfilePopover, GoalsPanel } from "@/components/ui";
+import {
+  EditRoomModal,
+  ProfilePopover,
+  GoalsPanel,
+  VideoGrid,
+} from "@/components/ui";
+import { LiveKitRoom } from "@livekit/components-react";
 import useAmbientSound from "@/hooks/useAmbientSound";
+import useLiveKit from "@/hooks/useLiveKit";
 
 /* ═══════════════════════════════════════════════════
    Theme config — CLASSIC uses site brand (blue),
@@ -89,7 +96,7 @@ function formatTime(ms) {
 /* ═══════════════════════════════════════════════════
    Main component
    ═══════════════════════════════════════════════════ */
-function RoomPage() {
+function RoomPageInner() {
   const { inviteCode } = useParams();
   const { state } = useLocation();
   const navigate = useNavigate();
@@ -122,7 +129,24 @@ function RoomPage() {
     toggleGoal,
     updateGoalTitle,
     deleteGoal,
+    livekitToken,
   } = useRoomStore();
+
+  // ── LiveKit video ──
+  const {
+    isCameraOn,
+    isScreenOn,
+    participantMediaMap,
+    hasActiveTracks,
+    toggleCamera,
+    toggleScreenShare,
+  } = useLiveKit();
+  const [showVideoGrid, setShowVideoGrid] = useState(false);
+  const [showPublishMenu, setShowPublishMenu] = useState(false);
+  const [videoLayoutMode, setVideoLayoutMode] = useState("gallery");
+  const [videoPinnedIndex, setVideoPinnedIndex] = useState(null);
+  const publishMenuRef = useRef(null);
+  const isPublishing = isCameraOn || isScreenOn;
 
   // ── Local state ──
   const [passCodeInput, setPassCodeInput] = useState("");
@@ -196,13 +220,31 @@ function RoomPage() {
   useEffect(() => {
     if (!showSoundPicker) return;
     const handleClick = (e) => {
-      if (soundPickerRef.current && !soundPickerRef.current.contains(e.target)) {
+      if (
+        soundPickerRef.current &&
+        !soundPickerRef.current.contains(e.target)
+      ) {
         setShowSoundPicker(false);
       }
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [showSoundPicker]);
+
+  // ── Close publish menu on outside click ──
+  useEffect(() => {
+    if (!showPublishMenu) return;
+    const handleClick = (e) => {
+      if (
+        publishMenuRef.current &&
+        !publishMenuRef.current.contains(e.target)
+      ) {
+        setShowPublishMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [showPublishMenu]);
 
   // ── Timer countdown ──
   useEffect(() => {
@@ -408,14 +450,34 @@ function RoomPage() {
         {/* ════════════════════════════════════════
            LEFT — Participants sidebar
            (RTL: appears on RIGHT side)
+           Hidden when video grid is active for max space
            ════════════════════════════════════════ */}
-        <aside className="w-[88px] flex-shrink-0 flex flex-col items-center justify-center py-4 relative">
+        <aside
+          className={`w-[88px] flex-shrink-0 flex flex-col items-center justify-center py-4 relative transition-all duration-300 ${showVideoGrid && hasActiveTracks ? "hidden" : ""}`}
+        >
           <div
             className={`${glassClass} rounded-3xl py-3 flex flex-col items-center gap-3 overflow-y-auto overflow-x-hidden custom-scrollbar max-h-[70vh] min-h-[120px] w-[82px]`}
           >
             {participants.map((p) => {
               const isMe = p.id === user?.id;
               const isSelected = selectedParticipant?.id === p.id;
+              // Find LiveKit tracks for this participant
+              // Match by identity OR name against all known participant fields
+              const pInfo = Object.values(participantMediaMap).find((info) => {
+                const candidates = [
+                  p.id,
+                  String(p.id),
+                  p.username,
+                  p.nickName,
+                  p.email,
+                ].filter(Boolean);
+                return (
+                  candidates.includes(info.identity) ||
+                  candidates.includes(info.name)
+                );
+              });
+              const hasCam = !!pInfo?.hasCam;
+              const hasScreen = !!pInfo?.hasScreen;
               return (
                 <div
                   key={p.id}
@@ -464,6 +526,98 @@ function RoomPage() {
                       👑
                     </span>
                   )}
+
+                  {/* ── LiveKit indicators ── */}
+                  {(hasCam || hasScreen) && !isMe && (
+                    <div className="absolute -bottom-1 -end-1 z-20 flex gap-0.5">
+                      {hasCam && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowVideoGrid(true);
+                          }}
+                          className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center lk-indicator"
+                          title="الكاميرا مفعّلة"
+                        >
+                          <svg
+                            className="w-3 h-3 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
+                            />
+                          </svg>
+                        </button>
+                      )}
+                      {hasScreen && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowVideoGrid(true);
+                          }}
+                          className="w-5 h-5 rounded-full bg-violet-500 flex items-center justify-center lk-indicator-screen"
+                          title="مشاركة الشاشة"
+                        >
+                          <svg
+                            className="w-3 h-3 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12"
+                            />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  {/* Self indicators (no unsubscribe) */}
+                  {(hasCam || hasScreen) && isMe && (
+                    <div className="absolute -bottom-1 -end-1 z-20 flex gap-0.5">
+                      {hasCam && (
+                        <span className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center lk-indicator">
+                          <svg
+                            className="w-3 h-3 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
+                            />
+                          </svg>
+                        </span>
+                      )}
+                      {hasScreen && (
+                        <span className="w-5 h-5 rounded-full bg-violet-500 flex items-center justify-center lk-indicator-screen">
+                          <svg
+                            className="w-3 h-3 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12"
+                            />
+                          </svg>
+                        </span>
+                      )}
+                    </div>
+                  )}
+
                   {/* Tooltip — hide when popover is open for this participant */}
                   {!isSelected && (
                     <span className="absolute start-full ms-3 px-2.5 py-1 rounded-lg bg-black/80 text-[11px] font-medium text-white whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
@@ -508,8 +662,24 @@ function RoomPage() {
            CENTER — Main area
            ════════════════════════════════════════ */}
         <main className="flex-1 flex flex-col justify-between relative">
-          {/* ── Top bar: Room name + Invite + Leave ── */}
-          <header className="flex justify-center items-start pt-1">
+          {/* ── LiveKit Video Grid + Floating Timer ── */}
+          {showVideoGrid && hasActiveTracks && (
+            <>
+              {/* Grid container — inset to avoid overlapping top & bottom bars */}
+              <div className="absolute inset-x-0 top-14 bottom-24 px-4 sm:px-6 z-20 animate-fade-in">
+                <VideoGrid
+                  layoutMode={videoLayoutMode}
+                  pinnedIndex={videoPinnedIndex}
+                  onPinnedIndexChange={setVideoPinnedIndex}
+                  gap={8}
+                />
+              </div>
+              {/* Timer overlay is now inside the header row below */}
+            </>
+          )}
+
+          {/* ── Top bar: Room name + Invite + Leave + Timer ── */}
+          <header className="flex justify-center items-start pt-1 gap-3">
             <div
               className={`${glassClass} px-5 py-2 rounded-full flex items-center gap-4`}
             >
@@ -603,6 +773,38 @@ function RoomPage() {
                 </button>
               )}
             </div>
+
+            {/* Compact timer pill — sits in the same row as the room name bar when video grid is active */}
+            {showVideoGrid && hasActiveTracks && (
+              <div
+                className={`${glassClass} px-4 py-2 rounded-full flex items-center gap-3 shadow-xl border border-white/10 animate-fade-in`}
+              >
+                <span className="relative flex h-2 w-2">
+                  {phaseStyle.ping && (
+                    <span
+                      className={`animate-ping absolute inline-flex h-full w-full rounded-full ${phaseStyle.dot} opacity-75`}
+                    />
+                  )}
+                  <span
+                    className={`relative inline-flex rounded-full h-2 w-2 ${phaseStyle.dot} ${phaseStyle.ring}`}
+                  />
+                </span>
+                <span className={`text-[11px] font-bold ${phaseStyle.text}`}>
+                  {TIMER_PHASE_LABELS[phase]}
+                </span>
+                <span
+                  className={`text-lg font-mono font-bold text-white tabular-nums tracking-wider ${
+                    phase === TIMER_PHASES.FOCUS
+                      ? "drop-shadow-[0_0_8px_rgba(16,185,129,.3)]"
+                      : phase === TIMER_PHASES.BREAK
+                        ? "drop-shadow-[0_0_8px_rgba(245,158,11,.3)]"
+                        : ""
+                  }`}
+                >
+                  {formatTime(timeLeft)}
+                </span>
+              </div>
+            )}
           </header>
 
           {/* ── Bottom bar: Sound controls ── */}
@@ -649,7 +851,11 @@ function RoomPage() {
                       stroke="currentColor"
                       strokeWidth={2}
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4.5 15.75l7.5-7.5 7.5 7.5"
+                      />
                     </svg>
                   )}
                 </button>
@@ -675,11 +881,13 @@ function RoomPage() {
                           جاري تحميل المحطات...
                         </p>
                       )}
-                      {availableTracks.length === 0 && !isLoadingLofi && room.ambientSound === "LOFIC_MUSIC" && (
-                        <p className="text-white/30 text-xs text-center py-4">
-                          لم يتم العثور على محطات
-                        </p>
-                      )}
+                      {availableTracks.length === 0 &&
+                        !isLoadingLofi &&
+                        room.ambientSound === "LOFIC_MUSIC" && (
+                          <p className="text-white/30 text-xs text-center py-4">
+                            لم يتم العثور على محطات
+                          </p>
+                        )}
                       {availableTracks.map((track) => {
                         const isActive = currentTrack?.id === track.id;
                         return (
@@ -765,8 +973,136 @@ function RoomPage() {
                 />
               </div>
 
-              {/* Divider + Fullscreen focus toggle */}
-              <div className="ps-4 border-s border-white/10">
+              {/* Divider + Publish / Grid / Fullscreen buttons */}
+              <div className="ps-4 border-s border-white/10 flex items-center gap-2">
+                {/* Combined publish (camera / screen) button with dropdown */}
+                <div className="relative" ref={publishMenuRef}>
+                  <button
+                    onClick={() => setShowPublishMenu((v) => !v)}
+                    title="بث فيديو"
+                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                      isPublishing
+                        ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600"
+                        : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
+                    }`}
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
+                      />
+                    </svg>
+                  </button>
+
+                  {/* Dropdown menu */}
+                  {showPublishMenu && (
+                    <div className="absolute bottom-full mb-2 start-1/2 -translate-x-1/2 w-44 bg-black/80 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl overflow-hidden animate-fade-in z-50">
+                      <button
+                        onClick={async () => {
+                          setShowPublishMenu(false);
+                          await toggleCamera();
+                          if (!isCameraOn) setShowVideoGrid(true);
+                        }}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-xs transition-colors cursor-pointer ${
+                          isCameraOn
+                            ? "bg-emerald-500/20 text-emerald-400 font-bold"
+                            : "text-white/70 hover:bg-white/10 hover:text-white"
+                        }`}
+                      >
+                        <svg
+                          className="w-4 h-4 flex-shrink-0"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
+                          />
+                        </svg>
+                        {isCameraOn ? "إيقاف الكاميرا" : "تشغيل الكاميرا"}
+                        {isCameraOn && (
+                          <span className="ms-auto relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                          </span>
+                        )}
+                      </button>
+                      <div className="h-px bg-white/10" />
+                      <button
+                        onClick={async () => {
+                          setShowPublishMenu(false);
+                          await toggleScreenShare();
+                          if (!isScreenOn) setShowVideoGrid(true);
+                        }}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-xs transition-colors cursor-pointer ${
+                          isScreenOn
+                            ? "bg-violet-500/20 text-violet-400 font-bold"
+                            : "text-white/70 hover:bg-white/10 hover:text-white"
+                        }`}
+                      >
+                        <svg
+                          className="w-4 h-4 flex-shrink-0"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12"
+                          />
+                        </svg>
+                        {isScreenOn ? "إيقاف المشاركة" : "مشاركة الشاشة"}
+                        {isScreenOn && (
+                          <span className="ms-auto relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-400" />
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Video grid toggle */}
+                {hasActiveTracks && (
+                  <button
+                    onClick={() => setShowVideoGrid((v) => !v)}
+                    title={
+                      showVideoGrid ? "إخفاء بث الفيديو" : "عرض بث الفيديو"
+                    }
+                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                      showVideoGrid
+                        ? "bg-brand-600 text-white shadow-lg shadow-brand-600/30"
+                        : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
+                    }`}
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
+                      />
+                    </svg>
+                  </button>
+                )}
+
+                {/* Fullscreen focus toggle */}
                 <button
                   onClick={() => setIsFullscreen(true)}
                   title="وضع التركيز"
@@ -794,8 +1130,11 @@ function RoomPage() {
         {/* ════════════════════════════════════════
            RIGHT — Panels sidebar
            (RTL: appears on LEFT side)
+           Collapses to timer-only when video grid is active
            ════════════════════════════════════════ */}
-        <aside className="w-80 flex-shrink-0 flex flex-col gap-3 h-full">
+        <aside
+          className={`flex-shrink-0 flex flex-col gap-3 h-full transition-all duration-300 ${showVideoGrid && hasActiveTracks ? "w-0 overflow-hidden opacity-0 pointer-events-none" : "w-80"}`}
+        >
           {/* ── Timer Panel ── */}
           <div className={`${glassClass} p-5 rounded-3xl flex flex-col gap-4`}>
             {/* Header */}
@@ -1207,97 +1546,110 @@ function RoomPage() {
         <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center animate-fade-in">
           {/* Wallpaper background */}
           <div className="absolute inset-0 z-0">
-            <img src={wallpaper} alt="" className="w-full h-full object-cover" />
+            <img
+              src={wallpaper}
+              alt=""
+              className="w-full h-full object-cover"
+            />
           </div>
 
           {/* Dark overlay for readability */}
           <div className="absolute inset-0 z-[1] bg-black/50 backdrop-blur-[2px]" />
 
-          {/* Exit button — top-start */}
-          <button
-            onClick={() => setIsFullscreen(false)}
-            className="absolute top-6 start-6 z-[3] w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer border border-white/10"
-            title="الخروج من وضع التركيز"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
-            </svg>
-          </button>
-
-          {/* Main content */}
-          <div className="relative z-[2] flex flex-col items-center gap-8 select-none">
-
-            {/* Room name */}
-            <div className="flex items-center gap-3">
-              <span className="relative flex h-2.5 w-2.5">
-                {phaseStyle.ping && (
-                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${phaseStyle.dot} opacity-75`} />
-                )}
-                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${phaseStyle.dot} ${phaseStyle.ring}`} />
-              </span>
-              <span className="font-bold text-white/80 tracking-wide text-lg">
-                {room.name}
-              </span>
-            </div>
-
-            {/* Phase label */}
-            <div className={`px-5 py-1.5 rounded-full backdrop-blur-md border border-white/10 ${phaseStyle.text} text-sm font-bold tracking-wider uppercase`}
-              style={{ background: 'rgba(255,255,255,0.07)' }}
+          {/* Top-start buttons — exit + video grid toggle */}
+          <div className="absolute top-6 start-6 z-[3] flex items-center gap-2">
+            <button
+              onClick={() => setIsFullscreen(false)}
+              className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer border border-white/10"
+              title="الخروج من وضع التركيز"
             >
-              {TIMER_PHASE_LABELS[phase]}
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"
+                />
+              </svg>
+            </button>
+
+            {/* Video grid toggle */}
+            {hasActiveTracks && (
+              <button
+                onClick={() => setShowVideoGrid((v) => !v)}
+                className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
+                  showVideoGrid
+                    ? "bg-brand-600 text-white"
+                    : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
+                }`}
+                title={showVideoGrid ? "إخفاء بث الفيديو" : "عرض بث الفيديو"}
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* Video grid overlay in fullscreen */}
+          {showVideoGrid && hasActiveTracks && (
+            <div className="absolute inset-0 z-[2] p-6 pt-20 pb-28 animate-fade-in">
+              <VideoGrid
+                layoutMode={videoLayoutMode}
+                pinnedIndex={videoPinnedIndex}
+                onPinnedIndexChange={setVideoPinnedIndex}
+                gap={8}
+              />
             </div>
+          )}
 
-            {/* Giant timer */}
-            <div className="relative">
-              {/* Glow ring behind the timer */}
-              <div className={`absolute inset-0 rounded-full blur-3xl opacity-30 scale-150 ${
-                phase === TIMER_PHASES.FOCUS
-                  ? "bg-emerald-400"
-                  : phase === TIMER_PHASES.BREAK
-                    ? "bg-yellow-400"
-                    : phase === TIMER_PHASES.PAUSED
-                      ? "bg-orange-400"
-                      : "bg-white/20"
-              }`} />
+          {/* Timer — centered when no grid, bottom-center pill when grid is active */}
+          <div
+            className={
+              showVideoGrid && hasActiveTracks
+                ? "absolute bottom-6 left-1/2 -translate-x-1/2 z-[3] flex items-center gap-3 px-6 py-3 rounded-full bg-black/60 backdrop-blur-md border border-white/10 select-none"
+                : "relative z-[2] flex items-center gap-4 select-none"
+            }
+          >
+            {/* Phase dot */}
+            <span
+              className={`relative flex ${showVideoGrid && hasActiveTracks ? "h-2.5 w-2.5" : "h-3 w-3"}`}
+            >
+              {phaseStyle.ping && (
+                <span
+                  className={`animate-ping absolute inline-flex h-full w-full rounded-full ${phaseStyle.dot} opacity-75`}
+                />
+              )}
+              <span
+                className={`relative inline-flex rounded-full ${showVideoGrid && hasActiveTracks ? "h-2.5 w-2.5" : "h-3 w-3"} ${phaseStyle.dot}`}
+              />
+            </span>
 
-              <div className={`relative text-[10rem] font-mono font-bold text-white tracking-[0.15em] tabular-nums leading-none ${
-                phase === TIMER_PHASES.FOCUS
-                  ? "drop-shadow-[0_0_40px_rgba(16,185,129,.35)]"
-                  : phase === TIMER_PHASES.BREAK
-                    ? "drop-shadow-[0_0_40px_rgba(245,158,11,.35)]"
-                    : phase === TIMER_PHASES.PAUSED
-                      ? "drop-shadow-[0_0_40px_rgba(251,146,60,.35)]"
-                      : "drop-shadow-[0_0_20px_rgba(255,255,255,.15)]"
-              }`}>
-                {formatTime(timeLeft)}
-              </div>
+            {/* Timer text */}
+            <div
+              className={`font-mono font-bold text-white tabular-nums leading-none ${
+                showVideoGrid && hasActiveTracks
+                  ? "text-2xl tracking-[0.1em]"
+                  : "text-[10rem] tracking-[0.15em]"
+              }`}
+            >
+              {formatTime(timeLeft)}
             </div>
-
-            {/* Pomodoro config */}
-            <p className="text-sm text-white/30 font-mono tracking-wider">
-              {room.focusDuration}د تركيز / {room.breakDuration}د استراحة
-            </p>
-
-            {/* Ambient sound badge */}
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
-              <span className="text-base">
-                {room.ambientSound === "RAIN"
-                  ? "🌧️"
-                  : room.ambientSound === "LOFIC_MUSIC"
-                    ? "🎵"
-                    : room.ambientSound === "SEA"
-                      ? "🌊"
-                      : "🔇"}
-              </span>
-              <span className="text-xs text-white/50 font-medium">
-                {currentTrack?.label || ambientLabel}
-              </span>
-            </div>
-
-            {/* Keyboard hint */}
-            <p className="text-[11px] text-white/20 font-mono mt-4">
-              ESC للخروج من وضع التركيز
-            </p>
           </div>
         </div>
       )}
@@ -1305,4 +1657,19 @@ function RoomPage() {
   );
 }
 
-export default RoomPage;
+export default function RoomPage() {
+  const { livekitToken } = useRoomStore();
+  const LIVEKIT_URL =
+    import.meta.env.VITE_LIVEKIT_URL || "wss://maeen-r9pg430b.livekit.cloud";
+
+  return (
+    <LiveKitRoom
+      token={livekitToken || undefined}
+      serverUrl={LIVEKIT_URL}
+      connect={!!livekitToken}
+      options={{ adaptiveStream: true }}
+    >
+      <RoomPageInner />
+    </LiveKitRoom>
+  );
+}

@@ -13,6 +13,7 @@ const useRoomStore = create((set, get) => ({
   notifications: [],
   roomGoals: [],
   isGoalsLoading: false,
+  livekitToken: null,
 
   // ── Connection state ──
   isJoining: false,
@@ -35,6 +36,7 @@ const useRoomStore = create((set, get) => ({
       set({
         room: data.room,
         participants: data.participants || data.currentParticipants || [],
+        livekitToken: data.livekitToken || null,
         isJoining: false,
       });
       // Auto-connect to SSE
@@ -70,6 +72,7 @@ const useRoomStore = create((set, get) => ({
         participants: [],
         notifications: [],
         roomGoals: [],
+        livekitToken: null,
         isLeaving: false,
         isConnected: false,
         error: null,
@@ -83,6 +86,7 @@ const useRoomStore = create((set, get) => ({
         participants: [],
         notifications: [],
         roomGoals: [],
+        livekitToken: null,
         isLeaving: false,
         isConnected: false,
       });
@@ -530,6 +534,7 @@ const useRoomStore = create((set, get) => ({
       participants: [],
       notifications: [],
       roomGoals: [],
+      livekitToken: null,
       isJoining: false,
       isLeaving: false,
       isConnected: false,
