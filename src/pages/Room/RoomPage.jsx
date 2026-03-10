@@ -808,7 +808,7 @@ function RoomPageInner() {
           </header>
 
           {/* ── Bottom bar: Sound controls ── */}
-          <div className="flex justify-center pb-1">
+          <div className="relative z-30 flex justify-center pb-1">
             <div
               className={`${glassClass} px-5 py-3 rounded-2xl flex items-center gap-5`}
             >
@@ -976,7 +976,7 @@ function RoomPageInner() {
               {/* Divider + Publish / Grid / Fullscreen buttons */}
               <div className="ps-4 border-s border-white/10 flex items-center gap-2">
                 {/* Combined publish (camera / screen) button with dropdown */}
-                <div className="relative" ref={publishMenuRef}>
+                <div className="relative h-9" ref={publishMenuRef}>
                   <button
                     onClick={() => setShowPublishMenu((v) => !v)}
                     title="بث فيديو"
@@ -1000,7 +1000,7 @@ function RoomPageInner() {
                     </svg>
                   </button>
 
-                  {/* Dropdown menu */}
+                  {/* Dropdown menu — anchored to button top */}
                   {showPublishMenu && (
                     <div className="absolute bottom-full mb-2 start-1/2 -translate-x-1/2 w-44 bg-black/80 backdrop-blur-xl rounded-xl border border-white/10 shadow-2xl overflow-hidden animate-fade-in z-50">
                       <button
@@ -1556,7 +1556,7 @@ function RoomPageInner() {
           {/* Dark overlay for readability */}
           <div className="absolute inset-0 z-[1] bg-black/50 backdrop-blur-[2px]" />
 
-          {/* Top-start buttons — exit + video grid toggle */}
+          {/* Top-start buttons — exit + video grid toggle + publish */}
           <div className="absolute top-6 start-6 z-[3] flex items-center gap-2">
             <button
               onClick={() => setIsFullscreen(false)}
@@ -1604,6 +1604,61 @@ function RoomPageInner() {
                 </svg>
               </button>
             )}
+
+            {/* Camera toggle */}
+            <button
+              onClick={async () => {
+                await toggleCamera();
+                if (!isCameraOn) setShowVideoGrid(true);
+              }}
+              className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
+                isCameraOn
+                  ? "bg-emerald-500 text-white"
+                  : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
+              }`}
+              title={isCameraOn ? "إيقاف الكاميرا" : "تشغيل الكاميرا"}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
+                />
+              </svg>
+            </button>
+
+            {/* Screen share toggle */}
+            <button
+              onClick={async () => {
+                await toggleScreenShare();
+                if (!isScreenOn) setShowVideoGrid(true);
+              }}
+              className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
+                isScreenOn
+                  ? "bg-violet-500 text-white"
+                  : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
+              }`}
+              title={isScreenOn ? "إيقاف مشاركة الشاشة" : "مشاركة الشاشة"}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12"
+                />
+              </svg>
+            </button>
           </div>
 
           {/* Video grid overlay in fullscreen */}
@@ -1628,7 +1683,7 @@ function RoomPageInner() {
           >
             {/* Phase dot */}
             <span
-              className={`relative flex ${showVideoGrid && hasActiveTracks ? "h-2.5 w-2.5" : "h-3 w-3"}`}
+              className={`relative flex ${showVideoGrid && hasActiveTracks ? "h-2.5 w-2.5" : "h-4 w-4"}`}
             >
               {phaseStyle.ping && (
                 <span
@@ -1636,7 +1691,7 @@ function RoomPageInner() {
                 />
               )}
               <span
-                className={`relative inline-flex rounded-full ${showVideoGrid && hasActiveTracks ? "h-2.5 w-2.5" : "h-3 w-3"} ${phaseStyle.dot}`}
+                className={`relative inline-flex rounded-full ${showVideoGrid && hasActiveTracks ? "h-2.5 w-2.5" : "h-4 w-4"} ${phaseStyle.dot}`}
               />
             </span>
 
@@ -1644,8 +1699,8 @@ function RoomPageInner() {
             <div
               className={`font-mono font-bold text-white tabular-nums leading-none ${
                 showVideoGrid && hasActiveTracks
-                  ? "text-2xl tracking-[0.1em]"
-                  : "text-[10rem] tracking-[0.15em]"
+                  ? "text-3xl tracking-[0.1em]"
+                  : "text-[14rem] tracking-[0.15em]"
               }`}
             >
               {formatTime(timeLeft)}
