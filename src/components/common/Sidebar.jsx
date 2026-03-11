@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores";
 import { APP_NAME, ROUTES } from "@/utils/constants";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import { useInstallPrompt } from "@/hooks";
 
 /**
  * Sidebar item — renders a Link or a button depending on props.
@@ -31,7 +32,11 @@ function SidebarItem({ to, onClick, icon, label, isActive, badge }) {
 
   if (onClick) {
     return (
-      <button onClick={onClick} title={label} className={`${classes} cursor-pointer`}>
+      <button
+        onClick={onClick}
+        title={label}
+        className={`${classes} cursor-pointer`}
+      >
         {inner}
       </button>
     );
@@ -51,6 +56,7 @@ function Sidebar() {
   const { user, logout } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
+  const { canInstall, promptInstall } = useInstallPrompt();
 
   const handleLogout = () => {
     logout();
@@ -122,10 +128,14 @@ function Sidebar() {
       {/* Logo */}
       <Link
         to={ROUTES.HOME}
-        className="font-display text-xl font-bold text-gradient mb-2"
+        className="mb-2 flex items-center justify-center"
         title={APP_NAME}
       >
-        {APP_NAME}
+        <img
+          src="/pwa/StudyShell.png"
+          alt={APP_NAME}
+          className="w-10 h-10 rounded-xl object-contain"
+        />
       </Link>
 
       {/* Divider */}
@@ -151,6 +161,32 @@ function Sidebar() {
 
       {/* Bottom section */}
       <div className="flex flex-col gap-3 items-center">
+        {/* Install PWA button — hidden when already installed */}
+        {canInstall && (
+          <button
+            onClick={promptInstall}
+            title="تثبيت التطبيق"
+            className="group relative w-11 h-11 flex items-center justify-center rounded-xl text-text-muted hover:bg-brand-600/10 hover:text-brand-600 transition-all cursor-pointer"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.8}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
+              />
+            </svg>
+            <span className="absolute start-full ms-3 px-2.5 py-1 rounded-lg bg-surface-elevated border border-border text-xs font-medium text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-elevated z-[100]">
+              تثبيت التطبيق
+            </span>
+          </button>
+        )}
+
         {/* Theme toggle */}
         <ThemeToggle />
 
@@ -206,4 +242,3 @@ function Sidebar() {
 }
 
 export default Sidebar;
-

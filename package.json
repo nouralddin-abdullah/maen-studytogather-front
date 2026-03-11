@@ -1,5 +1,5 @@
 {
-  "name": "maen-studytogather-front",
+  "name": "shell-front",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -37,6 +37,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "tailwindcss": "^4.2.1",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vite-plugin-pwa": "^1.2.0"
   }
 }

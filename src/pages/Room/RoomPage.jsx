@@ -28,7 +28,6 @@ const THEME_CONFIG = {
       "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1920&q=80",
     overlay: "bg-gradient-to-b from-black/30 via-transparent to-black/30",
     glass: "room-glass-classic",
-    // Accent colours used across UI
     accent: "bg-brand-600",
     accentHover: "hover:bg-brand-700",
     accentShadow: "shadow-brand-600/20",
@@ -49,6 +48,58 @@ const THEME_CONFIG = {
     accentBorder: "border-violet-500",
     accentBg: "bg-violet-600/20",
     notifHeader: "bg-violet-600/80",
+  },
+  PINKY: {
+    fallbackBg:
+      "https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1920&q=80",
+    overlay: "bg-gradient-to-b from-pink-950/20 via-transparent to-pink-950/20",
+    glass: "room-glass-pinky",
+    accent: "bg-pink-500",
+    accentHover: "hover:bg-pink-600",
+    accentShadow: "shadow-pink-500/20",
+    accentText: "text-pink-400",
+    accentBorder: "border-pink-400",
+    accentBg: "bg-pink-500/20",
+    notifHeader: "bg-pink-500/80",
+  },
+  GITHUB: {
+    fallbackBg:
+      "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=1920&q=80",
+    overlay: "bg-gradient-to-b from-gray-900/40 via-transparent to-gray-900/40",
+    glass: "room-glass-github",
+    accent: "bg-gray-800",
+    accentHover: "hover:bg-gray-900",
+    accentShadow: "shadow-gray-800/20",
+    accentText: "text-gray-300",
+    accentBorder: "border-gray-600",
+    accentBg: "bg-gray-800/20",
+    notifHeader: "bg-gray-800/80",
+  },
+  DARK: {
+    fallbackBg:
+      "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=1920&q=80",
+    overlay: "bg-gradient-to-b from-black/50 via-transparent to-black/50",
+    glass: "room-glass-dark",
+    accent: "bg-neutral-700",
+    accentHover: "hover:bg-neutral-800",
+    accentShadow: "shadow-neutral-900/30",
+    accentText: "text-neutral-300",
+    accentBorder: "border-neutral-600",
+    accentBg: "bg-neutral-700/20",
+    notifHeader: "bg-neutral-800/80",
+  },
+  GRAY: {
+    fallbackBg:
+      "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?w=1920&q=80",
+    overlay: "bg-gradient-to-b from-gray-500/20 via-transparent to-gray-500/20",
+    glass: "room-glass-gray",
+    accent: "bg-gray-500",
+    accentHover: "hover:bg-gray-600",
+    accentShadow: "shadow-gray-500/20",
+    accentText: "text-gray-400",
+    accentBorder: "border-gray-400",
+    accentBg: "bg-gray-500/20",
+    notifHeader: "bg-gray-500/80",
   },
 };
 
@@ -1131,30 +1182,70 @@ function RoomPageInner() {
           <div className={`${glassClass} p-5 rounded-3xl flex flex-col gap-4`}>
             {/* Header */}
             <div className="flex justify-between items-center text-white/90">
-              <span className="font-bold flex items-center gap-2 text-sm">
-                مؤقت الجلسة
+              <span className="font-bold text-sm">مؤقت الجلسة</span>
+              {/* Pomodoro config label */}
+              <span className="text-[11px] text-white/40 font-mono">
+                {room.focusDuration}د تركيز / {room.breakDuration}د استراحة
               </span>
-              <div className="flex items-center gap-2">
-                <span className={`text-[11px] font-bold ${phaseStyle.text}`}>
-                  {TIMER_PHASE_LABELS[phase]}
-                </span>
-                <span className="relative flex h-2 w-2">
-                  {phaseStyle.ping && (
-                    <span
-                      className={`animate-ping absolute inline-flex h-full w-full rounded-full ${phaseStyle.dot} opacity-75`}
-                    />
-                  )}
-                  <span
-                    className={`relative inline-flex rounded-full h-2 w-2 ${phaseStyle.dot} ${phaseStyle.ring}`}
-                  />
-                </span>
-              </div>
             </div>
 
-            {/* Countdown */}
-            <div className="text-center py-2">
+            {/* Countdown + Controls */}
+            <div className="flex items-center justify-center gap-4 py-2">
+              {/* Play / Pause / Resume button (host only) */}
+              {isHost &&
+                (phase === TIMER_PHASES.IDLE ||
+                  phase === TIMER_PHASES.PAUSED) && (
+                  <button
+                    onClick={
+                      phase === TIMER_PHASES.IDLE ? startTimer : resumeTimer
+                    }
+                    disabled={isTimerLoading}
+                    className="w-11 h-11 flex items-center justify-center rounded-full bg-emerald-500/80 hover:bg-emerald-500 text-white transition-all cursor-pointer disabled:opacity-50 shadow-lg shadow-emerald-500/20"
+                    title={
+                      phase === TIMER_PHASES.IDLE ? "ابدأ الجلسة" : "استئناف"
+                    }
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"
+                      />
+                    </svg>
+                  </button>
+                )}
+              {isHost && phase === TIMER_PHASES.FOCUS && (
+                <button
+                  onClick={pauseTimer}
+                  disabled={isTimerLoading}
+                  className="w-11 h-11 flex items-center justify-center rounded-full bg-orange-500/80 hover:bg-orange-500 text-white transition-all cursor-pointer disabled:opacity-50 shadow-lg shadow-orange-500/20"
+                  title="إيقاف مؤقت"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15.75 5.25v13.5m-7.5-13.5v13.5"
+                    />
+                  </svg>
+                </button>
+              )}
+
+              {/* Timer display */}
               <div
-                className={`text-6xl font-mono font-bold text-white tracking-widest tabular-nums ${
+                className={`text-5xl font-mono font-bold text-white tracking-widest tabular-nums ${
                   phase === TIMER_PHASES.FOCUS
                     ? "drop-shadow-[0_0_16px_rgba(16,185,129,.3)]"
                     : phase === TIMER_PHASES.BREAK
@@ -1164,279 +1255,183 @@ function RoomPageInner() {
               >
                 {formatTime(timeLeft)}
               </div>
-              {/* Pomodoro config label */}
-              <p className="text-[11px] text-white/40 mt-1 font-mono">
-                {room.focusDuration}د تركيز / {room.breakDuration}د استراحة
-              </p>
+
+              {/* Restart button (host, paused only) */}
+              {isHost && phase === TIMER_PHASES.PAUSED && (
+                <button
+                  onClick={restartTimer}
+                  disabled={isTimerLoading}
+                  className="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all cursor-pointer disabled:opacity-50"
+                  title="إعادة البدء"
+                >
+                  <svg
+                    className="w-4.5 h-4.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"
+                    />
+                  </svg>
+                </button>
+              )}
+
+              {/* Settings button (host, idle only) */}
+              {isHost && phase === TIMER_PHASES.IDLE && (
+                <button
+                  onClick={() => {
+                    setEditFocus(room.focusDuration);
+                    setEditBreak(room.breakDuration);
+                    setShowPomodoroSettings(!showPomodoroSettings);
+                  }}
+                  className={`w-11 h-11 flex items-center justify-center rounded-full transition-all cursor-pointer ${
+                    showPomodoroSettings
+                      ? "bg-white/25 text-white"
+                      : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
+                  }`}
+                  title="إعدادات البومودورو"
+                >
+                  <svg
+                    className="w-4.5 h-4.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                </button>
+              )}
+
+              {/* Break indicator (no button needed) */}
+              {phase === TIMER_PHASES.BREAK && (
+                <span className="text-yellow-300/80 text-lg">☕</span>
+              )}
             </div>
 
-            {/* Host controls */}
-            {isHost && (
-              <div className="flex flex-col gap-2">
-                <div className="flex gap-2">
-                  {phase === TIMER_PHASES.IDLE && (
-                    <>
-                      <button
-                        onClick={startTimer}
-                        disabled={isTimerLoading}
-                        className="flex-1 bg-emerald-500/80 hover:bg-emerald-500 text-white py-2 rounded-xl text-sm font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"
-                          />
-                        </svg>
-                        ابدأ الجلسة
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditFocus(room.focusDuration);
-                          setEditBreak(room.breakDuration);
-                          setShowPomodoroSettings(!showPomodoroSettings);
-                        }}
-                        className={`w-10 flex items-center justify-center rounded-xl transition-colors cursor-pointer ${
-                          showPomodoroSettings
-                            ? "bg-white/25 text-white"
-                            : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
-                        }`}
-                        title="إعدادات البومودورو"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                        </svg>
-                      </button>
-                    </>
-                  )}
-                  {phase === TIMER_PHASES.FOCUS && (
-                    <button
-                      onClick={pauseTimer}
-                      disabled={isTimerLoading}
-                      className="flex-1 bg-orange-500/80 hover:bg-orange-500 text-white py-2 rounded-xl text-sm font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
+            {/* Host controls — Pomodoro settings (IDLE only) */}
+            {isHost && showPomodoroSettings && phase === TIMER_PHASES.IDLE && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 flex flex-col gap-3 animate-fade-in">
+                <div className="flex items-center justify-between">
+                  <span className="text-white text-xs font-bold">
+                    إعدادات البومودورو
+                  </span>
+                  <button
+                    onClick={() => setShowPomodoroSettings(false)}
+                    className="text-white/40 hover:text-white/70 transition-colors cursor-pointer"
+                  >
+                    <svg
+                      className="w-3.5 h-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M15.75 5.25v13.5m-7.5-13.5v13.5"
-                        />
-                      </svg>
-                      إيقاف مؤقت
-                    </button>
-                  )}
-                  {phase === TIMER_PHASES.PAUSED && (
-                    <>
-                      <button
-                        onClick={resumeTimer}
-                        disabled={isTimerLoading}
-                        className="flex-1 bg-emerald-500/80 hover:bg-emerald-500 text-white py-2 rounded-xl text-sm font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"
-                          />
-                        </svg>
-                        استئناف
-                      </button>
-                      <button
-                        onClick={restartTimer}
-                        disabled={isTimerLoading}
-                        className="w-10 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors cursor-pointer disabled:opacity-50"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"
-                          />
-                        </svg>
-                      </button>
-                    </>
-                  )}
-                  {phase === TIMER_PHASES.BREAK && (
-                    <div className="flex-1 text-center py-2 text-yellow-300/80 text-sm font-medium">
-                      ☕ استمتع بالاستراحة
-                    </div>
-                  )}
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
                 </div>
 
-                {/* Pomodoro settings popover (IDLE only) */}
-                {showPomodoroSettings && phase === TIMER_PHASES.IDLE && (
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 flex flex-col gap-3 animate-fade-in">
-                    <div className="flex items-center justify-between">
-                      <span className="text-white text-xs font-bold">
-                        إعدادات البومودورو
+                <div className="flex gap-3">
+                  {/* Focus duration */}
+                  <div className="flex-1 flex flex-col gap-1">
+                    <label className="text-[10px] text-white/50 font-medium">
+                      تركيز (دقيقة)
+                    </label>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setEditFocus((v) => Math.max(5, v - 5))}
+                        className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+                      >
+                        −
+                      </button>
+                      <span className="flex-1 text-center text-white font-mono text-sm font-bold">
+                        {editFocus}
                       </span>
                       <button
-                        onClick={() => setShowPomodoroSettings(false)}
-                        className="text-white/40 hover:text-white/70 transition-colors cursor-pointer"
+                        onClick={() =>
+                          setEditFocus((v) => Math.min(360, v + 5))
+                        }
+                        className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
                       >
-                        <svg
-                          className="w-3.5 h-3.5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
+                        +
                       </button>
                     </div>
-
-                    <div className="flex gap-3">
-                      {/* Focus duration */}
-                      <div className="flex-1 flex flex-col gap-1">
-                        <label className="text-[10px] text-white/50 font-medium">
-                          تركيز (دقيقة)
-                        </label>
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() =>
-                              setEditFocus((v) => Math.max(5, v - 5))
-                            }
-                            className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
-                          >
-                            −
-                          </button>
-                          <span className="flex-1 text-center text-white font-mono text-sm font-bold">
-                            {editFocus}
-                          </span>
-                          <button
-                            onClick={() =>
-                              setEditFocus((v) => Math.min(360, v + 5))
-                            }
-                            className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Break duration */}
-                      <div className="flex-1 flex flex-col gap-1">
-                        <label className="text-[10px] text-white/50 font-medium">
-                          استراحة (دقيقة)
-                        </label>
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() =>
-                              setEditBreak((v) => Math.max(5, v - 5))
-                            }
-                            className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
-                          >
-                            −
-                          </button>
-                          <span className="flex-1 text-center text-white font-mono text-sm font-bold">
-                            {editBreak}
-                          </span>
-                          <button
-                            onClick={() =>
-                              setEditBreak((v) => Math.min(360, v + 5))
-                            }
-                            className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Save */}
-                    <button
-                      disabled={
-                        isPomodoroLoading ||
-                        (editFocus === room.focusDuration &&
-                          editBreak === room.breakDuration)
-                      }
-                      onClick={async () => {
-                        try {
-                          await changePomodoro({
-                            focusDuration: editFocus,
-                            breakDuration: editBreak,
-                          });
-                          setShowPomodoroSettings(false);
-                        } catch {
-                          // error logged in store
-                        }
-                      }}
-                      className={`w-full py-1.5 rounded-lg text-xs font-bold text-white transition-colors cursor-pointer disabled:opacity-40 ${themeCfg.accent} ${themeCfg.accentHover}`}
-                    >
-                      {isPomodoroLoading ? "جاري الحفظ..." : "حفظ"}
-                    </button>
                   </div>
-                )}
+
+                  {/* Break duration */}
+                  <div className="flex-1 flex flex-col gap-1">
+                    <label className="text-[10px] text-white/50 font-medium">
+                      استراحة (دقيقة)
+                    </label>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setEditBreak((v) => Math.max(5, v - 5))}
+                        className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+                      >
+                        −
+                      </button>
+                      <span className="flex-1 text-center text-white font-mono text-sm font-bold">
+                        {editBreak}
+                      </span>
+                      <button
+                        onClick={() =>
+                          setEditBreak((v) => Math.min(360, v + 5))
+                        }
+                        className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Save */}
+                <button
+                  disabled={
+                    isPomodoroLoading ||
+                    (editFocus === room.focusDuration &&
+                      editBreak === room.breakDuration)
+                  }
+                  onClick={async () => {
+                    try {
+                      await changePomodoro({
+                        focusDuration: editFocus,
+                        breakDuration: editBreak,
+                      });
+                      setShowPomodoroSettings(false);
+                    } catch {
+                      // error logged in store
+                    }
+                  }}
+                  className={`w-full py-1.5 rounded-lg text-xs font-bold text-white transition-colors cursor-pointer disabled:opacity-40 ${themeCfg.accent} ${themeCfg.accentHover}`}
+                >
+                  {isPomodoroLoading ? "جاري الحفظ..." : "حفظ"}
+                </button>
               </div>
             )}
 
-            {/* Non-host sees read-only status */}
+            {/* Non-host — no verbose messages, just quiet state */}
             {!isHost && phase === TIMER_PHASES.IDLE && (
-              <p className="text-center text-white/40 text-xs">
-                في انتظار المضيف لبدء الجلسة
-              </p>
-            )}
-            {!isHost && phase === TIMER_PHASES.FOCUS && (
-              <div className="text-center py-2 text-emerald-300/80 text-sm font-medium flex items-center justify-center gap-1.5">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-                </span>
-                وقت التركيز — أعطِها كل ما عندك!
-              </div>
-            )}
-            {!isHost && phase === TIMER_PHASES.BREAK && (
-              <div className="text-center py-2 text-yellow-300/80 text-sm font-medium">
-                ☕ استمتع بالاستراحة
-              </div>
-            )}
-            {!isHost && phase === TIMER_PHASES.PAUSED && (
-              <p className="text-center text-orange-300/60 text-xs">
-                الجلسة متوقفة مؤقتاً
+              <p className="text-center text-white/30 text-xs">
+                في انتظار المضيف
               </p>
             )}
           </div>

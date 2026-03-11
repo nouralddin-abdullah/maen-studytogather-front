@@ -1,8 +1,8 @@
 /**
  * Application-wide constants.
  */
-export const APP_NAME = "معاً";
-export const APP_NAME_EN = "Maen";
+export const APP_NAME = "Shell";
+export const APP_NAME_EN = "Shell";
 export const APP_TAGLINE = "ادرس مع أصدقائك";
 export const APP_DESCRIPTION = "منصة للدراسة الجماعية — تواصل، تعاون، تفوّق";
 
@@ -126,6 +126,10 @@ export const SEX_LABELS = {
 export const ROOM_THEMES = {
   CLASSIC: "CLASSIC",
   NIGHT_CITY: "NIGHT_CITY",
+  PINKY: "PINKY",
+  GITHUB: "GITHUB",
+  DARK: "DARK",
+  GRAY: "GRAY",
 };
 
 export const TIMER_PHASES = {
@@ -164,7 +168,11 @@ export const SOUND_TRACKS = {
   RAIN: [
     { id: "rain-1", label: "🌧️ مطر هادئ", file: "chilling-rain-sound.mp3" },
     { id: "rain-2", label: "🌧️ مطر لطيف", file: "gentle-rain.mp3" },
-    { id: "rain-3", label: "🌙 مطر منتصف الليل", file: "midnight-rainsound.mp3" },
+    {
+      id: "rain-3",
+      label: "🌙 مطر منتصف الليل",
+      file: "midnight-rainsound.mp3",
+    },
     { id: "rain-4", label: "⛈️ مطر غزير", file: "rain-sound.mp3" },
   ],
   SEA: [

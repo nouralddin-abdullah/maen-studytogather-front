@@ -17,6 +17,10 @@ import { Button, Input, Select } from "@/components/ui";
 const THEME_OPTIONS = [
   { value: ROOM_THEMES.CLASSIC, label: "🏛️ كلاسيكي" },
   { value: ROOM_THEMES.NIGHT_CITY, label: "🌃 مدينة ليلية" },
+  { value: ROOM_THEMES.PINKY, label: "🌸 وردي" },
+  { value: ROOM_THEMES.GITHUB, label: "🐙 GitHub" },
+  { value: ROOM_THEMES.DARK, label: "🌑 داكن" },
+  { value: ROOM_THEMES.GRAY, label: "🪨 رمادي" },
 ];
 
 // ── Ambient sound options ──
@@ -205,7 +209,7 @@ function CreateRoomPage() {
                   اضغط لرفع صورة الخلفية
                 </span>
                 <span className="text-xs text-text-muted">
-                  JPEG, PNG, WebP — حتى 5 ميجابايت
+                  JPEG, PNG, WebP, GIF — حتى 10 ميجابايت
                 </span>
               </button>
             )}
@@ -213,7 +217,7 @@ function CreateRoomPage() {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/jpeg,image/png,image/webp"
+              accept="image/jpeg,image/png,image/webp,image/gif"
               onChange={handleFileChange}
               className="hidden"
             />
@@ -333,7 +337,6 @@ function CreateRoomPage() {
               })}
             </div>
           </div>
-
 
           {/* ── PassCode (اختياري — لأي غرفة) ── */}
           <Input

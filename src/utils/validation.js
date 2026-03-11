@@ -159,12 +159,15 @@ export const createRoomSchema = z
       .instanceof(File, { message: "صورة الخلفية مطلوبة" })
       .refine((f) => f.size > 0, "صورة الخلفية مطلوبة")
       .refine(
-        (f) => f.size <= 5 * 1024 * 1024,
-        "حجم الصورة يجب أن يكون أقل من 5 ميجابايت",
+        (f) => f.size <= 10 * 1024 * 1024,
+        "حجم الملف يجب أن يكون أقل من 10 ميجابايت",
       )
       .refine(
-        (f) => ["image/jpeg", "image/png", "image/webp"].includes(f.type),
-        "صيغة الصورة يجب أن تكون JPEG أو PNG أو WebP",
+        (f) =>
+          ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
+            f.type,
+          ),
+        "الصيغة يجب أن تكون JPEG أو PNG أو WebP أو GIF",
       ),
   })
   .refine((data) => {
@@ -214,12 +217,13 @@ export const updateRoomSchema = z.object({
     .instanceof(File, { message: "صورة الخلفية غير صالحة" })
     .refine((f) => f.size > 0, "مطلوب ملف صورة")
     .refine(
-      (f) => f.size <= 5 * 1024 * 1024,
-      "حجم الصورة يجب أن يكون أقل من 5 ميجابايت",
+      (f) => f.size <= 10 * 1024 * 1024,
+      "حجم الملف يجب أن يكون أقل من 10 ميجابايت",
     )
     .refine(
-      (f) => ["image/jpeg", "image/png", "image/webp"].includes(f.type),
-      "صيغة الصورة يجب أن تكون JPEG أو PNG أو WebP",
+      (f) =>
+        ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(f.type),
+      "الصيغة يجب أن تكون JPEG أو PNG أو WebP أو GIF",
     )
     .optional()
     .or(z.literal("")),

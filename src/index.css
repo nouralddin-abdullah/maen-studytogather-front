@@ -3,7 +3,7 @@
 @import "tailwindcss";
 
 /* ===========================
-   معاً — Design System Tokens
+   Shell — Design System Tokens
    =========================== */
 
 @theme {
@@ -257,6 +257,50 @@
   box-shadow:
     0 4px 30px rgba(0, 0, 0, 0.25),
     inset 0 0 0 0.5px rgba(168, 85, 247, 0.08);
+}
+
+/* ── Pinky (pink & light) ── */
+.room-glass-pinky {
+  background: rgba(255, 238, 238, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 170, 170, 0.25);
+  box-shadow:
+    0 4px 30px rgba(255, 207, 207, 0.15),
+    inset 0 0 0 0.5px rgba(255, 170, 170, 0.1);
+}
+
+/* ── GitHub (dark gray/octopus) ── */
+.room-glass-github {
+  background: rgba(13, 17, 23, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(48, 54, 61, 0.4);
+  box-shadow:
+    0 4px 30px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 0.5px rgba(139, 148, 158, 0.06);
+}
+
+/* ── Dark (deep black) ── */
+.room-glass-dark {
+  background: rgba(5, 5, 5, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(64, 64, 64, 0.2);
+  box-shadow:
+    0 4px 30px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.04);
+}
+
+/* ── Gray (neutral mid-tone) ── */
+.room-glass-gray {
+  background: rgba(69, 69, 69, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(154, 154, 154, 0.2);
+  box-shadow:
+    0 4px 30px rgba(0, 0, 0, 0.2),
+    inset 0 0 0 0.5px rgba(212, 212, 212, 0.08);
 }
 
 /* Custom scrollbar for room panels */

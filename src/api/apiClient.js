@@ -4,7 +4,7 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
 
 /**
- * Axios instance configured for the معاً API.
+ * Axios instance configured for the Shell API.
  * Stateless auth — attaches JWT from localStorage on every request.
  */
 const apiClient = axios.create({

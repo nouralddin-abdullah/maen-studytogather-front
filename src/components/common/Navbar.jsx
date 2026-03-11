@@ -5,8 +5,9 @@ import ThemeToggle from "@/components/ui/ThemeToggle";
 
 /**
  * Top navigation bar — shown on all main layout pages.
+ * Pass `transparent` to render over hero sections with no background.
  */
-function Navbar() {
+function Navbar({ transparent = false }) {
   const { isAuthenticated, user, logout } = useAuthStore();
   const navigate = useNavigate();
 
@@ -16,12 +17,29 @@ function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-surface-elevated/80 backdrop-blur-md border-b border-border">
+    <nav
+      className={`sticky top-0 z-50 transition-colors duration-300 ${
+        transparent
+          ? "bg-transparent"
+          : "bg-surface-elevated/80 backdrop-blur-md border-b border-border"
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to={ROUTES.HOME} className="flex items-center gap-2">
-            <span className="font-display text-2xl font-bold text-gradient">
+          <Link to={ROUTES.HOME} className="flex items-center gap-3">
+            <img
+              src="/pwa/StudyShell.png"
+              alt={APP_NAME}
+              className="h-11 w-11 rounded-xl object-contain"
+            />
+            <span
+              className={`font-display text-2xl font-bold ${
+                transparent
+                  ? "text-gradient dark:text-text-primary"
+                  : "text-text-primary"
+              }`}
+            >
               {APP_NAME}
             </span>
           </Link>
@@ -34,16 +52,30 @@ function Navbar() {
               <>
                 <Link
                   to={ROUTES.DISCOVER}
-                  className="text-sm text-text-secondary hover:text-brand-600 transition-colors font-medium"
+                  className={`text-sm font-medium transition-colors hover:text-brand-600 ${
+                    transparent
+                      ? "text-black dark:text-text-secondary"
+                      : "text-text-secondary"
+                  }`}
                 >
                   اكتشف الغرف
                 </Link>
-                <span className="text-sm text-text-muted">
+                <span
+                  className={`text-sm ${
+                    transparent
+                      ? "text-black/70 dark:text-text-muted"
+                      : "text-text-muted"
+                  }`}
+                >
                   أهلاً، {user?.nickName || user?.name}
                 </span>
                 <button
                   onClick={handleLogout}
-                  className="text-sm text-text-secondary hover:text-error transition-colors cursor-pointer"
+                  className={`text-sm transition-colors cursor-pointer hover:text-error ${
+                    transparent
+                      ? "text-black dark:text-text-secondary"
+                      : "text-text-secondary"
+                  }`}
                 >
                   خروج
                 </button>
