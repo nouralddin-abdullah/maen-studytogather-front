@@ -42,9 +42,11 @@ const ENDPOINTS = {
   // Friendships
   FRIENDSHIPS: {
     LIST: "/friendships",
+    SEND: "/friendships",
     PENDING: "/friendships/requests/pending",
     RESPOND: (id) => `/friendships/${id}/respond`,
     REMOVE: (id) => `/friendships/${id}`,
+    STATUS: (id) => `/friendships/get-status/${id}`,
     LIVE: "/friendships/live",
   },
 };

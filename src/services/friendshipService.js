@@ -9,7 +9,9 @@ const friendshipService = {
    * @param {Object} params - { page, limit, sortBy, order, search }
    */
   async getAll(params = {}) {
-    const response = await apiClient.get(ENDPOINTS.FRIENDSHIPS.LIST, { params });
+    const response = await apiClient.get(ENDPOINTS.FRIENDSHIPS.LIST, {
+      params,
+    });
     return response.data; // { data: [...], meta: { ... } }
   },
 
@@ -42,6 +44,29 @@ const friendshipService = {
    */
   async remove(id) {
     const response = await apiClient.delete(ENDPOINTS.FRIENDSHIPS.REMOVE(id));
+    return response.data;
+  },
+
+  /**
+   * Send a friend request to a user.
+   * @param {string} addresseeId - The target user's ID
+   */
+  async sendRequest(addresseeId) {
+    const response = await apiClient.post(ENDPOINTS.FRIENDSHIPS.SEND, {
+      addresseeId,
+    });
+    return response.data;
+  },
+
+  /**
+   * Get friendship status with a specific user.
+   * @param {string} targetId - The other user's ID
+   * @returns {{ status: 'NOT_FRIENDS' | 'FRIENDS' | 'PENDING_SENT' | 'PENDING_RECEIVED' }}
+   */
+  async getStatus(targetId) {
+    const response = await apiClient.get(
+      ENDPOINTS.FRIENDSHIPS.STATUS(targetId),
+    );
     return response.data;
   },
 

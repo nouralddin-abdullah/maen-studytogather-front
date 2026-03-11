@@ -259,15 +259,15 @@
     inset 0 0 0 0.5px rgba(168, 85, 247, 0.08);
 }
 
-/* ── Pinky (pink & light) ── */
+/* ── Pinky (deep rose) ── */
 .room-glass-pinky {
-  background: rgba(255, 238, 238, 0.72);
+  background: rgba(160, 40, 80, 0.55);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 170, 170, 0.25);
+  border: 1px solid rgba(251, 146, 191, 0.25);
   box-shadow:
-    0 4px 30px rgba(255, 207, 207, 0.15),
-    inset 0 0 0 0.5px rgba(255, 170, 170, 0.1);
+    0 4px 30px rgba(0, 0, 0, 0.15),
+    inset 0 0 0 0.5px rgba(251, 146, 191, 0.12);
 }
 
 /* ── GitHub (dark gray/octopus) ── */

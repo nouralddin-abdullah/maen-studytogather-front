@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ROUTES, FIELD_LABELS, COUNTRY_LABELS } from "@/utils/constants";
+import { useAuthStore } from "@/stores";
+import { friendshipService } from "@/services";
 
 /* ───────────────────────────────────────────
    Inline SVG icons (same as ProfilePage)
@@ -36,6 +38,12 @@ const DEFAULT_BANNER =
  */
 export default function ProfilePopover({ participant, onClose, glassClass }) {
   const popoverRef = useRef(null);
+  const currentUser = useAuthStore((s) => s.user);
+  const [friendStatus, setFriendStatus] = useState(null); // NOT_FRIENDS | FRIENDS | PENDING_SENT | PENDING_RECEIVED
+  const [friendshipId, setFriendshipId] = useState(null);
+  const [friendLoading, setFriendLoading] = useState(false);
+
+  const isSelf = currentUser?.id === participant?.id;
 
   // Close on outside click
   useEffect(() => {
@@ -62,6 +70,68 @@ export default function ProfilePopover({ participant, onClose, glassClass }) {
     return () => window.removeEventListener("keydown", handleKey);
   }, [onClose]);
 
+  // Fetch friendship status
+  useEffect(() => {
+    if (!participant?.id || isSelf) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await friendshipService.getStatus(participant.id);
+        if (!cancelled) {
+          setFriendStatus(data.status);
+          setFriendshipId(data.friendshipId || null);
+        }
+      } catch {
+        if (!cancelled) setFriendStatus(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [participant?.id, isSelf]);
+
+  // Send friend request handler
+  const handleSendRequest = async () => {
+    setFriendLoading(true);
+    try {
+      await friendshipService.sendRequest(participant.id);
+      setFriendStatus("PENDING_SENT");
+    } catch {
+      // ignore — already sent or other error
+    } finally {
+      setFriendLoading(false);
+    }
+  };
+
+  // Accept incoming request
+  const handleAcceptRequest = async () => {
+    if (!friendshipId) return;
+    setFriendLoading(true);
+    try {
+      await friendshipService.respond(friendshipId, "accepted");
+      setFriendStatus("FRIENDS");
+    } catch {
+      // ignore
+    } finally {
+      setFriendLoading(false);
+    }
+  };
+
+  // Reject incoming request
+  const handleRejectRequest = async () => {
+    if (!friendshipId) return;
+    setFriendLoading(true);
+    try {
+      await friendshipService.respond(friendshipId, "rejected");
+      setFriendStatus("NOT_FRIENDS");
+      setFriendshipId(null);
+    } catch {
+      // ignore
+    } finally {
+      setFriendLoading(false);
+    }
+  };
+
   if (!participant) return null;
 
   const {
@@ -87,11 +157,7 @@ export default function ProfilePopover({ participant, onClose, glassClass }) {
   const focusHours = Math.round((totalFocusMinutes || 0) / 60);
 
   return (
-    <div
-      ref={popoverRef}
-      className="animate-popover-in"
-      style={{ width: 310 }}
-    >
+    <div ref={popoverRef} className="animate-popover-in" style={{ width: 310 }}>
       <div
         className={`${glassClass} rounded-2xl shadow-2xl border border-white/15`}
         style={{ overflow: "visible" }}
@@ -101,12 +167,120 @@ export default function ProfilePopover({ participant, onClose, glassClass }) {
           className="relative rounded-t-2xl"
           style={{ height: 80, overflow: "hidden" }}
         >
-          <img
-            src={bannerUrl}
-            alt=""
-            className="w-full h-full object-cover"
-          />
+          <img src={bannerUrl} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+          {/* Friendship status icon on banner */}
+          {!isSelf && friendStatus && (
+            <div className="absolute top-3 start-3 flex items-center gap-1.5">
+              {friendStatus === "FRIENDS" && (
+                <span
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-black/50 text-white/80"
+                  title="أصدقاء"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                    />
+                  </svg>
+                </span>
+              )}
+              {friendStatus === "PENDING_SENT" && (
+                <span
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-black/50 text-white/50"
+                  title="طلب مُرسل"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </span>
+              )}
+              {friendStatus === "PENDING_RECEIVED" && (
+                <>
+                  <button
+                    onClick={handleAcceptRequest}
+                    disabled={friendLoading}
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-black/50 text-emerald-400 hover:bg-emerald-600/60 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+                    title="قبول"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4.5 12.75l6 6 9-13.5"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleRejectRequest}
+                    disabled={friendLoading}
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-black/50 text-red-400 hover:bg-red-600/60 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+                    title="رفض"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </>
+              )}
+              {friendStatus === "NOT_FRIENDS" && (
+                <button
+                  onClick={handleSendRequest}
+                  disabled={friendLoading}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-black/50 text-white/50 hover:bg-brand-600/60 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+                  title="إضافة صديق"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 019.374 21c-2.331 0-4.512-.645-6.374-1.766z"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ── Avatar — overlapping banner ── */}
@@ -260,7 +434,6 @@ export default function ProfilePopover({ participant, onClose, glassClass }) {
               </span>
             </div>
           </div>
-
 
           {/* View Full Profile button */}
           <Link

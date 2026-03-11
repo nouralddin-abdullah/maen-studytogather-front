@@ -52,15 +52,15 @@ const THEME_CONFIG = {
   PINKY: {
     fallbackBg:
       "https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1920&q=80",
-    overlay: "bg-gradient-to-b from-pink-950/20 via-transparent to-pink-950/20",
+    overlay: "bg-gradient-to-b from-pink-950/40 via-pink-900/15 to-pink-950/40",
     glass: "room-glass-pinky",
     accent: "bg-pink-500",
     accentHover: "hover:bg-pink-600",
     accentShadow: "shadow-pink-500/20",
-    accentText: "text-pink-400",
+    accentText: "text-pink-300",
     accentBorder: "border-pink-400",
     accentBg: "bg-pink-500/20",
-    notifHeader: "bg-pink-500/80",
+    notifHeader: "bg-pink-600/80",
   },
   GITHUB: {
     fallbackBg:
@@ -1200,7 +1200,7 @@ function RoomPageInner() {
                       phase === TIMER_PHASES.IDLE ? startTimer : resumeTimer
                     }
                     disabled={isTimerLoading}
-                    className="w-11 h-11 flex items-center justify-center rounded-full bg-emerald-500/80 hover:bg-emerald-500 text-white transition-all cursor-pointer disabled:opacity-50 shadow-lg shadow-emerald-500/20"
+                    className="flex items-center justify-center text-emerald-400 hover:text-emerald-300 transition-all cursor-pointer disabled:opacity-50"
                     title={
                       phase === TIMER_PHASES.IDLE ? "ابدأ الجلسة" : "استئناف"
                     }
@@ -1224,7 +1224,7 @@ function RoomPageInner() {
                 <button
                   onClick={pauseTimer}
                   disabled={isTimerLoading}
-                  className="w-11 h-11 flex items-center justify-center rounded-full bg-orange-500/80 hover:bg-orange-500 text-white transition-all cursor-pointer disabled:opacity-50 shadow-lg shadow-orange-500/20"
+                  className="flex items-center justify-center text-orange-400 hover:text-orange-300 transition-all cursor-pointer disabled:opacity-50"
                   title="إيقاف مؤقت"
                 >
                   <svg
@@ -1261,7 +1261,7 @@ function RoomPageInner() {
                 <button
                   onClick={restartTimer}
                   disabled={isTimerLoading}
-                  className="w-11 h-11 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all cursor-pointer disabled:opacity-50"
+                  className="flex items-center justify-center text-white/60 hover:text-white transition-all cursor-pointer disabled:opacity-50"
                   title="إعادة البدء"
                 >
                   <svg
@@ -1288,10 +1288,10 @@ function RoomPageInner() {
                     setEditBreak(room.breakDuration);
                     setShowPomodoroSettings(!showPomodoroSettings);
                   }}
-                  className={`w-11 h-11 flex items-center justify-center rounded-full transition-all cursor-pointer ${
+                  className={`flex items-center justify-center transition-all cursor-pointer ${
                     showPomodoroSettings
-                      ? "bg-white/25 text-white"
-                      : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
+                      ? "text-white"
+                      : "text-white/60 hover:text-white"
                   }`}
                   title="إعدادات البومودورو"
                 >
