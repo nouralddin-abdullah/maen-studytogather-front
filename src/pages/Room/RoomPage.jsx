@@ -205,6 +205,8 @@ function RoomPageInner() {
   useEffect(() => {
     if (trackCount > 0 && prevTrackCount.current === 0) {
       setShowVideoGrid(true);
+    } else if (trackCount === 0 && prevTrackCount.current > 0) {
+      setShowVideoGrid(false);
     }
     prevTrackCount.current = trackCount;
   }, [trackCount]);
@@ -721,6 +723,7 @@ function RoomPageInner() {
            ════════════════════════════════════════ */}
         <main className="flex-1 flex flex-col justify-between relative">
           {/* ── LiveKit Video Grid + Floating Timer ── */}
+          {showVideoGrid && (
           <div className="absolute inset-x-0 top-14 bottom-24 px-4 sm:px-6 z-20 animate-fade-in flex items-center justify-center">
             <ResizableVideoWrapper>
               <VideoGrid
@@ -729,6 +732,8 @@ function RoomPageInner() {
                 onPinnedIndexChange={setVideoPinnedIndex}
                 gap={8}
                 maxCapacity={room.maxCapacity || 6}
+                participants={participants}
+                localIdentity={user?.id}
                 onPublishCamera={toggleCamera}
                 onPublishScreen={toggleScreenShare}
                 isCameraOn={isCameraOn}
@@ -736,6 +741,7 @@ function RoomPageInner() {
               />
             </ResizableVideoWrapper>
           </div>
+          )}
 
           {/* ── Top bar: Room name + Invite + Leave + Timer ── */}
           <header className="flex justify-center items-start pt-1 gap-3">
@@ -1133,34 +1139,30 @@ function RoomPageInner() {
                 </div>
 
                 {/* Video grid toggle */}
-                
-                  <button
-                    onClick={() => setShowVideoGrid((v) => !v)}
-                    title={
-                      showVideoGrid ? "إخفاء بث الفيديو" : "عرض بث الفيديو"
-                    }
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                      showVideoGrid
-                        ? `${themeCfg.accent} text-white shadow-lg ${themeCfg.accentShadow}`
-                        : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
-                    }`}
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
-                      />
-                    </svg>
-                  </button>
-                )}
 
+                <button
+                  onClick={() => setShowVideoGrid((v) => !v)}
+                  title={showVideoGrid ? "إخفاء بث الفيديو" : "عرض بث الفيديو"}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                    showVideoGrid
+                      ? `${themeCfg.accent} text-white shadow-lg ${themeCfg.accentShadow}`
+                      : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
+                  }`}
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
+                    />
+                  </svg>
+                </button>
                 {/* Fullscreen focus toggle */}
                 <button
                   onClick={() => setIsFullscreen(true)}
@@ -1192,7 +1194,7 @@ function RoomPageInner() {
            Collapses to timer-only when video grid is active
            ════════════════════════════════════════ */}
         <aside
-          className={`flex-shrink-0 flex flex-col gap-3 h-full transition-all duration-300 ${showVideoGrid ? "w-0 overflow-hidden opacity-0 pointer-events-none" : "w-80"}`}
+          className="flex-shrink-0 flex flex-col gap-3 h-full transition-all duration-300 w-80"
         >
           {/* ── Timer Panel ── */}
           <div className={`${glassClass} p-5 rounded-3xl flex flex-col gap-4`}>
@@ -1485,66 +1487,76 @@ function RoomPageInner() {
                   stroke="currentColor"
                   strokeWidth={2.5}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 19.5L8.25 12l7.5-7.5"
+                  />
                 </svg>
               </button>
             </div>
             {!isNotifsCollapsed && (
               <div className="flex-1 overflow-y-auto custom-scrollbar p-3 flex flex-col gap-2">
                 {notifications.length === 0 && (
-                <p className="text-white/30 text-xs text-center mt-4">
-                  لا توجد إشعارات بعد
-                </p>
-              )}
-              {notifications.map((notif) => (
-                <div
-                  key={notif.id}
-                  className="flex items-center gap-2 text-xs animate-fade-in"
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                      notif.type === "join"
-                        ? "bg-emerald-400"
-                        : notif.type === "goal_complete"
-                          ? "bg-amber-400"
-                          : "bg-red-400"
-                    }`}
-                  />
-                  <span className="text-white/80">
-                    <span className="font-bold text-white">
-                      {notif.user?.nickName || notif.user?.username || "مستخدم"}
-                    </span>{" "}
-                    {notif.type === "join"
-                      ? "انضم للغرفة"
-                      : notif.type === "leave"
-                        ? "غادر الغرفة"
+                  <p className="text-white/30 text-xs text-center mt-4">
+                    لا توجد إشعارات بعد
+                  </p>
+                )}
+                {notifications.map((notif) => (
+                  <div
+                    key={notif.id}
+                    className="flex items-center gap-2 text-xs animate-fade-in"
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                        notif.type === "join"
+                          ? "bg-emerald-400"
+                          : notif.type === "goal_complete"
+                            ? "bg-amber-400"
+                            : "bg-red-400"
+                      }`}
+                    />
+                    <span className="text-white/80">
+                      <span className="font-bold text-white">
+                        {notif.user?.nickName ||
+                          notif.user?.username ||
+                          "مستخدم"}
+                      </span>{" "}
+                      {notif.type === "join"
+                        ? "انضم للغرفة"
+                        : notif.type === "leave"
+                          ? "غادر الغرفة"
+                          : ""}
+                      {notif.type === "goal_complete" && (
+                        <>
+                          أكمل هدف:{" "}
+                          <span className="font-bold text-emerald-400">
+                            {notif.goalTitle}
+                          </span>{" "}
+                          🎯
+                        </>
+                      )}
+                      {notif.type === "join" &&
+                        notif.user?.currentStreak > 0 && (
+                          <span className="ms-1.5 text-[10px] text-orange-400 font-bold">
+                            🔥{notif.user.currentStreak}
+                          </span>
+                        )}
+                    </span>
+                    <span className="text-white/30 ms-auto font-mono text-[10px]">
+                      {notif.timestamp
+                        ? new Date(notif.timestamp).toLocaleTimeString(
+                            "ar-SA",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                          )
                         : ""}
-                    {notif.type === "goal_complete" && (
-                      <>
-                        أكمل هدف:{" "}
-                        <span className="font-bold text-emerald-400">
-                          {notif.goalTitle}
-                        </span>{" "}
-                        🎯
-                      </>
-                    )}
-                    {notif.type === "join" && notif.user?.currentStreak > 0 && (
-                      <span className="ms-1.5 text-[10px] text-orange-400 font-bold">
-                        🔥{notif.user.currentStreak}
-                      </span>
-                    )}
-                  </span>
-                  <span className="text-white/30 ms-auto font-mono text-[10px]">
-                    {notif.timestamp
-                      ? new Date(notif.timestamp).toLocaleTimeString("ar-SA", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                      : ""}
-                  </span>
-                </div>
-              ))}
-              <div ref={notifEndRef} />
+                    </span>
+                  </div>
+                ))}
+                <div ref={notifEndRef} />
               </div>
             )}
           </div>
@@ -1563,303 +1575,148 @@ function RoomPageInner() {
       {/* ═════════════════════════════════════════
          FULLSCREEN FOCUS MODE
          ═════════════════════════════════════════ */}
-      {isFullscreen && (() => {
-        const fsGridActive = showVideoGrid;
-        // Compact mode: always for 1-2 streams, opt-in for 3+
-        const useCompactGrid = fsGridActive && (trackCount <= 2 || (trackCount >= 3 && compactVideoLayout));
-        const useFullGrid = fsGridActive && !useCompactGrid;
+      {isFullscreen &&
+        (() => {
+          const fsGridActive = showVideoGrid;
+          // Compact mode: always for 1-2 streams, opt-in for 3+
+          const useCompactGrid =
+            fsGridActive &&
+            (trackCount <= 2 || (trackCount >= 3 && compactVideoLayout));
+          const useFullGrid = fsGridActive && !useCompactGrid;
 
-        return (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center animate-fade-in">
-          {/* Wallpaper background */}
-          <div className="absolute inset-0 z-0">
-            <img
-              src={wallpaper}
-              alt=""
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          {/* Dark overlay for readability */}
-          <div className="absolute inset-0 z-[1] bg-black/50 backdrop-blur-[2px]" />
-
-          {/* Top-start buttons — exit + video grid toggle + publish + compact toggle */}
-          <div className="absolute top-6 start-6 z-[3] flex items-center gap-2">
-            <button
-              onClick={() => setIsFullscreen(false)}
-              className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer border border-white/10"
-              title="الخروج من وضع التركيز"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"
+          return (
+            <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center animate-fade-in">
+              {/* Wallpaper background */}
+              <div className="absolute inset-0 z-0">
+                <img
+                  src={wallpaper}
+                  alt=""
+                  className="w-full h-full object-cover"
                 />
-              </svg>
-            </button>
-
-            {/* Video grid toggle */}
-            
-              <button
-                onClick={() => setShowVideoGrid((v) => !v)}
-                className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
-                  showVideoGrid
-                    ? `${themeCfg.accent} text-white`
-                    : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
-                }`}
-                title={showVideoGrid ? "إخفاء بث الفيديو" : "عرض بث الفيديو"}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
-                  />
-                </svg>
-              </button>
-            )}
-
-            {/* Camera toggle */}
-            <button
-              onClick={async () => {
-                await toggleCamera();
-                if (!isCameraOn) setShowVideoGrid(true);
-              }}
-              className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
-                isCameraOn
-                  ? "bg-emerald-500 text-white"
-                  : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
-              }`}
-              title={isCameraOn ? "إيقاف الكاميرا" : "تشغيل الكاميرا"}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
-                />
-              </svg>
-            </button>
-
-            {/* Screen share toggle */}
-            <button
-              onClick={async () => {
-                await toggleScreenShare();
-                if (!isScreenOn) setShowVideoGrid(true);
-              }}
-              className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
-                isScreenOn
-                  ? "bg-violet-500 text-white"
-                  : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
-              }`}
-              title={isScreenOn ? "إيقاف مشاركة الشاشة" : "مشاركة الشاشة"}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12"
-                />
-              </svg>
-            </button>
-
-            {/* Compact layout toggle — only visible for 3+ streams */}
-            {fsGridActive && trackCount >= 3 && (
-              <button
-                onClick={() => setCompactVideoLayout((v) => !v)}
-                className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
-                  compactVideoLayout
-                    ? `${themeCfg.accent} text-white`
-                    : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
-                }`}
-                title={compactVideoLayout ? "عرض كامل الشاشة" : "عرض مصغّر مع المؤقت"}
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"
-                  />
-                </svg>
-              </button>
-            )}
-          </div>
-
-          {/* ═══════════════════════════════════
-             COMPACT LAYOUT — 1-2 streams, or 3+ opt-in
-             Video on the left (end in RTL), panels on the right (start in RTL)
-             ═══════════════════════════════════ */}
-          {useCompactGrid && (
-            <div className="absolute inset-0 z-[2] flex flex-row-reverse pt-20 pb-8 px-6 gap-6 animate-fade-in">
-              {/* Left side (end in RTL): Video grid — compact */}
-              <div className="fs-compact-grid">
-                <ResizableVideoWrapper>
-                  <VideoGrid
-                    layoutMode={videoLayoutMode}
-                    pinnedIndex={videoPinnedIndex}
-                    onPinnedIndexChange={setVideoPinnedIndex}
-                    gap={8}
-                    compact
-                  />
-                </ResizableVideoWrapper>
               </div>
 
-              {/* Right side (start in RTL): Timer + Goals */}
-              <div className={`fs-compact-panels ${!showFsGoals ? "justify-center" : ""}`}>
-                {/* Timer */}
-                <div className="flex flex-col items-center gap-3 py-4">
-                  {/* Timer + phase dot inline */}
-                  <div className="flex items-center gap-3">
-                    <span className="relative flex h-3.5 w-3.5">
-                      {phaseStyle.ping && (
-                        <span
-                          className={`animate-ping absolute inline-flex h-full w-full rounded-full ${phaseStyle.dot} opacity-75`}
-                        />
-                      )}
-                      <span
-                        className={`relative inline-flex rounded-full h-3.5 w-3.5 ${phaseStyle.dot}`}
-                      />
-                    </span>
-                    <div
-                      className={`font-mono font-bold text-white tabular-nums leading-none tracking-[0.12em] ${
-                        showFsGoals ? "text-8xl" : "text-[10rem]"
-                      } ${
-                        phase === TIMER_PHASES.FOCUS
-                          ? "drop-shadow-[0_0_16px_rgba(16,185,129,.3)]"
-                          : phase === TIMER_PHASES.BREAK
-                            ? "drop-shadow-[0_0_16px_rgba(245,158,11,.3)]"
-                            : ""
-                      }`}
-                    >
-                      {formatTime(timeLeft)}
-                    </div>
-                  </div>
+              {/* Dark overlay for readability */}
+              <div className="absolute inset-0 z-[1] bg-black/50 backdrop-blur-[2px]" />
 
-                  {/* Host controls */}
-                  <div className="flex items-center gap-3 mt-1">
-                    {isHost &&
-                      (phase === TIMER_PHASES.IDLE ||
-                        phase === TIMER_PHASES.PAUSED) && (
-                        <button
-                          onClick={
-                            phase === TIMER_PHASES.IDLE
-                              ? startTimer
-                              : resumeTimer
-                          }
-                          disabled={isTimerLoading}
-                          className="flex items-center justify-center text-emerald-400 hover:text-emerald-300 transition-all cursor-pointer disabled:opacity-50"
-                          title={
-                            phase === TIMER_PHASES.IDLE
-                              ? "ابدأ الجلسة"
-                              : "استئناف"
-                          }
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"
-                            />
-                          </svg>
-                        </button>
-                      )}
-                    {isHost && phase === TIMER_PHASES.FOCUS && (
-                      <button
-                        onClick={pauseTimer}
-                        disabled={isTimerLoading}
-                        className="flex items-center justify-center text-orange-400 hover:text-orange-300 transition-all cursor-pointer disabled:opacity-50"
-                        title="إيقاف مؤقت"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M15.75 5.25v13.5m-7.5-13.5v13.5"
-                          />
-                        </svg>
-                      </button>
-                    )}
-                    {isHost && phase === TIMER_PHASES.PAUSED && (
-                      <button
-                        onClick={restartTimer}
-                        disabled={isTimerLoading}
-                        className="flex items-center justify-center text-white/60 hover:text-white transition-all cursor-pointer disabled:opacity-50"
-                        title="إعادة البدء"
-                      >
-                        <svg
-                          className="w-4.5 h-4.5"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"
-                          />
-                        </svg>
-                      </button>
-                    )}
-                    {phase === TIMER_PHASES.BREAK && (
-                      <span className="text-yellow-300/80 text-lg">☕</span>
-                    )}
-                    {!isHost && phase === TIMER_PHASES.IDLE && (
-                      <p className="text-white/30 text-xs">في انتظار المضيف</p>
-                    )}
-                  </div>
-                </div>
+              {/* Top-start buttons — exit + video grid toggle + publish + compact toggle */}
+              <div className="absolute top-6 start-6 z-[3] flex items-center gap-2">
+                <button
+                  onClick={() => setIsFullscreen(false)}
+                  className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer border border-white/10"
+                  title="الخروج من وضع التركيز"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"
+                    />
+                  </svg>
+                </button>
 
-                {/* Goals panel — visible by default, toggleable */}
-                <div className="flex items-center justify-between px-1">
+                {/* Video grid toggle */}
+
+                <button
+                  onClick={() => setShowVideoGrid((v) => !v)}
+                  className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
+                    showVideoGrid
+                      ? `${themeCfg.accent} text-white`
+                      : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
+                  }`}
+                  title={showVideoGrid ? "إخفاء بث الفيديو" : "عرض بث الفيديو"}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
+                    />
+                  </svg>
+                </button>
+                {/* Camera toggle */}
+                <button
+                  onClick={async () => {
+                    await toggleCamera();
+                    if (!isCameraOn) setShowVideoGrid(true);
+                  }}
+                  className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
+                    isCameraOn
+                      ? "bg-emerald-500 text-white"
+                      : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
+                  }`}
+                  title={isCameraOn ? "إيقاف الكاميرا" : "تشغيل الكاميرا"}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
+                    />
+                  </svg>
+                </button>
+
+                {/* Screen share toggle */}
+                <button
+                  onClick={async () => {
+                    await toggleScreenShare();
+                    if (!isScreenOn) setShowVideoGrid(true);
+                  }}
+                  className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
+                    isScreenOn
+                      ? "bg-violet-500 text-white"
+                      : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
+                  }`}
+                  title={isScreenOn ? "إيقاف مشاركة الشاشة" : "مشاركة الشاشة"}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12"
+                    />
+                  </svg>
+                </button>
+
+                {/* Compact layout toggle — only visible for 3+ streams */}
+                {fsGridActive && trackCount >= 3 && (
                   <button
-                    onClick={() => setShowFsGoals((v) => !v)}
-                    className="text-[11px] text-white/40 hover:text-white/70 transition-colors cursor-pointer flex items-center gap-1.5"
+                    onClick={() => setCompactVideoLayout((v) => !v)}
+                    className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
+                      compactVideoLayout
+                        ? `${themeCfg.accent} text-white`
+                        : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
+                    }`}
+                    title={
+                      compactVideoLayout
+                        ? "عرض كامل الشاشة"
+                        : "عرض مصغّر مع المؤقت"
+                    }
                   >
                     <svg
-                      className={`w-3 h-3 transition-transform ${showFsGoals ? "rotate-180" : ""}`}
+                      className="w-5 h-5"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -1868,88 +1725,266 @@ function RoomPageInner() {
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M4.5 15.75l7.5-7.5 7.5 7.5"
+                        d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"
                       />
                     </svg>
-                    {showFsGoals ? "إخفاء الأهداف" : "عرض الأهداف"}
                   </button>
-                </div>
-
-                {showFsGoals && (
-                  <div className="flex-1 min-h-0 animate-fade-in">
-                    <GoalsPanel
-                      glassClass={glassClass}
-                      themeCfg={themeCfg}
-                      userId={user?.id}
-                      participants={participants}
-                      roomGoals={roomGoals}
-                      isGoalsLoading={isGoalsLoading}
-                      createGoal={createGoal}
-                      toggleGoal={toggleGoal}
-                      updateGoalTitle={updateGoalTitle}
-                      deleteGoal={deleteGoal}
-                    />
-                  </div>
                 )}
               </div>
-            </div>
-          )}
 
-          {/* ═══════════════════════════════════
+              {/* ═══════════════════════════════════
+             COMPACT LAYOUT — 1-2 streams, or 3+ opt-in
+             Video on the left (end in RTL), panels on the right (start in RTL)
+             ═══════════════════════════════════ */}
+              {useCompactGrid && (
+                <div className="absolute inset-0 z-[2] flex flex-row-reverse pt-20 pb-8 px-6 gap-6 animate-fade-in">
+                  {/* Left side (end in RTL): Video grid — compact */}
+                  <div className="fs-compact-grid">
+                    <ResizableVideoWrapper>
+                      <VideoGrid
+                        layoutMode={videoLayoutMode}
+                        pinnedIndex={videoPinnedIndex}
+                        onPinnedIndexChange={setVideoPinnedIndex}
+                        gap={8}
+                        compact
+                        maxCapacity={room.maxCapacity || 6}
+                        participants={participants}
+                        localIdentity={user?.id}
+                        onPublishCamera={toggleCamera}
+                        onPublishScreen={toggleScreenShare}
+                        isCameraOn={isCameraOn}
+                        isScreenOn={isScreenOn}
+                      />
+                    </ResizableVideoWrapper>
+                  </div>
+
+                  {/* Right side (start in RTL): Timer + Goals */}
+                  <div
+                    className={`fs-compact-panels ${!showFsGoals ? "justify-center" : ""}`}
+                  >
+                    {/* Timer */}
+                    <div className="flex flex-col items-center gap-3 py-4">
+                      {/* Timer + phase dot inline */}
+                      <div className="flex items-center gap-3">
+                        <span className="relative flex h-3.5 w-3.5">
+                          {phaseStyle.ping && (
+                            <span
+                              className={`animate-ping absolute inline-flex h-full w-full rounded-full ${phaseStyle.dot} opacity-75`}
+                            />
+                          )}
+                          <span
+                            className={`relative inline-flex rounded-full h-3.5 w-3.5 ${phaseStyle.dot}`}
+                          />
+                        </span>
+                        <div
+                          className={`font-mono font-bold text-white tabular-nums leading-none tracking-[0.12em] ${
+                            showFsGoals ? "text-8xl" : "text-[10rem]"
+                          } ${
+                            phase === TIMER_PHASES.FOCUS
+                              ? "drop-shadow-[0_0_16px_rgba(16,185,129,.3)]"
+                              : phase === TIMER_PHASES.BREAK
+                                ? "drop-shadow-[0_0_16px_rgba(245,158,11,.3)]"
+                                : ""
+                          }`}
+                        >
+                          {formatTime(timeLeft)}
+                        </div>
+                      </div>
+
+                      {/* Host controls */}
+                      <div className="flex items-center gap-3 mt-1">
+                        {isHost &&
+                          (phase === TIMER_PHASES.IDLE ||
+                            phase === TIMER_PHASES.PAUSED) && (
+                            <button
+                              onClick={
+                                phase === TIMER_PHASES.IDLE
+                                  ? startTimer
+                                  : resumeTimer
+                              }
+                              disabled={isTimerLoading}
+                              className="flex items-center justify-center text-emerald-400 hover:text-emerald-300 transition-all cursor-pointer disabled:opacity-50"
+                              title={
+                                phase === TIMER_PHASES.IDLE
+                                  ? "ابدأ الجلسة"
+                                  : "استئناف"
+                              }
+                            >
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"
+                                />
+                              </svg>
+                            </button>
+                          )}
+                        {isHost && phase === TIMER_PHASES.FOCUS && (
+                          <button
+                            onClick={pauseTimer}
+                            disabled={isTimerLoading}
+                            className="flex items-center justify-center text-orange-400 hover:text-orange-300 transition-all cursor-pointer disabled:opacity-50"
+                            title="إيقاف مؤقت"
+                          >
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M15.75 5.25v13.5m-7.5-13.5v13.5"
+                              />
+                            </svg>
+                          </button>
+                        )}
+                        {isHost && phase === TIMER_PHASES.PAUSED && (
+                          <button
+                            onClick={restartTimer}
+                            disabled={isTimerLoading}
+                            className="flex items-center justify-center text-white/60 hover:text-white transition-all cursor-pointer disabled:opacity-50"
+                            title="إعادة البدء"
+                          >
+                            <svg
+                              className="w-4.5 h-4.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"
+                              />
+                            </svg>
+                          </button>
+                        )}
+                        {phase === TIMER_PHASES.BREAK && (
+                          <span className="text-yellow-300/80 text-lg">☕</span>
+                        )}
+                        {!isHost && phase === TIMER_PHASES.IDLE && (
+                          <p className="text-white/30 text-xs">
+                            في انتظار المضيف
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Goals panel — visible by default, toggleable */}
+                    <div className="flex items-center justify-between px-1">
+                      <button
+                        onClick={() => setShowFsGoals((v) => !v)}
+                        className="text-[11px] text-white/40 hover:text-white/70 transition-colors cursor-pointer flex items-center gap-1.5"
+                      >
+                        <svg
+                          className={`w-3 h-3 transition-transform ${showFsGoals ? "rotate-180" : ""}`}
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M4.5 15.75l7.5-7.5 7.5 7.5"
+                          />
+                        </svg>
+                        {showFsGoals ? "إخفاء الأهداف" : "عرض الأهداف"}
+                      </button>
+                    </div>
+
+                    {showFsGoals && (
+                      <div className="flex-1 min-h-0 animate-fade-in">
+                        <GoalsPanel
+                          glassClass={glassClass}
+                          themeCfg={themeCfg}
+                          userId={user?.id}
+                          participants={participants}
+                          roomGoals={roomGoals}
+                          isGoalsLoading={isGoalsLoading}
+                          createGoal={createGoal}
+                          toggleGoal={toggleGoal}
+                          updateGoalTitle={updateGoalTitle}
+                          deleteGoal={deleteGoal}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ═══════════════════════════════════
              FULL GRID LAYOUT — 3+ streams default
              Unchanged from original behavior
              ═══════════════════════════════════ */}
-          {useFullGrid && (
-            <div className="absolute inset-0 z-[2] p-6 pt-20 pb-28 animate-fade-in flex items-center justify-center">
-              <ResizableVideoWrapper>
-                <VideoGrid
-                  layoutMode={videoLayoutMode}
-                  pinnedIndex={videoPinnedIndex}
-                  onPinnedIndexChange={setVideoPinnedIndex}
-                  gap={8}
-                />
-              </ResizableVideoWrapper>
-            </div>
-          )}
+              {useFullGrid && (
+                <div className="absolute inset-0 z-[2] p-6 pt-20 pb-28 animate-fade-in flex items-center justify-center">
+                  <ResizableVideoWrapper>
+                    <VideoGrid
+                      layoutMode={videoLayoutMode}
+                      pinnedIndex={videoPinnedIndex}
+                      onPinnedIndexChange={setVideoPinnedIndex}
+                      gap={8}
+                      maxCapacity={room.maxCapacity || 6}
+                      participants={participants}
+                      localIdentity={user?.id}
+                      onPublishCamera={toggleCamera}
+                      onPublishScreen={toggleScreenShare}
+                      isCameraOn={isCameraOn}
+                      isScreenOn={isScreenOn}
+                    />
+                  </ResizableVideoWrapper>
+                </div>
+              )}
 
-          {/* Timer — centered when no grid, bottom pill when full grid */}
-          {!useCompactGrid && (
-            <div
-              className={
-                useFullGrid
-                  ? "absolute bottom-6 left-1/2 -translate-x-1/2 z-[3] flex items-center gap-3 px-6 py-3 rounded-full bg-black/60 backdrop-blur-md border border-white/10 select-none"
-                  : "relative z-[2] flex items-center gap-4 select-none"
-              }
-            >
-              {/* Phase dot */}
-              <span
-                className={`relative flex ${useFullGrid ? "h-2.5 w-2.5" : "h-4 w-4"}`}
-              >
-                {phaseStyle.ping && (
+              {/* Timer — centered when no grid, bottom pill when full grid */}
+              {!useCompactGrid && (
+                <div
+                  className={
+                    useFullGrid
+                      ? "absolute bottom-6 left-1/2 -translate-x-1/2 z-[3] flex items-center gap-3 px-6 py-3 rounded-full bg-black/60 backdrop-blur-md border border-white/10 select-none"
+                      : "relative z-[2] flex items-center gap-4 select-none"
+                  }
+                >
+                  {/* Phase dot */}
                   <span
-                    className={`animate-ping absolute inline-flex h-full w-full rounded-full ${phaseStyle.dot} opacity-75`}
-                  />
-                )}
-                <span
-                  className={`relative inline-flex rounded-full ${useFullGrid ? "h-2.5 w-2.5" : "h-4 w-4"} ${phaseStyle.dot}`}
-                />
-              </span>
+                    className={`relative flex ${useFullGrid ? "h-2.5 w-2.5" : "h-4 w-4"}`}
+                  >
+                    {phaseStyle.ping && (
+                      <span
+                        className={`animate-ping absolute inline-flex h-full w-full rounded-full ${phaseStyle.dot} opacity-75`}
+                      />
+                    )}
+                    <span
+                      className={`relative inline-flex rounded-full ${useFullGrid ? "h-2.5 w-2.5" : "h-4 w-4"} ${phaseStyle.dot}`}
+                    />
+                  </span>
 
-              {/* Timer text */}
-              <div
-                className={`font-mono font-bold text-white tabular-nums leading-none ${
-                  useFullGrid
-                    ? "text-3xl tracking-[0.1em]"
-                    : "text-[14rem] tracking-[0.15em]"
-                }`}
-              >
-                {formatTime(timeLeft)}
-              </div>
+                  {/* Timer text */}
+                  <div
+                    className={`font-mono font-bold text-white tabular-nums leading-none ${
+                      useFullGrid
+                        ? "text-3xl tracking-[0.1em]"
+                        : "text-[14rem] tracking-[0.15em]"
+                    }`}
+                  >
+                    {formatTime(timeLeft)}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        );
-      })()}
+          );
+        })()}
     </div>
   );
 }

@@ -13,6 +13,11 @@ import { useState, useCallback, useMemo, useRef, useEffect } from "react";
    VideoGrid — Full-featured video grid using
    meeting-grid-layout with pin, spotlight,
    pagination, PiP, and layout mode support.
+
+   Shows ALL participants (streaming or not) as tiles.
+   Non-streaming participants get a Discord-style
+   avatar placeholder. The local user's tile shows
+   hover controls for camera/screen share.
    ═══════════════════════════════════════════════════ */
 export default function VideoGrid({
   layoutMode = "gallery",
@@ -23,6 +28,9 @@ export default function VideoGrid({
   gap = 8,
   compact = false,
   maxCapacity = 6,
+  // Participant-aware props
+  participants = [],
+  localIdentity = null,
   onPublishCamera,
   onPublishScreen,
   isCameraOn,
@@ -91,16 +99,84 @@ export default function VideoGrid({
     [pinnedIndex, onPinnedIndexChange],
   );
 
-  // ── Compute padded slots ──
-  const paddedTracks = useMemo(() => {
-    // Determine target length: either maxCapacity or tracks.length (if it somehow exceeds)
-    const length = Math.max(maxCapacity, tracks.length);
-    const result = new Array(length).fill(null);
-    for (let i = 0; i < tracks.length; i++) {
-      result[i] = tracks[i];
+  // ── Build merged participant slots ──
+  // Each participant gets a slot. If they have tracks, those show as video.
+  // If not, they get a Discord-style avatar placeholder.
+  const mergedSlots = useMemo(() => {
+    if (!participants || participants.length === 0) {
+      // Fallback: just use tracks directly (no participant info available)
+      return tracks.map((t) => ({ type: "track", trackRef: t }));
     }
-    return result;
-  }, [tracks, maxCapacity]);
+
+    // Build a map: participantId → tracks for that participant
+    const tracksByParticipant = {};
+    const usedTrackIndices = new Set();
+
+    tracks.forEach((trackRef, idx) => {
+      const identity = trackRef.participant?.identity;
+      const name = trackRef.participant?.name;
+      if (!tracksByParticipant[identity]) {
+        tracksByParticipant[identity] = [];
+      }
+      tracksByParticipant[identity].push({ trackRef, originalIndex: idx });
+
+      // Also try matching by name
+      if (name && name !== identity && !tracksByParticipant[name]) {
+        tracksByParticipant[name] = tracksByParticipant[identity];
+      }
+    });
+
+    const slots = [];
+
+    participants.forEach((p) => {
+      // Try to find tracks for this participant by matching various identity fields
+      const candidates = [
+        p.id,
+        String(p.id),
+        p.username,
+        p.nickName,
+        p.email,
+      ].filter(Boolean);
+
+      let participantTracks = null;
+      for (const candidate of candidates) {
+        if (tracksByParticipant[candidate]) {
+          participantTracks = tracksByParticipant[candidate];
+          break;
+        }
+      }
+
+      if (participantTracks && participantTracks.length > 0) {
+        // This participant is streaming — add their track(s)
+        participantTracks.forEach(({ trackRef, originalIndex }) => {
+          usedTrackIndices.add(originalIndex);
+          slots.push({ type: "track", trackRef, participant: p });
+        });
+      } else {
+        // Not streaming — Discord-style avatar placeholder
+        const isLocal = candidates.includes(String(localIdentity)) || candidates.includes(localIdentity);
+        slots.push({ type: "placeholder", participant: p, isLocal });
+      }
+    });
+
+    // Add any orphan tracks (from participants not in the participants list)
+    tracks.forEach((trackRef, idx) => {
+      if (!usedTrackIndices.has(idx)) {
+        slots.push({ type: "track", trackRef });
+      }
+    });
+
+    // Pad with empty slots to fill the page capacity
+    const targetLength = Math.max(maxCapacity, slots.length);
+    while (slots.length < targetLength) {
+      slots.push({ type: "empty", id: `empty-${slots.length}` });
+    }
+
+    return slots;
+  }, [participants, tracks, localIdentity, maxCapacity]);
+
+  // Only-one-user check (for requirement 1.3)
+  const isSoloUser = participants.length <= 1;
 
   /* ═══════════════════════════════════════════
      Compact layout — custom flex-based tiles
@@ -294,8 +370,8 @@ export default function VideoGrid({
   }
 
   /* Per-item aspect ratios: screen shares are wider */
-  const itemAspectRatios = tracks.map((t) =>
-    t.source === Track.Source.ScreenShare ? "16:9" : undefined,
+  const itemAspectRatios = mergedSlots.map((slot) =>
+    slot.type === "track" && slot.trackRef.source === Track.Source.ScreenShare ? "16:9" : undefined,
   );
 
   /* Pagination math */
@@ -303,12 +379,13 @@ export default function VideoGrid({
   const hasPinned = pinnedIndex !== null && pinnedIndex !== undefined;
   const totalPages = isPaginated
     ? hasPinned
-      ? 1 + Math.ceil(Math.max(0, tracks.length - 1) / maxVisible)
-      : Math.ceil(tracks.length / maxVisible)
+      ? 1 + Math.ceil(Math.max(0, mergedSlots.length - 1) / maxVisible)
+      : Math.ceil(mergedSlots.length / maxVisible)
     : 1;
 
-  /* Use PiP for exactly 2 tracks in gallery mode */
-  const usePip = tracks.length === 2 && layoutMode === "gallery" && !hasPinned;
+  /* Use PiP for exactly 2 track slots in gallery mode */
+  const trackSlotCount = mergedSlots.filter((s) => s.type === "track").length;
+  const usePip = trackSlotCount === 2 && mergedSlots.length === 2 && layoutMode === "gallery" && !hasPinned;
 
   return (
     <div className="w-full h-full meetgrid-wrapper">
@@ -317,7 +394,7 @@ export default function VideoGrid({
         itemAspectRatios={itemAspectRatios}
         gap={gap}
         layoutMode={layoutMode}
-        count={paddedTracks.length}
+        count={mergedSlots.length}
         pinnedIndex={hasPinned ? pinnedIndex : undefined}
         othersPosition="right"
         maxVisible={maxVisible || 6}
@@ -328,11 +405,15 @@ export default function VideoGrid({
         }
         floatBreakpoints={usePip ? DEFAULT_FLOAT_BREAKPOINTS : undefined}
       >
-        {paddedTracks.map((trackRef, index) => {
-          if (!trackRef) {
-            // Empty slot placeholder
+        {mergedSlots.map((slot, index) => {
+          // ── Placeholder tile (non-streaming participant) ──
+          if (slot.type === "placeholder") {
+            const p = slot.participant;
+            const name = p.nickName || p.username || "مشارك";
+            const isLocal = slot.isLocal;
+
             return (
-              <GridItem key={`empty-slot-${index}`} index={index}>
+              <GridItem key={`placeholder-${p.id}`} index={index}>
                 {({ isLastVisibleOther, hiddenCount }) => {
                   if (isLastVisibleOther && hiddenCount > 0) {
                     return (
@@ -343,30 +424,57 @@ export default function VideoGrid({
                     );
                   }
                   return (
-                    <div className="meetgrid-tile bg-white/5 border border-white/10 flex flex-col items-center justify-center gap-4 transition-all hover:bg-white/10 group cursor-default">
-                      <div className="flex gap-4 opacity-50 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={onPublishCamera}
-                          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors cursor-pointer ${isCameraOn ? "bg-emerald-500 hover:bg-emerald-600 text-white" : "bg-white/10 hover:bg-white/20 text-white"}`}
-                          title={isCameraOn ? "إيقاف الكاميرا" : "افتح الكاميرا"}
-                        >
-                          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={onPublishScreen}
-                          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors cursor-pointer ${isScreenOn ? "bg-violet-500 hover:bg-violet-600 text-white" : "bg-white/10 hover:bg-white/20 text-white"}`}
-                          title={isScreenOn ? "إيقاف مشاركة الشاشة" : "مشاركة الشاشة"}
-                        >
-                          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12" />
-                          </svg>
-                        </button>
+                    <div className="meetgrid-tile meetgrid-tile-avatar group">
+                      {/* Discord-style avatar */}
+                      <div className="meetgrid-avatar-content">
+                        {p.avatar ? (
+                          <img
+                            src={p.avatar}
+                            alt={name}
+                            className="w-16 h-16 rounded-full object-cover border-2 border-white/10"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 rounded-full bg-[#5865f2] flex items-center justify-center text-2xl font-bold text-white">
+                            {name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <span className="text-xs text-white/60 mt-2 truncate max-w-[80%] font-medium">
+                          {name}
+                        </span>
                       </div>
-                      <span className="text-white/40 text-sm font-medium tracking-wide">
-                        مكان فارغ
-                      </span>
+
+                      {/* Hover controls for local user (only if not solo & streaming already handled) */}
+                      {isLocal && !isSoloUser && (
+                        <div className="meetgrid-hover-controls">
+                          <button
+                            onClick={onPublishCamera}
+                            className={`w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer ${isCameraOn ? "bg-emerald-500 hover:bg-emerald-600 text-white" : "bg-white/15 hover:bg-white/25 text-white/80"}`}
+                            title={isCameraOn ? "إيقاف الكاميرا" : "افتح الكاميرا"}
+                          >
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={onPublishScreen}
+                            className={`w-12 h-12 rounded-full flex items-center justify-center transition-all cursor-pointer ${isScreenOn ? "bg-violet-500 hover:bg-violet-600 text-white" : "bg-white/15 hover:bg-white/25 text-white/80"}`}
+                            title={isScreenOn ? "إيقاف مشاركة الشاشة" : "مشاركة الشاشة"}
+                          >
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Solo user empty placeholder — just avatar, no buttons (req 1.3) */}
+                      {isLocal && isSoloUser && (
+                        <div className="meetgrid-solo-badge">
+                          <svg className="w-5 h-5 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                          </svg>
+                        </div>
+                      )}
                     </div>
                   );
                 }}
@@ -374,9 +482,39 @@ export default function VideoGrid({
             );
           }
 
+          // ── Empty slot (no participant, just filler) ──
+          if (slot.type === "empty") {
+            return (
+              <GridItem key={slot.id} index={index}>
+                {({ isLastVisibleOther, hiddenCount }) => {
+                  if (isLastVisibleOther && hiddenCount > 0) {
+                    return (
+                      <div className="meetgrid-tile meetgrid-tile--more">
+                        <span className="text-2xl font-bold text-white/80">+{hiddenCount}</span>
+                        <span className="text-xs text-white/50 mt-1">المزيد</span>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className="meetgrid-tile meetgrid-tile-avatar">
+                      <div className="meetgrid-avatar-content">
+                        <svg className="w-12 h-12 text-white/15" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+                        </svg>
+                        <span className="text-[10px] text-white/20 font-medium">مكان فارغ</span>
+                      </div>
+                    </div>
+                  );
+                }}
+              </GridItem>
+            );
+          }
+
+          // ── Video track tile (streaming participant) ──
+          const trackRef = slot.trackRef;
           const participant = trackRef.participant;
           const isScreen = trackRef.source === Track.Source.ScreenShare;
-          const name = participant?.name || participant?.identity || "Participant";
+          const name = slot.participant?.nickName || slot.participant?.username || participant?.name || participant?.identity || "Participant";
           const isPinned = pinnedIndex === index;
           const trackKey = `${participant?.sid}-${trackRef.source}`;
           const isUnsubscribed = unsubscribedSet.has(trackKey);
@@ -476,7 +614,7 @@ export default function VideoGrid({
                         </button>
 
                         {/* Pin button */}
-                        {layoutMode === "gallery" && tracks.length > 1 && (
+                        {layoutMode === "gallery" && mergedSlots.filter(s => s.type === "track").length > 1 && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();

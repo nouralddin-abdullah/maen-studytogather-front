@@ -406,6 +406,53 @@
   cursor: pointer;
 }
 
+/* Discord-style avatar placeholder tile */
+.meetgrid-tile-avatar {
+  background-color: #2b2d31;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
+.meetgrid-avatar-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Hover controls overlay for local user */
+.meetgrid-hover-controls {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 2;
+  border-radius: inherit;
+}
+
+.meetgrid-tile-avatar:hover .meetgrid-hover-controls {
+  opacity: 1;
+}
+
+/* Solo user badge (just a subtle person icon) */
+.meetgrid-solo-badge {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.5;
+}
+
 /* ===========================
    Fullscreen Compact Layout
    =========================== */
