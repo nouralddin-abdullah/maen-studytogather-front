@@ -201,6 +201,14 @@ function RoomPageInner() {
   const publishMenuRef = useRef(null);
   const isPublishing = isCameraOn || isScreenOn;
 
+  const prevTrackCount = useRef(trackCount);
+  useEffect(() => {
+    if (trackCount > 0 && prevTrackCount.current === 0) {
+      setShowVideoGrid(true);
+    }
+    prevTrackCount.current = trackCount;
+  }, [trackCount]);
+
   // ── Compact video layout (for 3+ streams opt-in) ──
   const [compactVideoLayout, setCompactVideoLayout] = useState(false);
   const [showFsGoals, setShowFsGoals] = useState(true);
@@ -511,7 +519,7 @@ function RoomPageInner() {
            Hidden when video grid is active for max space
            ════════════════════════════════════════ */}
         <aside
-          className={`w-[88px] flex-shrink-0 flex flex-col items-center justify-center py-4 relative transition-all duration-300 ${showVideoGrid && hasActiveTracks ? "hidden" : ""}`}
+          className={`w-[88px] flex-shrink-0 flex flex-col items-center justify-center py-4 relative transition-all duration-300`}
         >
           <div
             className={`${glassClass} rounded-3xl py-3 flex flex-col items-center gap-3 overflow-y-auto overflow-x-hidden custom-scrollbar max-h-[70vh] min-h-[120px] w-[82px]`}
@@ -713,22 +721,21 @@ function RoomPageInner() {
            ════════════════════════════════════════ */}
         <main className="flex-1 flex flex-col justify-between relative">
           {/* ── LiveKit Video Grid + Floating Timer ── */}
-          {showVideoGrid && hasActiveTracks && (
-            <>
-              {/* Grid container — inset to avoid overlapping top & bottom bars */}
-              <div className="absolute inset-x-0 top-14 bottom-24 px-4 sm:px-6 z-20 animate-fade-in flex items-center justify-center">
-                <ResizableVideoWrapper>
-                  <VideoGrid
-                    layoutMode={videoLayoutMode}
-                    pinnedIndex={videoPinnedIndex}
-                    onPinnedIndexChange={setVideoPinnedIndex}
-                    gap={8}
-                  />
-                </ResizableVideoWrapper>
-              </div>
-              {/* Timer overlay is now inside the header row below */}
-            </>
-          )}
+          <div className="absolute inset-x-0 top-14 bottom-24 px-4 sm:px-6 z-20 animate-fade-in flex items-center justify-center">
+            <ResizableVideoWrapper>
+              <VideoGrid
+                layoutMode={videoLayoutMode}
+                pinnedIndex={videoPinnedIndex}
+                onPinnedIndexChange={setVideoPinnedIndex}
+                gap={8}
+                maxCapacity={room.maxCapacity || 6}
+                onPublishCamera={toggleCamera}
+                onPublishScreen={toggleScreenShare}
+                isCameraOn={isCameraOn}
+                isScreenOn={isScreenOn}
+              />
+            </ResizableVideoWrapper>
+          </div>
 
           {/* ── Top bar: Room name + Invite + Leave + Timer ── */}
           <header className="flex justify-center items-start pt-1 gap-3">
@@ -827,7 +834,7 @@ function RoomPageInner() {
             </div>
 
             {/* Compact timer pill — sits in the same row as the room name bar when video grid is active */}
-            {showVideoGrid && hasActiveTracks && (
+            {showVideoGrid && (
               <div
                 className={`${glassClass} px-4 py-2 rounded-full flex items-center gap-3 shadow-xl border border-white/10 animate-fade-in`}
               >
@@ -1126,7 +1133,7 @@ function RoomPageInner() {
                 </div>
 
                 {/* Video grid toggle */}
-                {hasActiveTracks && (
+                
                   <button
                     onClick={() => setShowVideoGrid((v) => !v)}
                     title={
@@ -1185,7 +1192,7 @@ function RoomPageInner() {
            Collapses to timer-only when video grid is active
            ════════════════════════════════════════ */}
         <aside
-          className={`flex-shrink-0 flex flex-col gap-3 h-full transition-all duration-300 ${showVideoGrid && hasActiveTracks ? "w-0 overflow-hidden opacity-0 pointer-events-none" : "w-80"}`}
+          className={`flex-shrink-0 flex flex-col gap-3 h-full transition-all duration-300 ${showVideoGrid ? "w-0 overflow-hidden opacity-0 pointer-events-none" : "w-80"}`}
         >
           {/* ── Timer Panel ── */}
           <div className={`${glassClass} p-5 rounded-3xl flex flex-col gap-4`}>
@@ -1557,7 +1564,7 @@ function RoomPageInner() {
          FULLSCREEN FOCUS MODE
          ═════════════════════════════════════════ */}
       {isFullscreen && (() => {
-        const fsGridActive = showVideoGrid && hasActiveTracks;
+        const fsGridActive = showVideoGrid;
         // Compact mode: always for 1-2 streams, opt-in for 3+
         const useCompactGrid = fsGridActive && (trackCount <= 2 || (trackCount >= 3 && compactVideoLayout));
         const useFullGrid = fsGridActive && !useCompactGrid;
@@ -1599,7 +1606,7 @@ function RoomPageInner() {
             </button>
 
             {/* Video grid toggle */}
-            {hasActiveTracks && (
+            
               <button
                 onClick={() => setShowVideoGrid((v) => !v)}
                 className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${

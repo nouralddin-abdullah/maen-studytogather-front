@@ -22,6 +22,11 @@ export default function VideoGrid({
   aspectRatio = "16:9",
   gap = 8,
   compact = false,
+  maxCapacity = 6,
+  onPublishCamera,
+  onPublishScreen,
+  isCameraOn,
+  isScreenOn,
 }) {
   const tracks = useTracks(
     [
@@ -86,7 +91,16 @@ export default function VideoGrid({
     [pinnedIndex, onPinnedIndexChange],
   );
 
-  if (tracks.length === 0) return null;
+  // ── Compute padded slots ──
+  const paddedTracks = useMemo(() => {
+    // Determine target length: either maxCapacity or tracks.length (if it somehow exceeds)
+    const length = Math.max(maxCapacity, tracks.length);
+    const result = new Array(length).fill(null);
+    for (let i = 0; i < tracks.length; i++) {
+      result[i] = tracks[i];
+    }
+    return result;
+  }, [tracks, maxCapacity]);
 
   /* ═══════════════════════════════════════════
      Compact layout — custom flex-based tiles
@@ -303,22 +317,66 @@ export default function VideoGrid({
         itemAspectRatios={itemAspectRatios}
         gap={gap}
         layoutMode={layoutMode}
-        count={tracks.length}
+        count={paddedTracks.length}
         pinnedIndex={hasPinned ? pinnedIndex : undefined}
         othersPosition="right"
-        maxVisible={isPaginated && !hasPinned ? maxVisible : undefined}
+        maxVisible={maxVisible || 6}
         currentPage={isPaginated && !hasPinned ? currentPage : undefined}
-        maxItemsPerPage={isPaginated && !hasPinned ? maxVisible : undefined}
+        maxItemsPerPage={maxVisible || 6}
         currentVisiblePage={
           isPaginated && hasPinned ? currentVisiblePage : undefined
         }
         floatBreakpoints={usePip ? DEFAULT_FLOAT_BREAKPOINTS : undefined}
       >
-        {tracks.map((trackRef, index) => {
+        {paddedTracks.map((trackRef, index) => {
+          if (!trackRef) {
+            // Empty slot placeholder
+            return (
+              <GridItem key={`empty-slot-${index}`} index={index}>
+                {({ isLastVisibleOther, hiddenCount }) => {
+                  if (isLastVisibleOther && hiddenCount > 0) {
+                    return (
+                      <div className="meetgrid-tile meetgrid-tile--more">
+                        <span className="text-2xl font-bold text-white/80">+{hiddenCount}</span>
+                        <span className="text-xs text-white/50 mt-1">المزيد</span>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className="meetgrid-tile bg-white/5 border border-white/10 flex flex-col items-center justify-center gap-4 transition-all hover:bg-white/10 group cursor-default">
+                      <div className="flex gap-4 opacity-50 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={onPublishCamera}
+                          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors cursor-pointer ${isCameraOn ? "bg-emerald-500 hover:bg-emerald-600 text-white" : "bg-white/10 hover:bg-white/20 text-white"}`}
+                          title={isCameraOn ? "إيقاف الكاميرا" : "افتح الكاميرا"}
+                        >
+                          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={onPublishScreen}
+                          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors cursor-pointer ${isScreenOn ? "bg-violet-500 hover:bg-violet-600 text-white" : "bg-white/10 hover:bg-white/20 text-white"}`}
+                          title={isScreenOn ? "إيقاف مشاركة الشاشة" : "مشاركة الشاشة"}
+                        >
+                          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12" />
+                          </svg>
+                        </button>
+                      </div>
+                      <span className="text-white/40 text-sm font-medium tracking-wide">
+                        مكان فارغ
+                      </span>
+                    </div>
+                  );
+                }}
+              </GridItem>
+            );
+          }
+
           const participant = trackRef.participant;
           const isScreen = trackRef.source === Track.Source.ScreenShare;
-          const name =
-            participant?.name || participant?.identity || "Participant";
+          const name = participant?.name || participant?.identity || "Participant";
           const isPinned = pinnedIndex === index;
           const trackKey = `${participant?.sid}-${trackRef.source}`;
           const isUnsubscribed = unsubscribedSet.has(trackKey);
