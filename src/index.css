@@ -450,11 +450,10 @@
   max-height: 320px;
 }
 
-/* Pinned tile takes most of the space */
+/* Pinned tile fills its container */
 .compact-tile-pinned {
   width: 100%;
   height: 100%;
-  max-height: 500px;
 }
 
 /* Others row — horizontal below pinned */
@@ -463,14 +462,127 @@
   display: flex;
   flex-direction: row;
   gap: 6px;
-  height: 120px;
-  min-height: 100px;
+  height: 160px;
+  min-height: 140px;
 }
 
 .compact-tile-other {
-  flex: 1;
+  flex: 0 1 280px;
+  max-width: 280px;
   min-width: 0;
   height: 100%;
+}
+
+/* ===========================
+   Resizable Video Wrapper
+   =========================== */
+
+/* Outer — fills the parent, acts as boundary */
+.resizable-video-outer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Inner — the actual resizable box */
+.resizable-video-wrapper {
+  position: relative;
+  transition: box-shadow 0.3s ease;
+}
+
+/* Border — only visible when handles are showing AND custom-sized */
+.resizable-video-wrapper--custom.resizable-video-wrapper--handles-visible {
+  border-radius: 0.75rem;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.resizable-video-content {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Resize handles — always present but invisible by default */
+.resize-handle {
+  position: absolute;
+  z-index: 30;
+  opacity: 0;
+  transition: opacity 0.3s ease, background 0.15s ease;
+  pointer-events: none;
+}
+
+/* Show handles when wrapper is hovered / active */
+.resizable-video-wrapper--handles-visible .resize-handle {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Edge handles — glow line on hover */
+.resize-handle--n:hover,
+.resize-handle--s:hover {
+  background: linear-gradient(
+    to bottom,
+    rgba(51, 141, 252, 0.5),
+    transparent
+  );
+}
+.resize-handle--e:hover,
+.resize-handle--w:hover {
+  background: linear-gradient(
+    to right,
+    rgba(51, 141, 252, 0.5),
+    transparent
+  );
+}
+
+/* Corner handles — glow on hover */
+.resize-handle--nw:hover,
+.resize-handle--ne:hover,
+.resize-handle--sw:hover,
+.resize-handle--se:hover {
+  background: radial-gradient(
+    circle at center,
+    rgba(51, 141, 252, 0.6) 0%,
+    transparent 70%
+  );
+}
+
+/* Corner dots — only when handles are visible */
+.resizable-video-wrapper--handles-visible .resize-handle--nw::after,
+.resizable-video-wrapper--handles-visible .resize-handle--ne::after,
+.resizable-video-wrapper--handles-visible .resize-handle--sw::after,
+.resizable-video-wrapper--handles-visible .resize-handle--se::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: background 0.15s ease;
+}
+
+.resizable-video-wrapper--handles-visible .resize-handle--nw::after {
+  top: 2px;
+  left: 2px;
+}
+.resizable-video-wrapper--handles-visible .resize-handle--ne::after {
+  top: 2px;
+  right: 2px;
+}
+.resizable-video-wrapper--handles-visible .resize-handle--sw::after {
+  bottom: 2px;
+  left: 2px;
+}
+.resizable-video-wrapper--handles-visible .resize-handle--se::after {
+  bottom: 2px;
+  right: 2px;
+}
+
+.resizable-video-wrapper--handles-visible .resize-handle:hover::after {
+  background: rgba(51, 141, 252, 0.8);
 }
 
 /* ===========================

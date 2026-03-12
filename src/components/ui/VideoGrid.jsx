@@ -7,7 +7,7 @@ import {
   FloatingGridItem,
   DEFAULT_FLOAT_BREAKPOINTS,
 } from "@thangdevalone/meeting-grid-layout-react";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 
 /* ═══════════════════════════════════════════════════
    VideoGrid — Full-featured video grid using
@@ -39,6 +39,25 @@ export default function VideoGrid({
   const [currentPage, setCurrentPage] = useState(0);
   const [currentVisiblePage, setCurrentVisiblePage] = useState(0);
   const [compactPage, setCompactPage] = useState(0);
+
+  // Compact layout — dynamic pagination via container measurement
+  const compactContainerRef = useRef(null);
+  const [compactMaxPerPage, setCompactMaxPerPage] = useState(10);
+
+  useEffect(() => {
+    if (!compact || !compactContainerRef.current) return;
+    const MIN_TILE_HEIGHT = 250;
+    const GAP_PX = 8;
+    const measure = () => {
+      const h = compactContainerRef.current?.clientHeight || 0;
+      const fits = Math.max(1, Math.floor((h + GAP_PX) / (MIN_TILE_HEIGHT + GAP_PX)));
+      setCompactMaxPerPage(fits);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(compactContainerRef.current);
+    return () => ro.disconnect();
+  }, [compact, tracks.length]);
 
   // Unsubscribed tracks — stored by participant sid + source key
   const [unsubscribedSet, setUnsubscribedSet] = useState(new Set());
@@ -80,15 +99,12 @@ export default function VideoGrid({
       ? tracks.filter((_, i) => i !== pinnedIndex)
       : tracks;
 
-    // Compact pagination for other tracks (max 4 visible in row)
-    const COMPACT_MAX_ROW = 4;
-    const totalOtherPages = hasPinned
-      ? Math.ceil(otherTracks.length / COMPACT_MAX_ROW)
-      : 1;
-    const visibleOthers = hasPinned
+    const totalOtherPages = Math.ceil(otherTracks.length / compactMaxPerPage);
+    const needsPagination = otherTracks.length > compactMaxPerPage;
+    const visibleOthers = needsPagination
       ? otherTracks.slice(
-          compactPage * COMPACT_MAX_ROW,
-          (compactPage + 1) * COMPACT_MAX_ROW,
+          compactPage * compactMaxPerPage,
+          (compactPage + 1) * compactMaxPerPage,
         )
       : otherTracks;
 
@@ -117,7 +133,7 @@ export default function VideoGrid({
           ) : (
             <VideoTrack
               trackRef={trackRef}
-              className="meetgrid-tile-video"
+              className={`meetgrid-tile-video ${trackRef.source === Track.Source.Camera ? "mirror-video" : ""}`}
             />
           )}
 
@@ -213,15 +229,15 @@ export default function VideoGrid({
     };
 
     return (
-      <div className="w-full h-full flex flex-col gap-2">
-        {/* Pinned tile — larger */}
+      <div className="w-full h-full flex flex-col gap-2" ref={compactContainerRef}>
+        {/* Pinned tile — stretches to fill remaining space */}
         {hasPinned && pinnedTrack && (
-          <div className="flex-1 min-h-0">
+          <div className="flex-1 min-h-0 max-h-[70%]">
             {renderCompactTile(pinnedTrack, pinnedIndex, "compact-tile-pinned")}
           </div>
         )}
 
-        {/* Other tiles — horizontal row (or all tiles if no pin) */}
+        {/* Other tiles — horizontal row (pinned) or vertical column (no pin) */}
         <div className={hasPinned ? "compact-others-row" : "compact-all-tiles"}>
           {visibleOthers.map((trackRef) => {
             const originalIndex = tracks.indexOf(trackRef);
@@ -233,8 +249,8 @@ export default function VideoGrid({
           })}
         </div>
 
-        {/* Compact pagination for others row */}
-        {hasPinned && totalOtherPages > 1 && (
+        {/* Pagination — shown when tiles don't fit */}
+        {needsPagination && totalOtherPages > 1 && (
           <div className="flex items-center justify-center gap-2 mt-1">
             <button
               onClick={() => setCompactPage((p) => Math.max(0, p - 1))}
@@ -338,7 +354,7 @@ export default function VideoGrid({
                       ) : (
                         <VideoTrack
                           trackRef={trackRef}
-                          className="meetgrid-tile-video"
+                          className={`meetgrid-tile-video ${trackRef.source === Track.Source.Camera ? "mirror-video" : ""}`}
                         />
                       )}
 

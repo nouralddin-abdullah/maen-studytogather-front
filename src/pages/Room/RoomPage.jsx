@@ -12,6 +12,7 @@ import {
   EditRoomModal,
   ProfilePopover,
   GoalsPanel,
+  ResizableVideoWrapper,
   VideoGrid,
 } from "@/components/ui";
 import { LiveKitRoom } from "@livekit/components-react";
@@ -714,13 +715,15 @@ function RoomPageInner() {
           {showVideoGrid && hasActiveTracks && (
             <>
               {/* Grid container — inset to avoid overlapping top & bottom bars */}
-              <div className="absolute inset-x-0 top-14 bottom-24 px-4 sm:px-6 z-20 animate-fade-in">
-                <VideoGrid
-                  layoutMode={videoLayoutMode}
-                  pinnedIndex={videoPinnedIndex}
-                  onPinnedIndexChange={setVideoPinnedIndex}
-                  gap={8}
-                />
+              <div className="absolute inset-x-0 top-14 bottom-24 px-4 sm:px-6 z-20 animate-fade-in flex items-center justify-center">
+                <ResizableVideoWrapper>
+                  <VideoGrid
+                    layoutMode={videoLayoutMode}
+                    pinnedIndex={videoPinnedIndex}
+                    onPinnedIndexChange={setVideoPinnedIndex}
+                    gap={8}
+                  />
+                </ResizableVideoWrapper>
               </div>
               {/* Timer overlay is now inside the header row below */}
             </>
@@ -1696,53 +1699,47 @@ function RoomPageInner() {
             <div className="absolute inset-0 z-[2] flex flex-row-reverse pt-20 pb-8 px-6 gap-6 animate-fade-in">
               {/* Left side (end in RTL): Video grid — compact */}
               <div className="fs-compact-grid">
-                <VideoGrid
-                  layoutMode={videoLayoutMode}
-                  pinnedIndex={videoPinnedIndex}
-                  onPinnedIndexChange={setVideoPinnedIndex}
-                  gap={8}
-                  compact
-                />
+                <ResizableVideoWrapper>
+                  <VideoGrid
+                    layoutMode={videoLayoutMode}
+                    pinnedIndex={videoPinnedIndex}
+                    onPinnedIndexChange={setVideoPinnedIndex}
+                    gap={8}
+                    compact
+                  />
+                </ResizableVideoWrapper>
               </div>
 
               {/* Right side (start in RTL): Timer + Goals */}
-              <div className="fs-compact-panels">
+              <div className={`fs-compact-panels ${!showFsGoals ? "justify-center" : ""}`}>
                 {/* Timer */}
-                <div className={`${glassClass} rounded-3xl p-6 flex flex-col items-center gap-3`}>
-                  {/* Phase label */}
-                  <div className="flex items-center gap-2">
-                    <span className="relative flex h-3 w-3">
+                <div className="flex flex-col items-center gap-3 py-4">
+                  {/* Timer + phase dot inline */}
+                  <div className="flex items-center gap-3">
+                    <span className="relative flex h-3.5 w-3.5">
                       {phaseStyle.ping && (
                         <span
                           className={`animate-ping absolute inline-flex h-full w-full rounded-full ${phaseStyle.dot} opacity-75`}
                         />
                       )}
                       <span
-                        className={`relative inline-flex rounded-full h-3 w-3 ${phaseStyle.dot}`}
+                        className={`relative inline-flex rounded-full h-3.5 w-3.5 ${phaseStyle.dot}`}
                       />
                     </span>
-                    <span className={`text-xs font-bold ${phaseStyle.text}`}>
-                      {TIMER_PHASE_LABELS[phase]}
-                    </span>
+                    <div
+                      className={`font-mono font-bold text-white tabular-nums leading-none tracking-[0.12em] ${
+                        showFsGoals ? "text-8xl" : "text-[10rem]"
+                      } ${
+                        phase === TIMER_PHASES.FOCUS
+                          ? "drop-shadow-[0_0_16px_rgba(16,185,129,.3)]"
+                          : phase === TIMER_PHASES.BREAK
+                            ? "drop-shadow-[0_0_16px_rgba(245,158,11,.3)]"
+                            : ""
+                      }`}
+                    >
+                      {formatTime(timeLeft)}
+                    </div>
                   </div>
-
-                  {/* Timer display */}
-                  <div
-                    className={`font-mono font-bold text-white tabular-nums leading-none text-6xl tracking-[0.12em] ${
-                      phase === TIMER_PHASES.FOCUS
-                        ? "drop-shadow-[0_0_16px_rgba(16,185,129,.3)]"
-                        : phase === TIMER_PHASES.BREAK
-                          ? "drop-shadow-[0_0_16px_rgba(245,158,11,.3)]"
-                          : ""
-                    }`}
-                  >
-                    {formatTime(timeLeft)}
-                  </div>
-
-                  {/* Pomodoro config label */}
-                  <span className="text-[11px] text-white/40 font-mono">
-                    {room.focusDuration}د تركيز / {room.breakDuration}د استراحة
-                  </span>
 
                   {/* Host controls */}
                   <div className="flex items-center gap-3 mt-1">
@@ -1879,13 +1876,15 @@ function RoomPageInner() {
              Unchanged from original behavior
              ═══════════════════════════════════ */}
           {useFullGrid && (
-            <div className="absolute inset-0 z-[2] p-6 pt-20 pb-28 animate-fade-in">
-              <VideoGrid
-                layoutMode={videoLayoutMode}
-                pinnedIndex={videoPinnedIndex}
-                onPinnedIndexChange={setVideoPinnedIndex}
-                gap={8}
-              />
+            <div className="absolute inset-0 z-[2] p-6 pt-20 pb-28 animate-fade-in flex items-center justify-center">
+              <ResizableVideoWrapper>
+                <VideoGrid
+                  layoutMode={videoLayoutMode}
+                  pinnedIndex={videoPinnedIndex}
+                  onPinnedIndexChange={setVideoPinnedIndex}
+                  gap={8}
+                />
+              </ResizableVideoWrapper>
             </div>
           )}
 
