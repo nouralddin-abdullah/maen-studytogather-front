@@ -59,6 +59,34 @@ const useAuthStore = create((set) => ({
   },
 
   /**
+   * Handle successful OAuth callback redirect.
+   */
+  handleOAuthLogin: async (accessToken) => {
+    set({ isLoading: true, error: null });
+    try {
+      if (accessToken) {
+        localStorage.setItem("access_token", accessToken);
+      }
+      
+      const user = await authService.getMe();
+      localStorage.setItem("user", JSON.stringify(user));
+
+      set({
+        user,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+      return { user, accessToken };
+    } catch (error) {
+      const message = "فشل المصادقة باستخدام Google. حاول مرة أخرى.";
+      set({ error: message, isLoading: false, isAuthenticated: false, user: null });
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user");
+      throw error;
+    }
+  },
+
+  /**
    * Logout action.
    */
   logout: () => {

@@ -13,6 +13,7 @@ import GuestRoute from "./GuestRoute";
 import HomePage from "@/pages/Home/HomePage";
 import LoginPage from "@/pages/Auth/LoginPage";
 import RegisterPage from "@/pages/Auth/RegisterPage";
+import AuthCallbackPage from "@/pages/Auth/AuthCallbackPage";
 import DiscoverPage from "@/pages/Discover/DiscoverPage";
 import ProfilePage from "@/pages/Profile/ProfilePage";
 import RoomPage from "@/pages/Room/RoomPage";
@@ -74,6 +75,7 @@ function AppRouter() {
             </GuestRoute>
           }
         />
+        <Route path="callback" element={<AuthCallbackPage />} />
       </Route>
 
       {/* 404 */}
