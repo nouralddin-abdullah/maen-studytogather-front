@@ -21,6 +21,7 @@ export default function VideoGrid({
   maxVisible = 0,
   aspectRatio = "16:9",
   gap = 8,
+  compact = false,
 }) {
   const tracks = useTracks(
     [
@@ -37,6 +38,7 @@ export default function VideoGrid({
   // Pagination state
   const [currentPage, setCurrentPage] = useState(0);
   const [currentVisiblePage, setCurrentVisiblePage] = useState(0);
+  const [compactPage, setCompactPage] = useState(0);
 
   // Unsubscribed tracks — stored by participant sid + source key
   const [unsubscribedSet, setUnsubscribedSet] = useState(new Set());
@@ -66,6 +68,200 @@ export default function VideoGrid({
   );
 
   if (tracks.length === 0) return null;
+
+  /* ═══════════════════════════════════════════
+     Compact layout — custom flex-based tiles
+     (no GridContainer, simpler sizing)
+     ═══════════════════════════════════════════ */
+  if (compact) {
+    const hasPinned = pinnedIndex !== null && pinnedIndex !== undefined && pinnedIndex < tracks.length;
+    const pinnedTrack = hasPinned ? tracks[pinnedIndex] : null;
+    const otherTracks = hasPinned
+      ? tracks.filter((_, i) => i !== pinnedIndex)
+      : tracks;
+
+    // Compact pagination for other tracks (max 4 visible in row)
+    const COMPACT_MAX_ROW = 4;
+    const totalOtherPages = hasPinned
+      ? Math.ceil(otherTracks.length / COMPACT_MAX_ROW)
+      : 1;
+    const visibleOthers = hasPinned
+      ? otherTracks.slice(
+          compactPage * COMPACT_MAX_ROW,
+          (compactPage + 1) * COMPACT_MAX_ROW,
+        )
+      : otherTracks;
+
+    const renderCompactTile = (trackRef, index, sizeClass) => {
+      const participant = trackRef.participant;
+      const isScreen = trackRef.source === Track.Source.ScreenShare;
+      const name = participant?.name || participant?.identity || "Participant";
+      const isPinned = pinnedIndex === index;
+      const trackKey = `${participant?.sid}-${trackRef.source}`;
+      const isUnsubscribed = unsubscribedSet.has(trackKey);
+
+      return (
+        <div
+          key={`${participant?.sid}-${trackRef.source}`}
+          className={`meetgrid-tile ${sizeClass} ${isPinned ? "meetgrid-tile--pinned" : ""}`}
+        >
+          {isUnsubscribed ? (
+            <div className="meetgrid-tile-placeholder">
+              <div className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center text-xl font-bold text-white/60">
+                {name.charAt(0).toUpperCase()}
+              </div>
+              <span className="text-xs text-white/40 mt-2 truncate max-w-[80%]">
+                {name}
+              </span>
+            </div>
+          ) : (
+            <VideoTrack
+              trackRef={trackRef}
+              className="meetgrid-tile-video"
+            />
+          )}
+
+          {/* Label */}
+          <div className="meetgrid-tile-label">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              {isScreen && (
+                <svg
+                  className="w-3 h-3 text-violet-400 flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12"
+                  />
+                </svg>
+              )}
+              <span className="truncate">{name}</span>
+            </div>
+
+            {/* Unsubscribe */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleUnsubscribe(trackKey);
+              }}
+              className={`flex-shrink-0 p-0.5 rounded transition-colors ${
+                isUnsubscribed
+                  ? "text-red-400"
+                  : "text-white/40 hover:text-white/80"
+              }`}
+              title={isUnsubscribed ? "إعادة التشغيل" : "إيقاف العرض"}
+            >
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                {isUnsubscribed ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.98 8.223A10.477 10.477 0 001.934 12c1.292 4.338 5.31 7.5 10.066 7.5.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                  />
+                )}
+              </svg>
+            </button>
+
+            {/* Pin */}
+            {tracks.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePin(index);
+                }}
+                className={`flex-shrink-0 p-0.5 rounded transition-colors ${
+                  isPinned
+                    ? "text-amber-400"
+                    : "text-white/40 hover:text-white/80"
+                }`}
+                title={isPinned ? "إلغاء التثبيت" : "تثبيت"}
+              >
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill={isPinned ? "currentColor" : "none"}
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    return (
+      <div className="w-full h-full flex flex-col gap-2">
+        {/* Pinned tile — larger */}
+        {hasPinned && pinnedTrack && (
+          <div className="flex-1 min-h-0">
+            {renderCompactTile(pinnedTrack, pinnedIndex, "compact-tile-pinned")}
+          </div>
+        )}
+
+        {/* Other tiles — horizontal row (or all tiles if no pin) */}
+        <div className={hasPinned ? "compact-others-row" : "compact-all-tiles"}>
+          {visibleOthers.map((trackRef) => {
+            const originalIndex = tracks.indexOf(trackRef);
+            return renderCompactTile(
+              trackRef,
+              originalIndex,
+              hasPinned ? "compact-tile-other" : "compact-tile-equal",
+            );
+          })}
+        </div>
+
+        {/* Compact pagination for others row */}
+        {hasPinned && totalOtherPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-1">
+            <button
+              onClick={() => setCompactPage((p) => Math.max(0, p - 1))}
+              disabled={compactPage === 0}
+              className="w-6 h-6 rounded-full bg-black/60 text-white/70 hover:bg-black/80 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+            <span className="text-[10px] font-mono text-white/50 tabular-nums">
+              {compactPage + 1}/{totalOtherPages}
+            </span>
+            <button
+              onClick={() => setCompactPage((p) => Math.min(totalOtherPages - 1, p + 1))}
+              disabled={compactPage >= totalOtherPages - 1}
+              className="w-6 h-6 rounded-full bg-black/60 text-white/70 hover:bg-black/80 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   /* Per-item aspect ratios: screen shares are wider */
   const itemAspectRatios = tracks.map((t) =>

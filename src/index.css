@@ -407,6 +407,73 @@
 }
 
 /* ===========================
+   Fullscreen Compact Layout
+   =========================== */
+
+/* Two-column split for fullscreen compact mode */
+.fs-compact-grid {
+  flex: 0 0 38%;
+  max-width: 38%;
+  height: 100%;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.fs-compact-panels {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow-y: auto;
+}
+
+/* ── Compact tile variants ── */
+
+/* All tiles equal size (no pin, stacked vertically) */
+.compact-all-tiles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.compact-tile-equal {
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+  max-height: 320px;
+}
+
+/* Pinned tile takes most of the space */
+.compact-tile-pinned {
+  width: 100%;
+  height: 100%;
+  max-height: 500px;
+}
+
+/* Others row — horizontal below pinned */
+.compact-others-row {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  height: 120px;
+  min-height: 100px;
+}
+
+.compact-tile-other {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+/* ===========================
    Legacy LiveKit minimal overrides
    (kept for LiveKit connection indicator styles)
    =========================== */

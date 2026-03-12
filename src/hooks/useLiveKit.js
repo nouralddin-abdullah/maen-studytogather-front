@@ -142,6 +142,7 @@ export default function useLiveKit() {
     isCameraOn,
     isScreenOn,
     hasActiveTracks,
+    trackCount: tracks.length,
     participantMediaMap,
     toggleCamera,
     toggleScreenShare,
