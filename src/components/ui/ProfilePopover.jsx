@@ -438,6 +438,8 @@ export default function ProfilePopover({ participant, onClose, glassClass }) {
           {/* View Full Profile button */}
           <Link
             to={ROUTES.PROFILE(id)}
+            target="_blank"
+            rel="noopener noreferrer"
             className="block w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-brand-600/20 text-center"
           >
             عرض الملف الشخصي

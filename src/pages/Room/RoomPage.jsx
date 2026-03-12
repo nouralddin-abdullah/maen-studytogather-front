@@ -204,6 +204,7 @@ function RoomPageInner() {
   // ── Compact video layout (for 3+ streams opt-in) ──
   const [compactVideoLayout, setCompactVideoLayout] = useState(false);
   const [showFsGoals, setShowFsGoals] = useState(true);
+  const [isNotifsCollapsed, setIsNotifsCollapsed] = useState(false);
 
   // ── Local state ──
   const [passCodeInput, setPassCodeInput] = useState("");
@@ -1460,15 +1461,30 @@ function RoomPageInner() {
 
           {/* ── Notifications Panel ── */}
           <div
-            className={`${glassClass} h-1/4 min-h-[140px] rounded-3xl flex flex-col overflow-hidden`}
+            className={`${glassClass} rounded-3xl flex flex-col overflow-hidden transition-all duration-300 ${isNotifsCollapsed ? "h-[50px] flex-shrink-0" : "h-1/4 min-h-[140px]"}`}
           >
             <div
-              className={`p-3 ${themeCfg.accentBg} border-b border-white/5 flex items-center`}
+              className={`p-3 ${themeCfg.accentBg} border-b border-white/5 flex justify-between items-center`}
             >
               <span className="font-bold text-white text-sm">الإشعارات</span>
+              <button
+                onClick={() => setIsNotifsCollapsed(!isNotifsCollapsed)}
+                className="text-white/40 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"
+              >
+                <svg
+                  className={`w-4 h-4 transition-transform duration-300 ${isNotifsCollapsed ? "rotate-90" : "-rotate-90"}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+              </button>
             </div>
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-3 flex flex-col gap-2">
-              {notifications.length === 0 && (
+            {!isNotifsCollapsed && (
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-3 flex flex-col gap-2">
+                {notifications.length === 0 && (
                 <p className="text-white/30 text-xs text-center mt-4">
                   لا توجد إشعارات بعد
                 </p>
@@ -1522,7 +1538,8 @@ function RoomPageInner() {
                 </div>
               ))}
               <div ref={notifEndRef} />
-            </div>
+              </div>
+            )}
           </div>
         </aside>
       </div>

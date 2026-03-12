@@ -29,6 +29,7 @@ function GoalsPanel({
   const [showUserPicker, setShowUserPicker] = useState(false);
   const [editingGoalId, setEditingGoalId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const inputRef = useRef(null);
   const subInputRef = useRef(null);
   const tabsRef = useRef(null);
@@ -189,7 +190,7 @@ function GoalsPanel({
 
   return (
     <div
-      className={`${glassClass} flex-1 rounded-3xl flex flex-col overflow-hidden min-h-[200px]`}
+      className={`${glassClass} rounded-3xl flex flex-col overflow-hidden transition-all duration-300 ${isCollapsed ? "h-[52px]" : "flex-1 min-h-[200px]"}`}
     >
       {/* ── Header ── */}
       <div
@@ -256,14 +257,26 @@ function GoalsPanel({
           )}
         </div>
 
-        <span className="text-[11px] font-mono text-white/40">
-          {completedParent}/{totalParent}
-        </span>
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="text-white/40 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"
+        >
+          <svg
+            className={`w-4 h-4 transition-transform duration-300 ${isCollapsed ? "rotate-90" : "-rotate-90"}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2.5}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
       </div>
 
       {/* ── Goal list ── */}
-      <div className="px-1.5 py-2 flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1">
-        {/* Loading */}
+      {!isCollapsed && (
+        <div className="px-1.5 py-2 flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1">
+          {/* Loading */}
         {isGoalsLoading && activeGoals.length === 0 && (
           <div className="flex items-center justify-center py-8">
             <div className="w-5 h-5 border-2 border-white/30 border-t-transparent rounded-full animate-spin" />
@@ -655,7 +668,8 @@ function GoalsPanel({
             </button>
           </form>
         )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
