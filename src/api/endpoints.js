@@ -28,6 +28,8 @@ const ENDPOINTS = {
     RESTART_TIMER: (roomId) => `/rooms/${roomId}/restart-timer`,
     CHANGE_POMODORO: (roomId) => `/rooms/${roomId}/change-pomodoro`,
     SETTINGS: (roomId) => `/rooms/${roomId}/settings`,
+    MY_ROOMS: "/rooms/my-rooms",
+    DELETE: (roomId) => `/rooms/${roomId}`,
   },
 
   // Goals

@@ -17,6 +17,7 @@ const useRoomsStore = create((set, get) => ({
     sortBy: "currentNumParticipents",
     order: "desc",
     search: "",
+    myRoomsOnly: false,
   },
 
   /**
@@ -30,23 +31,70 @@ const useRoomsStore = create((set, get) => ({
     set({ filters, isLoading: true, error: null });
 
     try {
-      const result = await roomService.discover({
-        page: filters.page,
-        limit: filters.limit,
-        sortBy: filters.sortBy,
-        order: filters.order,
-        ...(filters.search ? { search: filters.search } : {}),
-      });
+      let result;
+      if (filters.myRoomsOnly) {
+        // "My Rooms" mode — backend returns { item: [...] } without pagination params
+        result = await roomService.getMyRooms();
+        let fetchedRooms = result.item || result.data || [];
 
-      set({
-        rooms: result.data,
-        meta: result.meta,
-        isLoading: false,
-      });
+        // Apply manual search
+        if (filters.search) {
+          const s = filters.search.toLowerCase();
+          fetchedRooms = fetchedRooms.filter(
+            (r) =>
+              (r.name && r.name.toLowerCase().includes(s)) ||
+              (r.description && r.description.toLowerCase().includes(s))
+          );
+        }
+
+        // Apply manual sort
+        if (filters.sortBy) {
+          fetchedRooms.sort((a, b) => {
+            let valA = a[filters.sortBy];
+            let valB = b[filters.sortBy];
+
+            // Handle dates
+            if (filters.sortBy === "createdAt") {
+              valA = new Date(valA).getTime() || 0;
+              valB = new Date(valB).getTime() || 0;
+            }
+
+            if (valA < valB) return filters.order === "asc" ? -1 : 1;
+            if (valA > valB) return filters.order === "asc" ? 1 : -1;
+            return 0;
+          });
+        }
+
+        // Mock a meta object since the endpoint doesn't return one
+        set({
+          rooms: fetchedRooms,
+          meta: {
+            currentPage: 1,
+            totalPages: 1,
+            hasNextPage: false,
+            hasPreviousPage: false,
+          },
+          isLoading: false,
+        });
+      } else {
+        // Normal "Discover" mode
+        result = await roomService.discover({
+          page: filters.page,
+          limit: filters.limit,
+          sortBy: filters.sortBy,
+          order: filters.order,
+          ...(filters.search ? { search: filters.search } : {}),
+        });
+        set({
+          rooms: result.data || [],
+          meta: result.meta || { currentPage: 1, totalPages: 1 },
+          isLoading: false,
+        });
+      }
     } catch (error) {
       const message =
         error.response?.data?.message || "فشل تحميل الغرف. حاول مرة أخرى.";
-      set({ error: message, isLoading: false });
+      set({ error: message, isLoading: false, rooms: [] });
     }
   },
 
@@ -69,6 +117,13 @@ const useRoomsStore = create((set, get) => ({
    */
   setSort: (sortBy, order = "desc") => {
     get().fetchRooms({ sortBy, order, page: 1 });
+  },
+
+  /**
+   * Toggle 'My Rooms' filter
+   */
+  toggleMyRooms: (myRoomsOnly) => {
+    get().fetchRooms({ myRoomsOnly, page: 1, search: "" });
   },
 
   /**

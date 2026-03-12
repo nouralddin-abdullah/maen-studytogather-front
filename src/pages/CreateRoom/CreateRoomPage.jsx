@@ -159,7 +159,7 @@ function CreateRoomPage() {
           {/* ── Wallpaper Upload ── */}
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-text-secondary">
-              صورة الخلفية <span className="text-error">*</span>
+              صورة الخلفية (اختياري)
             </label>
 
             {wallpaperPreview ? (

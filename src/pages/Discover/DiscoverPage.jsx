@@ -29,7 +29,7 @@ function DiscoverPage() {
   // Initial fetch
   useEffect(() => {
     fetchRooms();
-  }, [fetchRooms]);
+  }, []);
 
   // ── Search handler (debounced) ── //
   const handleSearchChange = useCallback(
@@ -122,6 +122,35 @@ function DiscoverPage() {
           ))}
         </div>
 
+        {/* My Rooms toggle */}
+        <button
+          onClick={() => {
+            const nextVal = !filters.myRoomsOnly;
+            useRoomsStore.getState().toggleMyRooms(nextVal);
+            if (nextVal) setSearchInput(""); // Clear search visually when switching
+          }}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm cursor-pointer ${
+            filters.myRoomsOnly
+              ? "bg-brand-100 text-brand-700 border border-brand-200"
+              : "bg-surface-elevated text-text-secondary border border-border hover:bg-surface-muted hover:text-text-primary"
+          }`}
+        >
+          <svg
+            className="w-4.5 h-4.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+            />
+          </svg>
+          غرفي
+        </button>
+
         {/* Create room button */}
         <Link
           to={ROUTES.CREATE_ROOM}
@@ -206,9 +235,11 @@ function DiscoverPage() {
               لا توجد غرف
             </h3>
             <p className="text-text-muted text-sm max-w-xs">
-              {searchInput
-                ? `لم يتم العثور على غرف تطابق "${searchInput}"`
-                : "لا توجد غرف متاحة حالياً. كن أول من ينشئ غرفة!"}
+              {filters.myRoomsOnly
+                ? "لم تقم بإنشاء أي غرفة بعد."
+                : searchInput
+                  ? `لم يتم العثور على غرف تطابق "${searchInput}"`
+                  : "لا توجد غرف متاحة حالياً. كن أول من ينشئ غرفة!"}
             </p>
           </div>
         )}
@@ -217,7 +248,12 @@ function DiscoverPage() {
         {!error && rooms.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5 pb-4">
             {rooms.map((room) => (
-              <RoomCard key={room.id} room={room} onJoin={handleJoinRoom} />
+              <RoomCard
+                key={room.id || room.roomId}
+                room={room}
+                onJoin={handleJoinRoom}
+                onDeleteSuccess={() => fetchRooms()}
+              />
             ))}
           </div>
         )}

@@ -115,12 +115,14 @@ export const createRoomSchema = z
   .object({
     name: z
       .string()
-      .min(10, "اسم الغرفة يجب أن يكون 10 أحرف على الأقل")
+      .min(1, "اسم الغرفة يجب أن يكون حرفاً واحداً على الأقل")
       .max(100, "اسم الغرفة يجب أن يكون 100 حرف كحد أقصى"),
     description: z
       .string()
-      .min(10, "وصف الغرفة يجب أن يكون 10 أحرف على الأقل")
-      .max(500, "وصف الغرفة يجب أن يكون 500 حرف كحد أقصى"),
+      .min(1, "وصف الغرفة يجب أن يكون حرفاً واحداً على الأقل")
+      .max(500, "وصف الغرفة يجب أن يكون 500 حرف كحد أقصى")
+      .optional()
+      .or(z.literal("")),
     theme: z
       .enum(Object.values(ROOM_THEMES), {
         message: "اختر ثيم صالح",
@@ -156,19 +158,14 @@ export const createRoomSchema = z
       .min(5, "مدة الاستراحة 5 دقائق على الأقل")
       .max(360, "مدة الاستراحة 360 دقيقة كحد أقصى"),
     wallpaper: z
-      .instanceof(File, { message: "صورة الخلفية مطلوبة" })
-      .refine((f) => f.size > 0, "صورة الخلفية مطلوبة")
+      .instanceof(File, { message: "صورة الخلفية غير صالحة" })
+      .refine((f) => f.size <= 10 * 1024 * 1024, "حجم الملف يجب أن يكون أقل من 10 ميجابايت")
       .refine(
-        (f) => f.size <= 10 * 1024 * 1024,
-        "حجم الملف يجب أن يكون أقل من 10 ميجابايت",
+        (f) => ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(f.type),
+        "الصيغة يجب أن تكون JPEG أو PNG أو WebP أو GIF"
       )
-      .refine(
-        (f) =>
-          ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
-            f.type,
-          ),
-        "الصيغة يجب أن تكون JPEG أو PNG أو WebP أو GIF",
-      ),
+      .optional()
+      .nullable(),
   })
   .refine((data) => {
     // If room is not public and passCode is provided, that's fine
@@ -182,14 +179,15 @@ export const createRoomSchema = z
 export const updateRoomSchema = z.object({
   name: z
     .string()
-    .min(10, "اسم الغرفة يجب أن يكون 10 أحرف على الأقل")
+    .min(1, "اسم الغرفة يجب أن يكون حرفاً واحداً على الأقل")
     .max(100, "اسم الغرفة يجب أن يكون 100 حرف كحد أقصى")
     .optional(),
   description: z
     .string()
-    .min(10, "وصف الغرفة يجب أن يكون 10 أحرف على الأقل")
+    .min(1, "وصف الغرفة يجب أن يكون حرفاً واحداً على الأقل")
     .max(500, "وصف الغرفة يجب أن يكون 500 حرف كحد أقصى")
-    .optional(),
+    .optional()
+    .or(z.literal("")),
   theme: z
     .enum(Object.values(ROOM_THEMES), {
       message: "اختر ثيم صالح",

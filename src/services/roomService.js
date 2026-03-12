@@ -14,6 +14,14 @@ const roomService = {
   },
 
   /**
+   * Fetch user's own rooms (no pagination/sorting from backend).
+   */
+  async getMyRooms() {
+    const response = await apiClient.get(ENDPOINTS.ROOMS.MY_ROOMS);
+    return response.data; // { item: [...rooms] }
+  },
+
+  /**
    * Fetch paginated list of rooms.
    * @param {Object} params - Query params (page, limit, search, etc.)
    */
@@ -87,6 +95,15 @@ const roomService = {
     const response = await apiClient.patch(ENDPOINTS.ROOMS.UPDATE(roomId), formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
+    return response.data;
+  },
+
+  /**
+   * Delete a room.
+   * @param {string} roomId
+   */
+  async deleteRoom(roomId) {
+    const response = await apiClient.delete(ENDPOINTS.ROOMS.DELETE(roomId));
     return response.data;
   },
 
