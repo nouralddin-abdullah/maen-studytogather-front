@@ -839,37 +839,6 @@ function RoomPageInner() {
               )}
             </div>
 
-            {/* Compact timer pill — sits in the same row as the room name bar when video grid is active */}
-            {showVideoGrid && (
-              <div
-                className={`${glassClass} px-4 py-2 rounded-full flex items-center gap-3 shadow-xl border border-white/10 animate-fade-in`}
-              >
-                <span className="relative flex h-2 w-2">
-                  {phaseStyle.ping && (
-                    <span
-                      className={`animate-ping absolute inline-flex h-full w-full rounded-full ${phaseStyle.dot} opacity-75`}
-                    />
-                  )}
-                  <span
-                    className={`relative inline-flex rounded-full h-2 w-2 ${phaseStyle.dot} ${phaseStyle.ring}`}
-                  />
-                </span>
-                <span className={`text-[11px] font-bold ${phaseStyle.text}`}>
-                  {TIMER_PHASE_LABELS[phase]}
-                </span>
-                <span
-                  className={`text-lg font-mono font-bold text-white tabular-nums tracking-wider ${
-                    phase === TIMER_PHASES.FOCUS
-                      ? "drop-shadow-[0_0_8px_rgba(16,185,129,.3)]"
-                      : phase === TIMER_PHASES.BREAK
-                        ? "drop-shadow-[0_0_8px_rgba(245,158,11,.3)]"
-                        : ""
-                  }`}
-                >
-                  {formatTime(timeLeft)}
-                </span>
-              </div>
-            )}
           </header>
 
           {/* ── Bottom bar: Sound controls ── */}
