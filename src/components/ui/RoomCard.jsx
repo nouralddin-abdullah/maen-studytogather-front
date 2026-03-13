@@ -4,10 +4,25 @@ import { roomService } from "@/services";
 import toast from "react-hot-toast";
 
 /**
- * Default wallpaper fallback when room has no wallPaperUrl.
+ * Theme-based wallpaper fallback when room has no wallPaperUrl.
+ * Matches the THEME_CONFIG in RoomPage for visual consistency.
  */
-const DEFAULT_WALLPAPER =
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80";
+const THEME_WALLPAPERS = {
+  CLASSIC:
+    "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=600&q=80",
+  NIGHT_CITY:
+    "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=600&q=80",
+  PINKY:
+    "https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=600&q=80",
+  GITHUB:
+    "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=600&q=80",
+  DARK:
+    "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?w=600&q=80",
+  GRAY:
+    "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?w=600&q=80",
+};
+
+const DEFAULT_WALLPAPER = THEME_WALLPAPERS.CLASSIC;
 
 /**
  * Phase badge config — color & label per TimerPhase.
@@ -78,9 +93,10 @@ function RoomCard({ room, onJoin, onDeleteSuccess }) {
     currentPhase,
     host,
     hostId,
+    theme,
   } = room;
 
-  const wallpaper = wallPaperUrl || DEFAULT_WALLPAPER;
+  const wallpaper = wallPaperUrl || THEME_WALLPAPERS[theme] || DEFAULT_WALLPAPER;
   const hostAvatar = host?.avatar || DEFAULT_AVATAR;
   const hostName = host?.nickName || host?.username || "مجهول";
   const ambientCfg = AMBIENT_CONFIG[ambientSound];

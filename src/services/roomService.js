@@ -48,7 +48,7 @@ const roomService = {
 
     // Required fields
     formData.append("name", data.name);
-    formData.append("description", data.description);
+    if (data.description) formData.append("description", data.description);
     formData.append("focusDuration", String(data.focusDuration));
     formData.append("breakDuration", String(data.breakDuration));
     formData.append("wallpaper", data.wallpaper); // File
