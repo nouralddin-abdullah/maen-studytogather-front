@@ -9,6 +9,7 @@ import {
   AMBIENT_SOUND_LABELS,
 } from "@/utils/constants";
 import {
+  ChatPanel,
   EditRoomModal,
   ProfilePopover,
   GoalsPanel,
@@ -18,6 +19,7 @@ import {
 import { LiveKitRoom } from "@livekit/components-react";
 import useAmbientSound from "@/hooks/useAmbientSound";
 import useLiveKit from "@/hooks/useLiveKit";
+import useRoomChat from "@/hooks/useRoomChat";
 
 /* ═══════════════════════════════════════════════════
    Theme config — CLASSIC uses site brand (blue),
@@ -194,6 +196,16 @@ function RoomPageInner() {
     toggleCamera,
     toggleScreenShare,
   } = useLiveKit();
+
+  // ── Room chat (Socket.IO) ──
+  const {
+    messages: chatMessages,
+    sendMessage,
+    isChatConnected,
+    typingUsers,
+    emitTyping,
+  } = useRoomChat(room?.roomId, user?.avatar);
+
   const [showVideoGrid, setShowVideoGrid] = useState(false);
   const [showPublishMenu, setShowPublishMenu] = useState(false);
   const [videoLayoutMode, setVideoLayoutMode] = useState("gallery");
@@ -231,7 +243,7 @@ function RoomPageInner() {
   const [editFocus, setEditFocus] = useState(25);
   const [editBreak, setEditBreak] = useState(5);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
-  const notifEndRef = useRef(null);
+  const chatPanelRef = useRef(null);
   const soundPickerRef = useRef(null);
   const selectedAvatarRef = useRef(null);
 
@@ -348,10 +360,7 @@ function RoomPageInner() {
     setTimeLeft(null);
   }, [room, phase]);
 
-  // ── Auto-scroll notifications ──
-  useEffect(() => {
-    notifEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [notifications.length]);
+  // Auto-scroll is now handled inside ChatPanel
 
   // ── Handlers ──
   const handlePassCodeSubmit = async (e) => {
@@ -567,23 +576,21 @@ function RoomPageInner() {
                     <img
                       src={p.avatar}
                       alt={p.nickName}
-                      className={`w-13 h-13 rounded-full object-cover border-2 transition-colors flex-shrink-0 ${
-                        isMe
+                      className={`w-13 h-13 rounded-full object-cover border-2 transition-colors flex-shrink-0 ${isMe
                           ? `${themeCfg.accentBorder}`
                           : isSelected
                             ? "border-white/70"
                             : "border-transparent hover:border-white/50"
-                      }`}
+                        }`}
                     />
                   ) : (
                     <div
-                      className={`w-13 h-13 rounded-full flex items-center justify-center text-base font-bold border-2 transition-colors flex-shrink-0 ${
-                        isMe
+                      className={`w-13 h-13 rounded-full flex items-center justify-center text-base font-bold border-2 transition-colors flex-shrink-0 ${isMe
                           ? `${themeCfg.accentBorder} ${themeCfg.accent} text-white`
                           : isSelected
                             ? "border-white/70 bg-white/30 text-white"
                             : "border-transparent hover:border-white/50 bg-white/20 text-white"
-                      }`}
+                        }`}
                     >
                       {(p.nickName || p.username || "؟").charAt(0)}
                     </div>
@@ -724,23 +731,23 @@ function RoomPageInner() {
         <main className="flex-1 flex flex-col justify-between relative">
           {/* ── LiveKit Video Grid + Floating Timer ── */}
           {showVideoGrid && (
-          <div className="absolute inset-x-0 top-14 bottom-24 px-4 sm:px-6 z-20 animate-fade-in flex items-center justify-center">
-            <ResizableVideoWrapper>
-              <VideoGrid
-                layoutMode={videoLayoutMode}
-                pinnedIndex={videoPinnedIndex}
-                onPinnedIndexChange={setVideoPinnedIndex}
-                gap={8}
-                maxCapacity={room.maxCapacity || 6}
-                participants={participants}
-                localIdentity={user?.id}
-                onPublishCamera={toggleCamera}
-                onPublishScreen={toggleScreenShare}
-                isCameraOn={isCameraOn}
-                isScreenOn={isScreenOn}
-              />
-            </ResizableVideoWrapper>
-          </div>
+            <div className="absolute inset-x-0 top-14 bottom-24 px-4 sm:px-6 z-20 animate-fade-in flex items-center justify-center">
+              <ResizableVideoWrapper>
+                <VideoGrid
+                  layoutMode={videoLayoutMode}
+                  pinnedIndex={videoPinnedIndex}
+                  onPinnedIndexChange={setVideoPinnedIndex}
+                  gap={8}
+                  maxCapacity={room.maxCapacity || 6}
+                  participants={participants}
+                  localIdentity={user?.id}
+                  onPublishCamera={toggleCamera}
+                  onPublishScreen={toggleScreenShare}
+                  isCameraOn={isCameraOn}
+                  isScreenOn={isScreenOn}
+                />
+              </ResizableVideoWrapper>
+            </div>
           )}
 
           {/* ── Top bar: Room name + Invite + Leave + Timer ── */}
@@ -854,11 +861,10 @@ function RoomPageInner() {
                       ? setShowSoundPicker((v) => !v)
                       : null
                   }
-                  className={`flex items-center gap-3 pe-4 border-e border-white/10 transition-colors ${
-                    room.ambientSound && room.ambientSound !== "NONE"
+                  className={`flex items-center gap-3 pe-4 border-e border-white/10 transition-colors ${room.ambientSound && room.ambientSound !== "NONE"
                       ? "cursor-pointer hover:bg-white/5 rounded-lg px-3 py-1.5 -mx-1"
                       : ""
-                  }`}
+                    }`}
                 >
                   <div className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-lg">
                     {room.ambientSound === "RAIN"
@@ -877,9 +883,8 @@ function RoomPageInner() {
                   </div>
                   {room.ambientSound && room.ambientSound !== "NONE" && (
                     <svg
-                      className={`w-3.5 h-3.5 text-white/40 transition-transform ms-1 ${
-                        showSoundPicker ? "rotate-180" : ""
-                      }`}
+                      className={`w-3.5 h-3.5 text-white/40 transition-transform ms-1 ${showSoundPicker ? "rotate-180" : ""
+                        }`}
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -931,11 +936,10 @@ function RoomPageInner() {
                               changeTrack(track.id);
                               setShowSoundPicker(false);
                             }}
-                            className={`w-full text-start px-3 py-2 text-xs transition-colors cursor-pointer flex items-center gap-2.5 ${
-                              isActive
+                            className={`w-full text-start px-3 py-2 text-xs transition-colors cursor-pointer flex items-center gap-2.5 ${isActive
                                 ? "bg-white/15 text-white font-bold"
                                 : "text-white/70 hover:bg-white/10 hover:text-white"
-                            }`}
+                              }`}
                           >
                             {isActive && (
                               <span className="relative flex h-2 w-2 flex-shrink-0">
@@ -1014,11 +1018,10 @@ function RoomPageInner() {
                   <button
                     onClick={() => setShowPublishMenu((v) => !v)}
                     title="بث فيديو"
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                      isPublishing
+                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${isPublishing
                         ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 hover:bg-emerald-600"
                         : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
-                    }`}
+                      }`}
                   >
                     <svg
                       className="w-4 h-4"
@@ -1043,11 +1046,10 @@ function RoomPageInner() {
                           await toggleCamera();
                           if (!isCameraOn) setShowVideoGrid(true);
                         }}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-xs transition-colors cursor-pointer ${
-                          isCameraOn
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-xs transition-colors cursor-pointer ${isCameraOn
                             ? "bg-emerald-500/20 text-emerald-400 font-bold"
                             : "text-white/70 hover:bg-white/10 hover:text-white"
-                        }`}
+                          }`}
                       >
                         <svg
                           className="w-4 h-4 flex-shrink-0"
@@ -1076,11 +1078,10 @@ function RoomPageInner() {
                           await toggleScreenShare();
                           if (!isScreenOn) setShowVideoGrid(true);
                         }}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-xs transition-colors cursor-pointer ${
-                          isScreenOn
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-xs transition-colors cursor-pointer ${isScreenOn
                             ? "bg-violet-500/20 text-violet-400 font-bold"
                             : "text-white/70 hover:bg-white/10 hover:text-white"
-                        }`}
+                          }`}
                       >
                         <svg
                           className="w-4 h-4 flex-shrink-0"
@@ -1112,11 +1113,10 @@ function RoomPageInner() {
                 <button
                   onClick={() => setShowVideoGrid((v) => !v)}
                   title={showVideoGrid ? "إخفاء بث الفيديو" : "عرض بث الفيديو"}
-                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-                    showVideoGrid
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${showVideoGrid
                       ? `${themeCfg.accent} text-white shadow-lg ${themeCfg.accentShadow}`
                       : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <svg
                     className="w-4 h-4"
@@ -1232,13 +1232,12 @@ function RoomPageInner() {
 
               {/* Timer display */}
               <div
-                className={`text-5xl font-mono font-bold text-white tracking-widest tabular-nums ${
-                  phase === TIMER_PHASES.FOCUS
+                className={`text-5xl font-mono font-bold text-white tracking-widest tabular-nums ${phase === TIMER_PHASES.FOCUS
                     ? "drop-shadow-[0_0_16px_rgba(16,185,129,.3)]"
                     : phase === TIMER_PHASES.BREAK
                       ? "drop-shadow-[0_0_16px_rgba(245,158,11,.3)]"
                       : ""
-                }`}
+                  }`}
               >
                 {formatTime(timeLeft)}
               </div>
@@ -1275,11 +1274,10 @@ function RoomPageInner() {
                     setEditBreak(room.breakDuration);
                     setShowPomodoroSettings(!showPomodoroSettings);
                   }}
-                  className={`flex items-center justify-center transition-all cursor-pointer ${
-                    showPomodoroSettings
+                  className={`flex items-center justify-center transition-all cursor-pointer ${showPomodoroSettings
                       ? "text-white"
                       : "text-white/60 hover:text-white"
-                  }`}
+                    }`}
                   title="إعدادات البومودورو"
                 >
                   <svg
@@ -1437,98 +1435,20 @@ function RoomPageInner() {
             deleteGoal={deleteGoal}
           />
 
-          {/* ── Notifications Panel ── */}
-          <div
-            className={`${glassClass} rounded-3xl flex flex-col overflow-hidden transition-all duration-300 ${isNotifsCollapsed ? "h-[50px] flex-shrink-0" : "h-1/4 min-h-[140px]"}`}
-          >
-            <div
-              className={`p-3 ${themeCfg.accentBg} border-b border-white/5 flex justify-between items-center`}
-            >
-              <span className="font-bold text-white text-sm">الإشعارات</span>
-              <button
-                onClick={() => setIsNotifsCollapsed(!isNotifsCollapsed)}
-                className="text-white/40 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"
-              >
-                <svg
-                  className={`w-4 h-4 transition-transform duration-300 ${isNotifsCollapsed ? "rotate-90" : "-rotate-90"}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.75 19.5L8.25 12l7.5-7.5"
-                  />
-                </svg>
-              </button>
-            </div>
-            {!isNotifsCollapsed && (
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-3 flex flex-col gap-2">
-                {notifications.length === 0 && (
-                  <p className="text-white/30 text-xs text-center mt-4">
-                    لا توجد إشعارات بعد
-                  </p>
-                )}
-                {notifications.map((notif) => (
-                  <div
-                    key={notif.id}
-                    className="flex items-center gap-2 text-xs animate-fade-in"
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                        notif.type === "join"
-                          ? "bg-emerald-400"
-                          : notif.type === "goal_complete"
-                            ? "bg-amber-400"
-                            : "bg-red-400"
-                      }`}
-                    />
-                    <span className="text-white/80">
-                      <span className="font-bold text-white">
-                        {notif.user?.nickName ||
-                          notif.user?.username ||
-                          "مستخدم"}
-                      </span>{" "}
-                      {notif.type === "join"
-                        ? "انضم للغرفة"
-                        : notif.type === "leave"
-                          ? "غادر الغرفة"
-                          : ""}
-                      {notif.type === "goal_complete" && (
-                        <>
-                          أكمل هدف:{" "}
-                          <span className="font-bold text-emerald-400">
-                            {notif.goalTitle}
-                          </span>{" "}
-                          🎯
-                        </>
-                      )}
-                      {notif.type === "join" &&
-                        notif.user?.currentStreak > 0 && (
-                          <span className="ms-1.5 text-[10px] text-orange-400 font-bold">
-                            🔥{notif.user.currentStreak}
-                          </span>
-                        )}
-                    </span>
-                    <span className="text-white/30 ms-auto font-mono text-[10px]">
-                      {notif.timestamp
-                        ? new Date(notif.timestamp).toLocaleTimeString(
-                            "ar-SA",
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            },
-                          )
-                        : ""}
-                    </span>
-                  </div>
-                ))}
-                <div ref={notifEndRef} />
-              </div>
-            )}
-          </div>
+          {/* ── Chat + Notifications Panel ── */}
+          <ChatPanel
+            glassClass={glassClass}
+            themeCfg={themeCfg}
+            notifications={notifications}
+            chatMessages={chatMessages}
+            onSendMessage={sendMessage}
+            isChatConnected={isChatConnected}
+            isCollapsed={isNotifsCollapsed}
+            onToggleCollapse={() => setIsNotifsCollapsed(!isNotifsCollapsed)}
+            currentUserId={user?.id}
+            typingUsers={typingUsers}
+            onTyping={emitTyping}
+          />
         </aside>
       </div>
 
@@ -1593,11 +1513,10 @@ function RoomPageInner() {
 
                 <button
                   onClick={() => setShowVideoGrid((v) => !v)}
-                  className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
-                    showVideoGrid
+                  className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${showVideoGrid
                       ? `${themeCfg.accent} text-white`
                       : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
-                  }`}
+                    }`}
                   title={showVideoGrid ? "إخفاء بث الفيديو" : "عرض بث الفيديو"}
                 >
                   <svg
@@ -1620,11 +1539,10 @@ function RoomPageInner() {
                     await toggleCamera();
                     if (!isCameraOn) setShowVideoGrid(true);
                   }}
-                  className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
-                    isCameraOn
+                  className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${isCameraOn
                       ? "bg-emerald-500 text-white"
                       : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
-                  }`}
+                    }`}
                   title={isCameraOn ? "إيقاف الكاميرا" : "تشغيل الكاميرا"}
                 >
                   <svg
@@ -1647,11 +1565,10 @@ function RoomPageInner() {
                     await toggleScreenShare();
                     if (!isScreenOn) setShowVideoGrid(true);
                   }}
-                  className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
-                    isScreenOn
+                  className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${isScreenOn
                       ? "bg-violet-500 text-white"
                       : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
-                  }`}
+                    }`}
                   title={isScreenOn ? "إيقاف مشاركة الشاشة" : "مشاركة الشاشة"}
                 >
                   <svg
@@ -1673,11 +1590,10 @@ function RoomPageInner() {
                 {fsGridActive && trackCount >= 3 && (
                   <button
                     onClick={() => setCompactVideoLayout((v) => !v)}
-                    className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${
-                      compactVideoLayout
+                    className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${compactVideoLayout
                         ? `${themeCfg.accent} text-white`
                         : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
-                    }`}
+                      }`}
                     title={
                       compactVideoLayout
                         ? "عرض كامل الشاشة"
@@ -1746,15 +1662,13 @@ function RoomPageInner() {
                           />
                         </span>
                         <div
-                          className={`font-mono font-bold text-white tabular-nums leading-none tracking-[0.12em] ${
-                            showFsGoals ? "text-8xl" : "text-[10rem]"
-                          } ${
-                            phase === TIMER_PHASES.FOCUS
+                          className={`font-mono font-bold text-white tabular-nums leading-none tracking-[0.12em] ${showFsGoals ? "text-8xl" : "text-[10rem]"
+                            } ${phase === TIMER_PHASES.FOCUS
                               ? "drop-shadow-[0_0_16px_rgba(16,185,129,.3)]"
                               : phase === TIMER_PHASES.BREAK
                                 ? "drop-shadow-[0_0_16px_rgba(245,158,11,.3)]"
                                 : ""
-                          }`}
+                            }`}
                         >
                           {formatTime(timeLeft)}
                         </div>
@@ -1941,11 +1855,10 @@ function RoomPageInner() {
 
                   {/* Timer text */}
                   <div
-                    className={`font-mono font-bold text-white tabular-nums leading-none ${
-                      useFullGrid
+                    className={`font-mono font-bold text-white tabular-nums leading-none ${useFullGrid
                         ? "text-3xl tracking-[0.1em]"
                         : "text-[14rem] tracking-[0.15em]"
-                    }`}
+                      }`}
                   >
                     {formatTime(timeLeft)}
                   </div>

@@ -1,4 +1,5 @@
 export { default as ActivityHeatmap } from "./ActivityHeatmap";
+export { default as ChatPanel } from "./ChatPanel";
 export { default as Button } from "./Button";
 export { default as EditProfileDrawer } from "./EditProfileDrawer";
 export { default as EditRoomModal } from "./EditRoomModal";

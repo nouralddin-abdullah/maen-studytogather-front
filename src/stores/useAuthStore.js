@@ -17,6 +17,15 @@ const useAuthStore = create((set) => ({
   setLoading: (isLoading) => set({ isLoading }),
 
   /**
+   * Update the stored user (Zustand + localStorage).
+   * Use after profile edits so the new data persists across reloads.
+   */
+  setUser: (user) => {
+    localStorage.setItem("user", JSON.stringify(user));
+    set({ user });
+  },
+
+  /**
    * Login action.
    */
   login: async (credentials) => {

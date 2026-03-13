@@ -223,11 +223,9 @@ function EditProfileDrawer({ isOpen, onClose, profile, onUpdated }) {
 
       await userService.updateMe(payload, avatarFile, bgFile);
 
-      // Refresh auth user data (so navbar avatar etc. updates)
+      // Refresh auth user data (so navbar avatar, chat, etc. all update)
       const refreshed = await authService.getMe();
-      useAuthStore.getState().setUser
-        ? useAuthStore.setState({ user: refreshed })
-        : null;
+      useAuthStore.getState().setUser(refreshed);
 
       setSubmitSuccess(true);
 

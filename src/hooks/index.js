@@ -4,3 +4,4 @@
 export { default as useAmbientSound } from "./useAmbientSound";
 export { default as useInstallPrompt } from "./useInstallPrompt";
 export { default as useLiveKit } from "./useLiveKit";
+export { default as useRoomChat } from "./useRoomChat";
