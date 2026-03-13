@@ -537,99 +537,181 @@
 /* Inner — the actual resizable box */
 .resizable-video-wrapper {
   position: relative;
-  transition: box-shadow 0.3s ease;
+  transition: box-shadow 0.35s ease, border-color 0.35s ease;
+  border: 1.5px solid transparent;
+  border-radius: 0.75rem;
 }
 
-/* Border — only visible when handles are showing AND custom-sized */
+/* Subtle outlined border when handles are visible */
+.resizable-video-wrapper--handles-visible {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Accent border when custom-sized + handles visible */
 .resizable-video-wrapper--custom.resizable-video-wrapper--handles-visible {
-  border-radius: 0.75rem;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+  border-color: rgba(99, 144, 255, 0.35);
+  box-shadow: 0 0 0 1px rgba(99, 144, 255, 0.08),
+              0 0 20px rgba(99, 144, 255, 0.06);
 }
 
 .resizable-video-content {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  border-radius: inherit;
 }
 
-/* Resize handles — always present but invisible by default */
+/* ── Resize handles ── */
+/* Invisible hit zones — large for easy grabbing */
 .resize-handle {
   position: absolute;
   z-index: 30;
   opacity: 0;
-  transition: opacity 0.3s ease, background 0.15s ease;
   pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
-/* Show handles when wrapper is hovered / active */
+/* Show handles when wrapper is hovered */
 .resizable-video-wrapper--handles-visible .resize-handle {
   opacity: 1;
   pointer-events: auto;
 }
 
-/* Edge handles — glow line on hover */
-.resize-handle--n:hover,
-.resize-handle--s:hover {
-  background: linear-gradient(
-    to bottom,
-    rgba(51, 141, 252, 0.5),
-    transparent
-  );
-}
-.resize-handle--e:hover,
-.resize-handle--w:hover {
-  background: linear-gradient(
-    to right,
-    rgba(51, 141, 252, 0.5),
-    transparent
-  );
-}
-
-/* Corner handles — glow on hover */
-.resize-handle--nw:hover,
-.resize-handle--ne:hover,
-.resize-handle--sw:hover,
-.resize-handle--se:hover {
-  background: radial-gradient(
-    circle at center,
-    rgba(51, 141, 252, 0.6) 0%,
-    transparent 70%
-  );
-}
-
-/* Corner dots — only when handles are visible */
-.resizable-video-wrapper--handles-visible .resize-handle--nw::after,
-.resizable-video-wrapper--handles-visible .resize-handle--ne::after,
-.resizable-video-wrapper--handles-visible .resize-handle--sw::after,
-.resizable-video-wrapper--handles-visible .resize-handle--se::after {
+/* Edge handles — show a thin line on hover */
+.resize-handle--n::after,
+.resize-handle--s::after,
+.resize-handle--e::after,
+.resize-handle--w::after {
   content: "";
   position: absolute;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transition: background 0.15s ease;
+  background: rgba(99, 144, 255, 0);
+  transition: background 0.2s ease;
+  border-radius: 1px;
 }
 
-.resizable-video-wrapper--handles-visible .resize-handle--nw::after {
-  top: 2px;
-  left: 2px;
+/* Horizontal edges */
+.resize-handle--n::after {
+  top: 50%;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  transform: translateY(-50%);
 }
-.resizable-video-wrapper--handles-visible .resize-handle--ne::after {
-  top: 2px;
-  right: 2px;
-}
-.resizable-video-wrapper--handles-visible .resize-handle--sw::after {
-  bottom: 2px;
-  left: 2px;
-}
-.resizable-video-wrapper--handles-visible .resize-handle--se::after {
-  bottom: 2px;
-  right: 2px;
+.resize-handle--s::after {
+  bottom: 50%;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  transform: translateY(50%);
 }
 
-.resizable-video-wrapper--handles-visible .resize-handle:hover::after {
-  background: rgba(51, 141, 252, 0.8);
+/* Vertical edges */
+.resize-handle--e::after {
+  right: 50%;
+  top: 20%;
+  bottom: 20%;
+  width: 2px;
+  transform: translateX(50%);
+}
+.resize-handle--w::after {
+  left: 50%;
+  top: 20%;
+  bottom: 20%;
+  width: 2px;
+  transform: translateX(-50%);
+}
+
+/* Edge hover — accent line appears */
+.resize-handle--n:hover::after,
+.resize-handle--s:hover::after,
+.resize-handle--e:hover::after,
+.resize-handle--w:hover::after {
+  background: rgba(99, 144, 255, 0.5);
+}
+
+/* ── Corner grip indicators (Figma-style L-shapes) ── */
+.resize-handle-grip {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+}
+
+/* Position each corner's grip */
+.resize-handle--nw .resize-handle-grip {
+  top: 50%;
+  left: 50%;
+  transform: translate(-30%, -30%);
+  border-top: 2px solid rgba(255, 255, 255, 0.35);
+  border-left: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 2px 0 0 0;
+}
+.resize-handle--ne .resize-handle-grip {
+  top: 50%;
+  right: 50%;
+  transform: translate(30%, -30%);
+  border-top: 2px solid rgba(255, 255, 255, 0.35);
+  border-right: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0 2px 0 0;
+}
+.resize-handle--sw .resize-handle-grip {
+  bottom: 50%;
+  left: 50%;
+  transform: translate(-30%, 30%);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.35);
+  border-left: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0 0 0 2px;
+}
+.resize-handle--se .resize-handle-grip {
+  bottom: 50%;
+  right: 50%;
+  transform: translate(30%, 30%);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.35);
+  border-right: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0 0 2px 0;
+}
+
+/* Corner hover — brighter + slightly larger */
+.resize-handle:hover .resize-handle-grip {
+  border-color: rgba(99, 144, 255, 0.9) !important;
+  transform: translate(-30%, -30%) scale(1.15);
+}
+.resize-handle--ne:hover .resize-handle-grip {
+  transform: translate(30%, -30%) scale(1.15);
+}
+.resize-handle--sw:hover .resize-handle-grip {
+  transform: translate(-30%, 30%) scale(1.15);
+}
+.resize-handle--se:hover .resize-handle-grip {
+  transform: translate(30%, 30%) scale(1.15);
+}
+
+/* ── Reset button ── */
+.resize-reset-btn {
+  position: absolute;
+  top: -28px;
+  right: 0;
+  z-index: 31;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  animation: fade-in 0.2s ease-out;
+}
+
+.resize-reset-btn:hover {
+  background: rgba(99, 144, 255, 0.3);
+  border-color: rgba(99, 144, 255, 0.5);
+  color: white;
+  transform: scale(1.1);
 }
 
 /* ===========================

@@ -4,29 +4,32 @@ import { useState, useRef, useCallback, useEffect } from "react";
    ResizableVideoWrapper
    Wraps children (VideoGrid) in a container that
    the user can resize by dragging edges / corners,
-   like an OS window. Resizing the container causes
-   GridContainer inside to re-layout all tiles.
+   like an OS window / Figma frame.
 
-   UX: Handles are completely invisible by default.
-   They fade in when the mouse hovers near edges,
-   then fade out 1.5s after the mouse leaves.
+   UX: Handles only show when the mouse is over
+   the actual video box (not the entire parent).
+   They fade out after the mouse leaves.
    ═══════════════════════════════════════════════ */
 
 const MIN_W = 200;
 const MIN_H = 150;
-const FADE_OUT_DELAY = 500; // ms after mouse leaves before handles hide
+const FADE_OUT_DELAY = 800; // ms after mouse leaves before handles hide
+
+// Larger hit areas for comfortable dragging, rendered elements are smaller
+const HANDLE_HIT = 14; // invisible hit zone size
+const CORNER_HIT = 20;
 
 const HANDLES = [
-  // edges
-  { id: "n", cursor: "ns-resize", style: { top: 0, left: 6, right: 6, height: 6 } },
-  { id: "s", cursor: "ns-resize", style: { bottom: 0, left: 6, right: 6, height: 6 } },
-  { id: "e", cursor: "ew-resize", style: { top: 6, right: 0, bottom: 6, width: 6 } },
-  { id: "w", cursor: "ew-resize", style: { top: 6, left: 0, bottom: 6, width: 6 } },
-  // corners
-  { id: "nw", cursor: "nwse-resize", style: { top: 0, left: 0, width: 12, height: 12 } },
-  { id: "ne", cursor: "nesw-resize", style: { top: 0, right: 0, width: 12, height: 12 } },
-  { id: "sw", cursor: "nesw-resize", style: { bottom: 0, left: 0, width: 12, height: 12 } },
-  { id: "se", cursor: "nwse-resize", style: { bottom: 0, right: 0, width: 12, height: 12 } },
+  // edges — large invisible hit zone
+  { id: "n", cursor: "ns-resize", style: { top: -HANDLE_HIT / 2, left: CORNER_HIT, right: CORNER_HIT, height: HANDLE_HIT } },
+  { id: "s", cursor: "ns-resize", style: { bottom: -HANDLE_HIT / 2, left: CORNER_HIT, right: CORNER_HIT, height: HANDLE_HIT } },
+  { id: "e", cursor: "ew-resize", style: { top: CORNER_HIT, right: -HANDLE_HIT / 2, bottom: CORNER_HIT, width: HANDLE_HIT } },
+  { id: "w", cursor: "ew-resize", style: { top: CORNER_HIT, left: -HANDLE_HIT / 2, bottom: CORNER_HIT, width: HANDLE_HIT } },
+  // corners — large invisible hit zone
+  { id: "nw", cursor: "nwse-resize", style: { top: -CORNER_HIT / 2, left: -CORNER_HIT / 2, width: CORNER_HIT, height: CORNER_HIT } },
+  { id: "ne", cursor: "nesw-resize", style: { top: -CORNER_HIT / 2, right: -CORNER_HIT / 2, width: CORNER_HIT, height: CORNER_HIT } },
+  { id: "sw", cursor: "nesw-resize", style: { bottom: -CORNER_HIT / 2, left: -CORNER_HIT / 2, width: CORNER_HIT, height: CORNER_HIT } },
+  { id: "se", cursor: "nwse-resize", style: { bottom: -CORNER_HIT / 2, right: -CORNER_HIT / 2, width: CORNER_HIT, height: CORNER_HIT } },
 ];
 
 export default function ResizableVideoWrapper({ children }) {
@@ -47,7 +50,6 @@ export default function ResizableVideoWrapper({ children }) {
   }, []);
 
   const scheduleHide = useCallback(() => {
-    // Don't hide while dragging
     if (isDraggingRef.current) return;
     clearTimeout(fadeTimerRef.current);
     fadeTimerRef.current = setTimeout(() => setHandlesVisible(false), FADE_OUT_DELAY);
@@ -56,7 +58,7 @@ export default function ResizableVideoWrapper({ children }) {
   // Clean up on unmount
   useEffect(() => () => clearTimeout(fadeTimerRef.current), []);
 
-  // Drag bookkeeping (refs to avoid re-renders during drag)
+  // Drag bookkeeping
   const dragRef = useRef(null);
 
   // Measure parent on mount / resize to know max bounds
@@ -95,7 +97,7 @@ export default function ResizableVideoWrapper({ children }) {
       };
 
       isDraggingRef.current = true;
-      showHandles(); // Keep handles visible during drag
+      showHandles();
 
       document.body.style.cursor = HANDLES.find((h) => h.id === handleId)?.cursor || "default";
       document.body.style.userSelect = "none";
@@ -127,7 +129,7 @@ export default function ResizableVideoWrapper({ children }) {
         document.body.style.userSelect = "";
         document.removeEventListener("pointermove", onMove);
         document.removeEventListener("pointerup", onUp);
-        scheduleHide(); // Start fade-out timer after drag ends
+        scheduleHide();
       };
 
       document.addEventListener("pointermove", onMove);
@@ -139,35 +141,58 @@ export default function ResizableVideoWrapper({ children }) {
   // Reset to full size on double-click any handle
   const onDoubleClick = useCallback(() => setSize(null), []);
 
+  const isCustomSized = !!size;
+
   return (
     <div
       ref={outerRef}
       className="resizable-video-outer"
-      onMouseEnter={showHandles}
-      onMouseLeave={scheduleHide}
     >
       <div
         ref={boxRef}
-        className={`resizable-video-wrapper ${size ? "resizable-video-wrapper--custom" : ""} ${handlesVisible ? "resizable-video-wrapper--handles-visible" : ""}`}
+        className={`resizable-video-wrapper ${isCustomSized ? "resizable-video-wrapper--custom" : ""} ${handlesVisible ? "resizable-video-wrapper--handles-visible" : ""}`}
         style={
           size
             ? { width: size.w, height: size.h }
             : { width: "100%", height: "100%" }
         }
+        onMouseEnter={showHandles}
+        onMouseLeave={scheduleHide}
       >
         {/* Content */}
         <div className="resizable-video-content">{children}</div>
 
-        {/* Resize handles */}
-        {HANDLES.map((h) => (
-          <div
-            key={h.id}
-            className={`resize-handle resize-handle--${h.id}`}
-            style={{ ...h.style, cursor: h.cursor }}
-            onPointerDown={(e) => onPointerDown(h.id, e)}
-            onDoubleClick={onDoubleClick}
-          />
-        ))}
+        {/* Resize handles — only rendered when custom-sized or hovering */}
+        {HANDLES.map((h) => {
+          const isCorner = h.id.length === 2;
+          return (
+            <div
+              key={h.id}
+              className={`resize-handle resize-handle--${h.id}`}
+              style={{ ...h.style, cursor: h.cursor }}
+              onPointerDown={(e) => onPointerDown(h.id, e)}
+              onDoubleClick={onDoubleClick}
+            >
+              {/* Visual indicator inside the hit zone */}
+              {isCorner && (
+                <div className="resize-handle-grip" />
+              )}
+            </div>
+          );
+        })}
+
+        {/* Reset button — shown when custom-sized & handles visible */}
+        {isCustomSized && handlesVisible && (
+          <button
+            className="resize-reset-btn"
+            onClick={() => setSize(null)}
+            title="إعادة الحجم الأصلي"
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
