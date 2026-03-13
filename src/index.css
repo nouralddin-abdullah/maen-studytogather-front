@@ -686,14 +686,21 @@
   transform: translate(30%, 30%) scale(1.15);
 }
 
-/* ── Reset button ── */
-.resize-reset-btn {
+/* ── Toolbar (lock + reset buttons) ── */
+.resize-toolbar {
   position: absolute;
-  top: -28px;
+  top: -32px;
   right: 0;
   z-index: 31;
-  width: 22px;
-  height: 22px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: fade-in 0.2s ease-out;
+}
+
+.resize-toolbar-btn {
+  width: 24px;
+  height: 24px;
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
@@ -704,14 +711,26 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  animation: fade-in 0.2s ease-out;
 }
 
-.resize-reset-btn:hover {
+.resize-toolbar-btn:hover {
   background: rgba(99, 144, 255, 0.3);
   border-color: rgba(99, 144, 255, 0.5);
   color: white;
   transform: scale(1.1);
+}
+
+/* Active state for unlock */
+.resize-toolbar-btn--active {
+  background: rgba(99, 144, 255, 0.35);
+  border-color: rgba(99, 144, 255, 0.6);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Unlocked state — dashed border to hint "moveable" */
+.resizable-video-wrapper--unlocked.resizable-video-wrapper--handles-visible {
+  border-style: dashed;
+  border-color: rgba(99, 144, 255, 0.4);
 }
 
 /* ===========================
