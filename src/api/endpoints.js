@@ -51,6 +51,12 @@ const ENDPOINTS = {
     STATUS: (id) => `/friendships/get-status/${id}`,
     LIVE: "/friendships/live",
   },
+
+  // Leaderboard
+  LEADERBOARD: {
+    LIST: "/user/leaderboard",
+    ME: "/user/leaderboard/me",
+  },
 };
 
 export default ENDPOINTS;

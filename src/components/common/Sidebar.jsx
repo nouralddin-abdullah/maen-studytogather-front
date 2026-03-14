@@ -103,8 +103,8 @@ function Sidebar() {
       ),
     },
     {
-      to: "#",
-      label: "الإحصائيات",
+      to: ROUTES.LEADERBOARD,
+      label: "المتصدرين",
       icon: (
         <svg
           className="w-5 h-5"

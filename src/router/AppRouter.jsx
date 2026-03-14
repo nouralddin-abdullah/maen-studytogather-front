@@ -20,6 +20,7 @@ import RoomPage from "@/pages/Room/RoomPage";
 import CreateRoomPage from "@/pages/CreateRoom/CreateRoomPage";
 import FriendsPage from "@/pages/Friends/FriendsPage";
 import NotFoundPage from "@/pages/NotFound/NotFoundPage";
+import LeaderboardPage from "@/pages/Leaderboard/LeaderboardPage";
 
 /**
  * Application router — defines all routes and their layouts.
@@ -44,6 +45,7 @@ function AppRouter() {
         <Route path="/friends" element={<FriendsPage />} />
         <Route path="/create-room" element={<CreateRoomPage />} />
         <Route path="/user/:id" element={<ProfilePage />} />
+        <Route path="/leaderboard" element={<LeaderboardPage />} />
       </Route>
 
       {/* Room page — standalone full-screen (no sidebar) */}

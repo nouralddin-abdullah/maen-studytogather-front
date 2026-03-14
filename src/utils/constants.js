@@ -21,6 +21,7 @@ export const ROUTES = {
   CREATE_ROOM: "/create-room",
   PROFILE: (id) => `/user/${id}`,
   MY_PROFILE: "/user/me",
+  LEADERBOARD: "/leaderboard",
   ROOM: (id) => `/room/${id}`,
 };
 
