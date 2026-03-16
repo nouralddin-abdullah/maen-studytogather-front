@@ -57,6 +57,12 @@ const ENDPOINTS = {
     LIST: "/user/leaderboard",
     ME: "/user/leaderboard/me",
   },
+
+  // Direct Messages
+  DIRECT_MESSAGES: {
+    CONVERSATION: (friendId) => `/direct-messages/conversation/${friendId}`,
+    EDIT: (messageId) => `/direct-messages/${messageId}`,
+  },
 };
 
 export default ENDPOINTS;

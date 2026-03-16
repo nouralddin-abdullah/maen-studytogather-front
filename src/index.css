@@ -785,3 +785,54 @@
 .lk-indicator-screen {
   animation: lk-indicator-pulse-screen 2s ease-in-out infinite;
 }
+
+/* ===========================
+   Chat Panel Styles
+   =========================== */
+
+/* Message entrance animation */
+@keyframes msg-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-msg-enter {
+  animation: msg-slide-in 0.2s ease-out both;
+}
+
+/* Typing dots animation */
+@keyframes typing-dot {
+  0%, 60%, 100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+.typing-dot-1 { animation: typing-dot 1.2s ease-in-out infinite; }
+.typing-dot-2 { animation: typing-dot 1.2s ease-in-out 0.2s infinite; }
+.typing-dot-3 { animation: typing-dot 1.2s ease-in-out 0.4s infinite; }
+
+/* Chat scrollbar (thinner, fades in) */
+.chat-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+.chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+.chat-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong);
+}
