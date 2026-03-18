@@ -133,11 +133,11 @@ function LeaderboardPage() {
         <section className="flex flex-col gap-2.5">
           {/* Column headers */}
           {entries.length > 0 && (
-            <div className="flex items-center px-5 py-2 text-[11px] font-bold uppercase tracking-wider text-text-muted">
-              <span className="w-12">الترتيب</span>
+            <div className="flex items-center px-3 md:px-5 py-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-text-muted gap-2 md:gap-0">
+              <span className="w-6 md:w-12 text-center md:text-start">#</span>
               <span className="flex-1">الطالب</span>
-              <span className="w-24 text-start">الوقت</span>
-              <span className="w-20 text-start">السلسلة</span>
+              <span className="w-16 md:w-24 text-start">الوقت</span>
+              <span className="w-12 md:w-20 text-start">السلسلة</span>
             </div>
           )}
 
@@ -196,17 +196,17 @@ function LeaderboardPage() {
             return (
               <div
                 key={entry.rank}
-                className={`flex items-center px-5 rounded-2xl transition-all ${
+                className={`flex items-center px-3 md:px-5 gap-2 md:gap-0 rounded-2xl transition-all ${
                   isMe
-                    ? "py-4 bg-brand-600/5 dark:bg-brand-600/10 border border-brand-500/20 scale-[1.02] shadow-elevated"
+                    ? "py-3 md:py-4 bg-brand-600/5 dark:bg-brand-600/10 border border-brand-500/20 scale-[1.02] shadow-elevated"
                     : isFirst
-                      ? "py-4 bg-surface-elevated/60 backdrop-blur-xl border border-brand-500/30 ring-2 ring-brand-500/20"
-                      : "py-3.5 bg-surface-elevated/60 backdrop-blur-xl border border-border"
+                      ? "py-3 md:py-4 bg-surface-elevated/60 backdrop-blur-xl border border-brand-500/30 ring-2 ring-brand-500/20"
+                      : "py-2.5 md:py-3.5 bg-surface-elevated/60 backdrop-blur-xl border border-border"
                 }`}
               >
                 {/* Rank */}
                 <span
-                  className={`w-12 text-2xl font-black ${
+                  className={`w-6 md:w-12 text-lg md:text-2xl font-black text-center md:text-start ${
                     isFirst || isMe ? "text-brand-600" : "opacity-40"
                   }`}
                 >
@@ -214,17 +214,17 @@ function LeaderboardPage() {
                 </span>
 
                 {/* Avatar + Info */}
-                <div className="flex-1 flex items-center gap-3.5 min-w-0">
+                <div className="flex-1 flex items-center gap-2 md:gap-3.5 min-w-0">
                   <div className="relative flex-shrink-0">
                     {entry.user?.avatar ? (
                       <img
                         src={entry.user.avatar}
                         alt={entry.user.nickName || entry.user.username}
-                        className="w-10 h-10 rounded-full object-cover"
+                        className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center">
-                        <span className="text-sm font-bold text-brand-600">
+                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center">
+                        <span className="text-xs md:text-sm font-bold text-brand-600">
                           {(
                             entry.user?.nickName ||
                             entry.user?.username ||
@@ -238,14 +238,14 @@ function LeaderboardPage() {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-sm text-text-primary truncate">
+                    <p className="font-bold text-xs md:text-sm text-text-primary truncate">
                       {entry.user?.nickName || entry.user?.username || "مستخدم"}
                       {isMe && (
                         <span className="text-brand-600 me-1"> (أنت)</span>
                       )}
                     </p>
                     {entry.user?.field && FIELD_LABELS[entry.user.field] && (
-                      <p className="text-xs text-text-muted truncate">
+                      <p className="text-[10px] md:text-xs text-text-muted truncate">
                         {FIELD_LABELS[entry.user.field]}
                       </p>
                     )}
@@ -254,7 +254,7 @@ function LeaderboardPage() {
 
                 {/* Time */}
                 <span
-                  className={`w-24 text-start font-mono font-bold text-sm ${
+                  className={`w-16 md:w-24 text-start font-mono font-bold text-[11px] md:text-sm ${
                     isMe ? "text-brand-600" : "text-text-primary"
                   }`}
                 >
@@ -263,7 +263,7 @@ function LeaderboardPage() {
 
                 {/* Streak */}
                 <div
-                  className={`w-20 flex items-center gap-1 ${
+                  className={`w-12 md:w-20 flex items-center gap-0.5 md:gap-1 ${
                     isFirst || isMe
                       ? "text-brand-600"
                       : "text-brand-600/50"
@@ -271,10 +271,10 @@ function LeaderboardPage() {
                 >
                   {entry.user?.longestStreak > 0 ? (
                     <>
-                      <span className="font-bold text-sm">
+                      <span className="font-bold text-xs md:text-sm">
                         {entry.user.longestStreak}
                       </span>
-                      <span className="text-base">🔥</span>
+                      <span className="text-xs md:text-base">🔥</span>
                     </>
                   ) : (
                     <span className="text-xs text-text-muted">—</span>
