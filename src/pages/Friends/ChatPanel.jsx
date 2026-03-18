@@ -325,6 +325,8 @@ function TypingIndicator({ friend }) {
 /* ─────────────── Main Component ─────────────── */
 
 export default function ChatPanel({
+  className = "",
+  onBack,
   friend,
   messages,
   isConnected,
@@ -506,7 +508,7 @@ export default function ChatPanel({
   /* ── No friend selected ── */
   if (!friend) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-surface-elevated/60 backdrop-blur-xl border border-border rounded-2xl shadow-card">
+      <div className={`flex-1 flex flex-col items-center justify-center bg-surface-elevated/60 backdrop-blur-xl border border-border rounded-2xl shadow-card ${className}`}>
         <div className="w-20 h-20 rounded-full bg-gradient-to-br from-brand-500/20 to-brand-600/10 flex items-center justify-center mb-5">
           <svg
             className="w-10 h-10 text-brand-500/60"
@@ -528,14 +530,28 @@ export default function ChatPanel({
         <p className="text-text-muted text-sm">
           اختر صديقاً من القائمة لبدء المحادثة
         </p>
+        <button
+          onClick={onBack}
+          className="md:hidden mt-4 px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium"
+        >
+          العودة للأصدقاء
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-surface-elevated/60 backdrop-blur-xl border border-border rounded-2xl shadow-card overflow-hidden">
+    <div className={`flex-1 flex flex-col bg-surface-elevated/60 backdrop-blur-xl border border-border rounded-2xl shadow-card overflow-hidden ${className}`}>
       {/* ════════ Header ════════ */}
-      <div className="flex items-center gap-3 px-5 py-3 border-b border-border bg-surface-elevated/90 backdrop-blur-sm flex-shrink-0">
+      <div className="flex items-center gap-3 px-3 md:px-5 py-3 border-b border-border bg-surface-elevated/90 backdrop-blur-sm flex-shrink-0">
+        <button
+          onClick={onBack}
+          className="md:hidden flex items-center justify-center w-8 h-8 rounded-full text-text-muted hover:bg-surface-muted transition-colors cursor-pointer flex-shrink-0"
+        >
+          <svg className="w-5 h-5 text-text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+        </button>
         <div className="relative flex-shrink-0">
           {friend.avatar ? (
             <img

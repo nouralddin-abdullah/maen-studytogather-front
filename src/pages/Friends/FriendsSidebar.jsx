@@ -6,6 +6,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
  * Includes room indicator, join room, and remove friend options.
  */
 export default function FriendsSidebar({
+  className = "",
   friends,
   pendingRequests,
   isLoading,
@@ -47,7 +48,7 @@ export default function FriendsSidebar({
   }, [friends, search]);
 
   return (
-    <aside className="w-[320px] flex-shrink-0 flex flex-col bg-surface-elevated/80 backdrop-blur-xl border border-border rounded-2xl shadow-card overflow-hidden">
+    <aside className={`w-full md:w-[320px] flex-shrink-0 flex flex-col bg-surface-elevated/80 backdrop-blur-xl border border-border rounded-2xl shadow-card overflow-hidden ${className}`}>
       {/* ── Header + Tabs ── */}
       <div className="p-3.5 border-b border-border space-y-3">
         <h2 className="font-display text-base font-bold text-text-primary">

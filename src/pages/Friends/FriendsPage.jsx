@@ -49,9 +49,18 @@ function FriendsPage() {
     return () => disconnectSSE();
   }, [fetchFriends, fetchPending, connectSSE, disconnectSSE]);
 
-  // Auto-select first friend once friends load
+  // Manage responsive view state for auto-select logic
+  const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
+
   useEffect(() => {
-    if (!selectedFriend && friends.length > 0) {
+    const handleResize = () => setIsMobileView(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Auto-select first friend once friends load (Desktop ONLY)
+  useEffect(() => {
+    if (!selectedFriend && friends.length > 0 && !isMobileView) {
       const profile = friends[0].friendProfile;
       if (profile) {
         setSelectedFriend({
@@ -62,7 +71,7 @@ function FriendsPage() {
         });
       }
     }
-  }, [friends, selectedFriend]);
+  }, [friends, selectedFriend, isMobileView]);
 
   // Handle friend selection
   const handleSelectFriend = useCallback((friendId, profile) => {
@@ -111,9 +120,11 @@ function FriendsPage() {
   );
 
   return (
-    <div className="flex-1 flex gap-4 overflow-hidden h-full">
+    <div className="flex-1 flex gap-4 overflow-hidden h-full relative">
       {/* ── Chat Panel (left in RTL = main area) ── */}
       <ChatPanel
+        className={!selectedFriend ? "hidden md:flex" : "flex"}
+        onBack={() => setSelectedFriend(null)}
         friend={selectedFriend}
         messages={messages}
         isConnected={isConnected}
@@ -128,6 +139,7 @@ function FriendsPage() {
 
       {/* ── Friends Sidebar (right in RTL) ── */}
       <FriendsSidebar
+        className={selectedFriend ? "hidden md:flex" : "flex"}
         friends={friends}
         pendingRequests={pendingRequests}
         isLoading={isLoading}
