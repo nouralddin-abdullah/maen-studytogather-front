@@ -32,6 +32,7 @@ export default function VideoGrid({
   participants = [],
   localIdentity = null,
   onPublishCamera,
+  onPublishScreen,
   isCameraOn,
   isScreenOn,
   wrapperClassName = "",

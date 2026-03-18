@@ -29,7 +29,7 @@ async function fetchLofiStations() {
     .map((s) => ({
       id: s.stationuuid,
       label: `🎵 ${s.name}`,
-      streamUrl: s.url_resolved || s.url,
+      streamUrl: (s.url_resolved || s.url).replace(/^http:\/\//i, "https://"),
       favicon: s.favicon || null,
     }));
 }
@@ -121,9 +121,15 @@ export default function useAmbientSound(ambientSound, volume, isMuted) {
       audio.loop = shouldLoop;
       audio.volume = isMuted ? 0 : volume / 100;
       audio.crossOrigin = "anonymous";
-      audio.play().catch((err) => {
-        console.warn("Ambient audio play failed:", err.message);
-      });
+      
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          if (err.name !== "AbortError") {
+            console.warn("Ambient audio play failed:", err.message);
+          }
+        });
+      }
       audioRef.current = audio;
     },
     [volume, isMuted, stopAudio],
