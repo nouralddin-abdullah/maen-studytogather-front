@@ -3,6 +3,7 @@ import {
   Track,
   createLocalVideoTrack,
   createLocalScreenTracks,
+  VideoPresets,
 } from "livekit-client";
 import {
   useRoomContext,
@@ -92,7 +93,7 @@ export default function useLiveKit() {
 
     try {
       const track = await createLocalVideoTrack({
-        resolution: { width: 1280, height: 720 },
+        resolution: VideoPresets.h1080.resolution,
       });
       await localParticipant.publishTrack(track);
       setIsCameraOn(true);

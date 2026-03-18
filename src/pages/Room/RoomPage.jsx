@@ -574,7 +574,7 @@ function RoomPageInner() {
                   {/* Video button */}
                   <button
                     onClick={() => setShowMobileVideoOverlay(true)}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer border border-white/10 ${hasActiveTracks
+                    className={`relative w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer border border-white/10 ${hasActiveTracks
                       ? `${themeCfg.accent} text-white`
                       : "bg-white/10 text-white/60"
                       }`}
@@ -1642,7 +1642,7 @@ function RoomPageInner() {
                   <button
                     onClick={() => setShowVideoGrid((v) => !v)}
                     title={showVideoGrid ? "إخفاء بث الفيديو" : "عرض بث الفيديو"}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${showVideoGrid
+                    className={`relative w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${showVideoGrid
                       ? `${themeCfg.accent} text-white shadow-lg ${themeCfg.accentShadow}`
                       : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
                       }`}
