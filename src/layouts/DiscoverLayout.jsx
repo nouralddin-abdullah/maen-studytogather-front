@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "@/components/common/Sidebar";
+import MobileSidebar from "@/components/common/MobileSidebar";
 
 /**
  * Discover layout — full-screen immersive layout with sidebar.
@@ -15,14 +16,17 @@ function DiscoverLayout() {
       </div>
 
       {/* Content layer */}
-      <div className="relative z-10 flex h-full w-full p-4 gap-4">
-        {/* Sidebar */}
+      <div className="relative z-10 flex h-full w-full p-4 md:pb-4 pb-[84px] gap-4">
+        {/* Sidebar (Desktop) */}
         <Sidebar />
 
         {/* Main content */}
-        <main className="flex-1 flex flex-col gap-4 overflow-hidden">
+        <main className="flex-1 flex flex-col gap-4 overflow-hidden relative">
           <Outlet />
         </main>
+
+        {/* Mobile Sidebar (Bottom Nav) */}
+        <MobileSidebar />
       </div>
     </div>
   );

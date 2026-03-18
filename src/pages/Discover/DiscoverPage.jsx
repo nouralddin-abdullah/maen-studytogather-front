@@ -174,7 +174,7 @@ function DiscoverPage() {
       </header>
 
       {/* ══════ Room Grid ══════ */}
-      <div className="flex-1 overflow-y-auto pe-1">
+      <div className="flex-1 overflow-y-auto pe-1 mobile-no-scrollbar">
         {/* Error state */}
         {error && (
           <div className="flex items-center justify-center py-16">

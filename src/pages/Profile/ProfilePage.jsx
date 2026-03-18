@@ -119,7 +119,7 @@ function ProfilePage() {
   // ── Loading state ── //
   if (isLoading) {
     return (
-      <div className="flex-1 overflow-y-auto animate-pulse">
+      <div className="flex-1 overflow-y-auto animate-pulse mobile-no-scrollbar">
         <div className="h-56 bg-surface-muted rounded-2xl mb-6" />
         <div className="max-w-4xl mx-auto px-6 space-y-4">
           <div className="flex gap-6">
@@ -159,7 +159,7 @@ function ProfilePage() {
   if (!profile) return null;
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto mobile-no-scrollbar">
       {/* ══════ Background Banner ══════ */}
       <div className="relative h-52 md:h-64 rounded-2xl overflow-hidden">
         <img

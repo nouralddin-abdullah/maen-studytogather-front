@@ -24,11 +24,10 @@ function SidebarItem({ to, onClick, icon, label, isActive, badge }) {
     </>
   );
 
-  const classes = `relative group w-11 h-11 flex items-center justify-center rounded-xl transition-all ${
-    isActive
+  const classes = `relative group w-11 h-11 flex items-center justify-center rounded-xl transition-all ${isActive
       ? "bg-brand-600/15 text-brand-600 border border-brand-500/30"
       : "hover:bg-surface-muted text-text-muted hover:text-text-primary"
-  }`;
+    }`;
 
   if (onClick) {
     return (
@@ -124,7 +123,7 @@ function Sidebar() {
   ];
 
   return (
-    <aside className="w-[72px] flex-shrink-0 flex flex-col items-center gap-5 py-5 bg-surface-elevated/80 backdrop-blur-xl border border-border rounded-2xl shadow-elevated z-40">
+    <aside className="hidden md:flex w-[72px] flex-shrink-0 flex-col items-center gap-5 py-5 bg-surface-elevated/80 backdrop-blur-xl border border-border rounded-2xl shadow-elevated z-40">
       {/* Logo */}
       <Link
         to={ROUTES.HOME}

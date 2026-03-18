@@ -229,6 +229,17 @@
   .animate-popover-in {
     animation: popover-scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+
+  /* Utility to hide scrollbar on mobile but keep content scrollable */
+  @media (max-width: 768px) {
+    .mobile-no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .mobile-no-scrollbar {
+      -ms-overflow-style: none; /* IE and Edge */
+      scrollbar-width: none; /* Firefox */
+    }
+  }
 }
 
 /* ===========================
