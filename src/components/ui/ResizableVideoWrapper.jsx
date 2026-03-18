@@ -12,10 +12,10 @@ import { useState, useRef, useCallback, useEffect } from "react";
 
 const MIN_W = 200;
 const MIN_H = 150;
-const FADE_OUT_DELAY = 800;
+const FADE_OUT_DELAY = 3000;
 
-const HANDLE_HIT = 14;
-const CORNER_HIT = 20;
+const HANDLE_HIT = 28;
+const CORNER_HIT = 36;
 
 const HANDLES = [
   { id: "n", cursor: "ns-resize", style: { top: -HANDLE_HIT / 2, left: CORNER_HIT, right: CORNER_HIT, height: HANDLE_HIT } },
@@ -117,11 +117,13 @@ export default function ResizableVideoWrapper({ children }) {
         document.body.style.userSelect = "";
         document.removeEventListener("pointermove", onMove);
         document.removeEventListener("pointerup", onUp);
+        document.removeEventListener("pointercancel", onUp);
         scheduleHide();
       };
 
       document.addEventListener("pointermove", onMove);
       document.addEventListener("pointerup", onUp);
+      document.addEventListener("pointercancel", onUp);
     },
     [size, showHandles, scheduleHide],
   );
@@ -179,11 +181,13 @@ export default function ResizableVideoWrapper({ children }) {
         document.body.style.userSelect = "";
         document.removeEventListener("pointermove", onMove);
         document.removeEventListener("pointerup", onUp);
+        document.removeEventListener("pointercancel", onUp);
         scheduleHide();
       };
 
       document.addEventListener("pointermove", onMove);
       document.addEventListener("pointerup", onUp);
+      document.addEventListener("pointercancel", onUp);
     },
     [locked, size, position, showHandles, scheduleHide],
   );
@@ -218,10 +222,12 @@ export default function ResizableVideoWrapper({ children }) {
         style={boxStyle}
         onMouseEnter={showHandles}
         onMouseLeave={scheduleHide}
+        onTouchStart={showHandles}
+        onClick={showHandles}
       >
         {/* Content — draggable when unlocked */}
         <div
-          className={`resizable-video-content ${!locked ? "cursor-grab active:cursor-grabbing" : ""}`}
+          className={`resizable-video-content ${!locked ? "cursor-grab active:cursor-grabbing touch-none" : ""}`}
           onPointerDown={onMovePointerDown}
         >
           {children}
@@ -233,7 +239,7 @@ export default function ResizableVideoWrapper({ children }) {
           return (
             <div
               key={h.id}
-              className={`resize-handle resize-handle--${h.id}`}
+              className={`resize-handle resize-handle--${h.id} touch-none`}
               style={{ ...h.style, cursor: h.cursor }}
               onPointerDown={(e) => onPointerDown(h.id, e)}
               onDoubleClick={onDoubleClick}

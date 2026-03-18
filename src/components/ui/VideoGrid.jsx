@@ -32,9 +32,10 @@ export default function VideoGrid({
   participants = [],
   localIdentity = null,
   onPublishCamera,
-  onPublishScreen,
   isCameraOn,
   isScreenOn,
+  wrapperClassName = "",
+  wrapperStyle = {},
 }) {
   const tracks = useTracks(
     [
@@ -388,7 +389,7 @@ export default function VideoGrid({
   const usePip = trackSlotCount === 2 && mergedSlots.length === 2 && layoutMode === "gallery" && !hasPinned;
 
   return (
-    <div className="w-full h-full meetgrid-wrapper">
+    <div className={`w-full h-full meetgrid-wrapper ${wrapperClassName}`} style={wrapperStyle}>
       <GridContainer
         aspectRatio={aspectRatio}
         itemAspectRatios={itemAspectRatios}

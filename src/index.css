@@ -459,13 +459,23 @@
 
 /* Two-column split for fullscreen compact mode */
 .fs-compact-grid {
-  flex: 0 0 38%;
-  max-width: 38%;
-  height: 100%;
+  flex: 1;
+  width: 100%;
+  max-height: 50%;
   display: flex;
   align-items: stretch;
   justify-content: center;
 }
+
+@media (min-width: 768px) {
+  .fs-compact-grid {
+    flex: 0 0 38%;
+    max-width: 38%;
+    max-height: none;
+    height: 100%;
+  }
+}
+
 
 .fs-compact-panels {
   flex: 1;
@@ -691,7 +701,7 @@
   position: absolute;
   top: -32px;
   right: 0;
-  z-index: 31;
+  z-index: 100;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -836,3 +846,191 @@
 .chat-scroll::-webkit-scrollbar-thumb:hover {
   background: var(--color-border-strong);
 }
+
+/* ===========================
+   Room Page — Mobile Responsive
+   =========================== */
+
+/* Bottom navigation bar */
+.room-mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  height: 64px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(10, 10, 14, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.room-mobile-nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 10px;
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.15s ease;
+  position: relative;
+}
+
+.room-mobile-nav-btn.active {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.room-mobile-nav-btn.active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 25%;
+  right: 25%;
+  height: 2.5px;
+  border-radius: 0 0 4px 4px;
+  background: currentColor;
+  opacity: 0.7;
+}
+
+.room-mobile-nav-btn:active {
+  transform: scale(0.92);
+}
+
+.room-mobile-nav-btn svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+/* Tab content area — fills between top bar and bottom nav */
+.room-mobile-content {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Tab panel slide-in animation */
+@keyframes mobile-tab-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.room-mobile-tab-panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  animation: mobile-tab-enter 0.25s ease-out both;
+}
+
+/* Mobile top bar */
+.room-mobile-topbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  padding-top: calc(10px + env(safe-area-inset-top, 0px));
+  z-index: 15;
+}
+
+/* Mobile sound floating button */
+.room-mobile-sound-fab {
+  position: fixed;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  left: 16px;
+  z-index: 55;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(10, 10, 14, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.room-mobile-sound-fab:active {
+  transform: scale(0.9);
+}
+
+/* Participants grid for mobile */
+.room-mobile-participants-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 20px 16px;
+}
+
+.room-mobile-participant-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 8px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: background 0.2s ease;
+}
+
+.room-mobile-participant-card:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile sound picker sheet */
+.room-mobile-sound-sheet {
+  position: fixed;
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  left: 12px;
+  right: 12px;
+  z-index: 58;
+  max-height: 50vh;
+  border-radius: 20px;
+  background: rgba(10, 10, 14, 0.94);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  animation: mobile-sheet-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes mobile-sheet-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+

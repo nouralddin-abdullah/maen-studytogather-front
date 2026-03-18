@@ -19,6 +19,7 @@ function GoalsPanel({
   toggleGoal,
   updateGoalTitle,
   deleteGoal,
+  isMobileFullHeight,
 }) {
   const [activeTab, setActiveTab] = useState(userId); // userId of selected tab
   const [newGoalTitle, setNewGoalTitle] = useState("");
@@ -257,20 +258,22 @@ function GoalsPanel({
           )}
         </div>
 
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="text-white/40 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"
-        >
-          <svg
-            className={`w-4 h-4 transition-transform duration-300 ${isCollapsed ? "rotate-90" : "-rotate-90"}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2.5}
+        {!isMobileFullHeight && (
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="text-white/40 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-          </svg>
-        </button>
+            <svg
+              className={`w-4 h-4 transition-transform duration-300 ${isCollapsed ? "rotate-90" : "-rotate-90"}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* ── Goal list ── */}
