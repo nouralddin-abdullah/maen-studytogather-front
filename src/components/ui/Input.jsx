@@ -21,7 +21,7 @@ const Input = forwardRef(
           id={id}
           type={type}
           className={clsx(
-            "w-full px-4 py-2.5 rounded-xl border bg-surface-elevated text-text-primary placeholder:text-text-muted transition-all duration-200",
+            "w-full px-4 py-2.5 rounded-md border bg-surface-elevated text-text-primary placeholder:text-text-muted transition-all duration-200",
             "focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500",
             error
               ? "border-error focus:ring-error/40 focus:border-error"

@@ -126,10 +126,10 @@ function CreateRoomPage() {
   return (
     <>
       {/* ══════ Header ══════ */}
-      <header className="flex-shrink-0 flex items-center gap-4 bg-surface-elevated/80 backdrop-blur-xl border border-border p-3.5 rounded-2xl shadow-card">
+      <header className="flex-shrink-0 flex items-center gap-4 bg-surface-elevated border border-border p-3 rounded-lg">
         <button
           onClick={() => navigate(ROUTES.DISCOVER)}
-          className="p-2 rounded-xl hover:bg-surface-muted text-text-secondary hover:text-text-primary transition-all cursor-pointer"
+          className="p-2 rounded-md hover:bg-surface-muted text-text-secondary hover:text-text-primary transition-all cursor-pointer"
         >
           <svg
             className="w-5 h-5"
@@ -163,7 +163,7 @@ function CreateRoomPage() {
             </label>
 
             {wallpaperPreview ? (
-              <div className="relative group rounded-2xl overflow-hidden border border-border shadow-card">
+              <div className="relative group rounded-lg overflow-hidden border border-border">
                 <img
                   src={wallpaperPreview}
                   alt="معاينة الخلفية"
@@ -173,14 +173,14 @@ function CreateRoomPage() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-4 py-2 bg-white/90 text-gray-900 rounded-xl text-sm font-medium hover:bg-white transition-all cursor-pointer"
+                    className="px-4 py-2 bg-white/90 text-gray-900 rounded-md text-sm font-medium hover:bg-white transition-all cursor-pointer"
                   >
                     تغيير
                   </button>
                   <button
                     type="button"
                     onClick={removeWallpaper}
-                    className="px-4 py-2 bg-red-500/90 text-white rounded-xl text-sm font-medium hover:bg-red-500 transition-all cursor-pointer"
+                    className="px-4 py-2 bg-red-500/90 text-white rounded-md text-sm font-medium hover:bg-red-500 transition-all cursor-pointer"
                   >
                     إزالة
                   </button>
@@ -190,7 +190,7 @@ function CreateRoomPage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full h-48 border-2 border-dashed border-border hover:border-brand-500 rounded-2xl flex flex-col items-center justify-center gap-2 text-text-muted hover:text-brand-600 transition-all cursor-pointer group"
+                className="w-full h-48 border-2 border-dashed border-border hover:border-brand-500 rounded-lg flex flex-col items-center justify-center gap-2 text-text-muted hover:text-brand-600 transition-all cursor-pointer group"
               >
                 <svg
                   className="w-10 h-10 group-hover:scale-110 transition-transform"
@@ -249,7 +249,7 @@ function CreateRoomPage() {
               id="description"
               rows={3}
               placeholder="وصف قصير عن الغرفة وأهدافها..."
-              className="w-full px-4 py-2.5 rounded-xl border bg-surface-elevated text-text-primary placeholder:text-text-muted transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 border-border hover:border-border-strong resize-none"
+              className="w-full px-4 py-2.5 rounded-md border bg-surface-elevated text-text-primary placeholder:text-text-muted transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 border-border hover:border-border-strong resize-none"
               {...register("description")}
             />
             {errors.description && (
@@ -312,7 +312,7 @@ function CreateRoomPage() {
                 return (
                   <label
                     key={opt.value}
-                    className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
+                    className={`flex items-center gap-3 p-3.5 rounded-md border cursor-pointer transition-all ${
                       checked
                         ? "border-brand-500 bg-brand-50 dark:bg-brand-950/40 ring-2 ring-brand-500/30"
                         : "border-border hover:border-border-strong bg-surface-elevated"

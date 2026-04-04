@@ -24,7 +24,7 @@ const Select = forwardRef(
             ref={ref}
             id={id}
             className={clsx(
-              "w-full px-4 py-2.5 pe-10 rounded-xl border bg-surface-elevated text-text-primary transition-all duration-200 appearance-none",
+              "w-full px-4 py-2.5 pe-10 rounded-md border bg-surface-elevated text-text-primary transition-all duration-200 appearance-none",
               "focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500",
               error
                 ? "border-error focus:ring-error/40 focus:border-error"

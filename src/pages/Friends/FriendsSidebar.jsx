@@ -48,7 +48,7 @@ export default function FriendsSidebar({
   }, [friends, search]);
 
   return (
-    <aside className={`w-full md:w-[320px] flex-shrink-0 flex flex-col bg-surface-elevated/80 backdrop-blur-xl border border-border rounded-2xl shadow-card overflow-hidden ${className}`}>
+    <aside className={`w-full md:w-[320px] flex-shrink-0 flex flex-col bg-surface-elevated border border-border rounded-lg overflow-hidden ${className}`}>
       {/* ── Header + Tabs ── */}
       <div className="p-3.5 border-b border-border space-y-3">
         <h2 className="font-display text-base font-bold text-text-primary">
@@ -59,7 +59,7 @@ export default function FriendsSidebar({
         <div className="flex gap-2">
           <button
             onClick={() => setActiveTab("friends")}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${activeTab === "friends"
+            className={`flex-1 py-2 rounded-md text-sm font-medium transition-all cursor-pointer ${activeTab === "friends"
                 ? "bg-brand-600 text-white shadow-sm"
                 : "border border-border text-text-secondary hover:bg-surface-muted hover:text-text-primary"
               }`}
@@ -71,7 +71,7 @@ export default function FriendsSidebar({
           </button>
           <button
             onClick={() => setActiveTab("pending")}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === "pending"
+            className={`flex-1 py-2 rounded-md text-sm font-medium transition-all cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === "pending"
                 ? "bg-brand-600 text-white shadow-sm"
                 : "border border-border text-text-secondary hover:bg-surface-muted hover:text-text-primary"
               }`}
@@ -106,7 +106,7 @@ export default function FriendsSidebar({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث عن صديق..."
-              className="w-full ps-9 pe-3 py-2 rounded-lg bg-surface-muted border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-brand-500 transition-colors"
+              className="w-full ps-9 pe-3 py-2 rounded-md bg-surface-muted border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-brand-500 transition-colors"
             />
           </div>
         )}
@@ -122,7 +122,7 @@ export default function FriendsSidebar({
                 {[...Array(6)].map((_, i) => (
                   <div
                     key={i}
-                    className="flex items-center gap-3 p-3 rounded-xl animate-pulse"
+                    className="flex items-center gap-3 p-3 rounded-md animate-pulse"
                   >
                     <div className="w-10 h-10 rounded-full bg-surface-muted" />
                     <div className="flex-1 space-y-1.5">
@@ -178,7 +178,7 @@ export default function FriendsSidebar({
               return (
                 <div
                   key={friend.id}
-                  className={`group relative flex items-center gap-3 p-3 rounded-xl transition-all ${isActive
+                  className={`group relative flex items-center gap-3 p-3 rounded-md transition-all ${isActive
                       ? "bg-brand-600/15 border border-brand-500/30"
                       : "hover:bg-surface-muted border border-transparent"
                     }`}
@@ -267,7 +267,7 @@ export default function FriendsSidebar({
 
                     {/* Dropdown */}
                     {menuOpenId === friend.id && (
-                      <div className="absolute end-0 top-full mt-1 w-44 bg-surface-elevated border border-border rounded-xl shadow-elevated py-1.5 z-[110]">
+                      <div className="absolute end-0 top-full mt-1 w-44 bg-surface-elevated border border-border rounded-lg shadow-elevated py-1.5 z-[110]">
                         {isOnline && friend.inviteCode && (
                           <button
                             onClick={() => {
@@ -331,7 +331,7 @@ export default function FriendsSidebar({
                 {[...Array(3)].map((_, i) => (
                   <div
                     key={i}
-                    className="flex items-center gap-3 p-3 rounded-xl animate-pulse"
+                    className="flex items-center gap-3 p-3 rounded-md animate-pulse"
                   >
                     <div className="w-10 h-10 rounded-full bg-surface-muted" />
                     <div className="flex-1 space-y-1.5">
@@ -376,7 +376,7 @@ export default function FriendsSidebar({
               return (
                 <div
                   key={req.id}
-                  className="flex items-center gap-3 p-3 rounded-xl border border-border bg-surface-elevated"
+                  className="flex items-center gap-3 p-3 rounded-md border border-border bg-surface-elevated"
                 >
                   {/* Avatar */}
                   {requester?.avatar ? (
@@ -412,7 +412,7 @@ export default function FriendsSidebar({
                     <button
                       onClick={() => onRespondToRequest(req.id, "accepted")}
                       title="قبول"
-                      className="w-8 h-8 flex items-center justify-center rounded-lg bg-green-500/15 text-green-500 hover:bg-green-500/25 transition-colors cursor-pointer"
+                      className="w-8 h-8 flex items-center justify-center rounded-md bg-green-500/15 text-green-500 hover:bg-green-500/25 transition-colors cursor-pointer"
                     >
                       <svg
                         className="w-4 h-4"
@@ -431,7 +431,7 @@ export default function FriendsSidebar({
                     <button
                       onClick={() => onRespondToRequest(req.id, "rejected")}
                       title="رفض"
-                      className="w-8 h-8 flex items-center justify-center rounded-lg bg-error/10 text-error hover:bg-error/20 transition-colors cursor-pointer"
+                      className="w-8 h-8 flex items-center justify-center rounded-md bg-error/10 text-error hover:bg-error/20 transition-colors cursor-pointer"
                     >
                       <svg
                         className="w-4 h-4"

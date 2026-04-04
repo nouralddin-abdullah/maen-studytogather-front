@@ -27,10 +27,7 @@ function HomePage() {
       {/* -------- Gradient overlay -------- */}
       <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/85 to-surface/40 dark:from-surface dark:via-surface/90 dark:to-surface/50" />
 
-      {/* -------- Subtle brand glow -------- */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 start-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-brand-500/10 dark:bg-brand-500/5 blur-[120px] rounded-full" />
-      </div>
+
 
       {/* -------- Content -------- */}
       <div className="relative z-10 flex flex-col items-center text-center px-4 pt-24 pb-16 max-w-2xl mx-auto">
@@ -43,7 +40,7 @@ function HomePage() {
 
         {/* Heading */}
         <h1
-          className="font-display text-5xl sm:text-7xl font-extrabold text-gradient mb-3 animate-fade-in"
+          className="font-display text-5xl sm:text-7xl font-extrabold text-brand-600 mb-3 animate-fade-in"
           style={{ animationDelay: "0.05s" }}
         >
           {APP_NAME}
@@ -73,7 +70,7 @@ function HomePage() {
           {isAuthenticated ? (
             <Link
               to={ROUTES.DISCOVER}
-              className="bg-brand-600 text-white px-8 py-3.5 rounded-2xl text-lg font-semibold hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/25 transition-all duration-200"
+              className="bg-brand-600 text-white px-8 py-3.5 rounded-lg text-lg font-semibold hover:bg-brand-700 transition-all duration-200"
             >
               اكتشف الغرف
             </Link>
@@ -81,13 +78,13 @@ function HomePage() {
             <>
               <Link
                 to={ROUTES.REGISTER}
-                className="bg-brand-600 text-white px-8 py-3.5 rounded-2xl text-lg font-semibold hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/25 transition-all duration-200"
+                className="bg-brand-600 text-white px-8 py-3.5 rounded-lg text-lg font-semibold hover:bg-brand-700 transition-all duration-200"
               >
                 ابدأ الآن
               </Link>
               <Link
                 to={ROUTES.LOGIN}
-                className="bg-surface-elevated/60 backdrop-blur-md border border-border text-text-primary px-8 py-3.5 rounded-2xl text-lg font-semibold hover:bg-surface-elevated/90 transition-all duration-200"
+                className="bg-surface-elevated border border-border text-text-primary px-8 py-3.5 rounded-lg text-lg font-semibold hover:bg-surface-muted transition-all duration-200"
               >
                 تسجيل الدخول
               </Link>
@@ -99,7 +96,7 @@ function HomePage() {
         {canInstall && (
           <button
             onClick={promptInstall}
-            className="mt-8 inline-flex items-center gap-2 bg-surface-elevated/50 backdrop-blur-lg border border-border/60 text-text-secondary px-5 py-2.5 rounded-xl text-sm font-medium hover:text-brand-600 hover:border-brand-500/40 transition-all duration-200 cursor-pointer animate-fade-in"
+            className="mt-8 inline-flex items-center gap-2 bg-surface-elevated border border-border text-text-secondary px-5 py-2.5 rounded-lg text-sm font-medium hover:text-brand-600 hover:border-brand-500/40 transition-all duration-200 cursor-pointer animate-fade-in"
             style={{ animationDelay: "0.3s" }}
           >
             <svg

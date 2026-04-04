@@ -120,7 +120,7 @@ function ProfilePage() {
   if (isLoading) {
     return (
       <div className="flex-1 overflow-y-auto animate-pulse mobile-no-scrollbar">
-        <div className="h-56 bg-surface-muted rounded-2xl mb-6" />
+        <div className="h-56 bg-surface-muted rounded-lg mb-6" />
         <div className="max-w-4xl mx-auto px-6 space-y-4">
           <div className="flex gap-6">
             <div className="w-32 h-32 rounded-full bg-surface-muted -mt-16" />
@@ -131,7 +131,7 @@ function ProfilePage() {
           </div>
           <div className="grid grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-24 bg-surface-muted rounded-2xl" />
+              <div key={i} className="h-24 bg-surface-muted rounded-lg" />
             ))}
           </div>
         </div>
@@ -161,7 +161,7 @@ function ProfilePage() {
   return (
     <div className="flex-1 overflow-y-auto mobile-no-scrollbar">
       {/* ══════ Background Banner ══════ */}
-      <div className="relative h-52 md:h-64 rounded-2xl overflow-hidden">
+      <div className="relative h-52 md:h-64 rounded-lg overflow-hidden">
         <img
           src={bgUrl}
           alt=""
@@ -204,17 +204,17 @@ function ProfilePage() {
             {/* Tags */}
             <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-2">
               {fieldLabel && (
-                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-surface-muted text-text-secondary text-xs border border-border">
+                <span className="flex items-center gap-1 px-3 py-1 rounded-md bg-surface-muted text-text-secondary text-xs border border-border">
                   {fieldLabel}
                 </span>
               )}
               {countryLabel && (
-                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-surface-muted text-text-secondary text-xs border border-border">
+                <span className="flex items-center gap-1 px-3 py-1 rounded-md bg-surface-muted text-text-secondary text-xs border border-border">
                   {countryLabel}
                 </span>
               )}
               {genderLabel && (
-                <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-surface-muted text-text-secondary text-xs border border-border">
+                <span className="flex items-center gap-1 px-3 py-1 rounded-md bg-surface-muted text-text-secondary text-xs border border-border">
                   {genderLabel}
                 </span>
               )}
@@ -226,7 +226,7 @@ function ProfilePage() {
             {isOwnProfile && (
               <button
                 onClick={() => setIsEditOpen(true)}
-                className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-colors shadow-sm text-sm cursor-pointer"
+                className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-md transition-colors text-sm cursor-pointer"
               >
                 <svg
                   className="w-4 h-4"
@@ -244,7 +244,7 @@ function ProfilePage() {
                 تعديل الملف الشخصي
               </button>
             )}
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-surface-muted hover:bg-surface-elevated text-text-secondary font-bold rounded-xl transition-colors border border-border text-sm cursor-pointer">
+            <button className="flex items-center gap-2 px-4 py-2.5 bg-surface-muted hover:bg-surface-elevated text-text-secondary font-bold rounded-md transition-colors border border-border text-sm cursor-pointer">
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -291,14 +291,14 @@ function ProfilePage() {
         <div className="grid md:grid-cols-2 gap-5">
           {/* Social links */}
           {(profile.discordUsername || profile.twitterUrl) && (
-            <div className="bg-surface-elevated border border-border rounded-2xl p-5 space-y-4">
+            <div className="bg-surface-elevated border border-border rounded-lg p-5 space-y-4">
               <h3 className="text-sm font-bold text-text-muted uppercase tracking-wider">
                 التواصل الاجتماعي
               </h3>
               <div className="flex gap-3">
                 {profile.discordUsername && (
                   <span
-                    className="flex items-center gap-2 px-3 py-2 bg-[#5865F2]/10 text-[#5865F2] rounded-xl text-sm font-medium border border-[#5865F2]/20"
+                    className="flex items-center gap-2 px-3 py-2 bg-[#5865F2]/10 text-[#5865F2] rounded-md text-sm font-medium border border-[#5865F2]/20"
                     title={profile.discordUsername}
                   >
                     <DiscordIcon className="w-4 h-4" />
@@ -310,7 +310,7 @@ function ProfilePage() {
                     href={profile.twitterUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3 py-2 bg-black/5 dark:bg-white/5 text-text-primary rounded-xl text-sm font-medium border border-border hover:border-brand-500 transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 bg-black/5 dark:bg-white/5 text-text-primary rounded-md text-sm font-medium border border-border hover:border-brand-500 transition-colors"
                   >
                     <TwitterIcon className="w-4 h-4" />X / Twitter
                   </a>
@@ -321,7 +321,7 @@ function ProfilePage() {
 
           {/* Interests */}
           {profile.interests && profile.interests.length > 0 && (
-            <div className="bg-surface-elevated border border-border rounded-2xl p-5 space-y-4">
+            <div className="bg-surface-elevated border border-border rounded-lg p-5 space-y-4">
               <h3 className="text-sm font-bold text-text-muted uppercase tracking-wider">
                 الاهتمامات
               </h3>
@@ -329,7 +329,7 @@ function ProfilePage() {
                 {profile.interests.map((interest) => (
                   <span
                     key={interest}
-                    className="px-3 py-1 bg-brand-500/10 text-brand-600 rounded-lg text-sm font-medium border border-brand-500/20"
+                    className="px-3 py-1 bg-brand-500/10 text-brand-600 rounded-md text-sm font-medium border border-brand-500/20"
                   >
                     {interest}
                   </span>
@@ -340,7 +340,7 @@ function ProfilePage() {
         </div>
 
         {/* ── Activity Heatmap ── */}
-        <div className="bg-surface-elevated border border-border rounded-2xl p-5">
+        <div className="bg-surface-elevated border border-border rounded-lg p-5">
           <ActivityHeatmap
             data={heatmapData}
             year={heatmapYear}
@@ -379,7 +379,7 @@ function ProfilePage() {
  */
 function StatCard({ value, label }) {
   return (
-    <div className="bg-surface-elevated border border-border p-5 rounded-2xl flex flex-col items-center hover:shadow-card-hover transition-shadow">
+    <div className="bg-surface-elevated border border-border p-5 rounded-lg flex flex-col items-center hover:border-border-strong transition-colors">
       <span className="text-2xl font-bold text-text-primary mb-1">{value}</span>
       <span className="text-[11px] uppercase tracking-wider font-bold text-brand-600">
         {label}

@@ -80,7 +80,7 @@ function DiscoverPage() {
   return (
     <>
       {/* ══════ Header Bar ══════ */}
-      <header className="flex-shrink-0 flex items-center gap-4 bg-surface-elevated/80 backdrop-blur-xl border border-border p-3.5 rounded-2xl shadow-card flex-wrap">
+      <header className="flex-shrink-0 flex items-center gap-3 bg-surface-elevated border border-border p-3 rounded-lg flex-wrap">
         {/* Search */}
         <div className="flex-1 min-w-[200px] max-w-xl relative">
           <svg
@@ -101,7 +101,7 @@ function DiscoverPage() {
             value={searchInput}
             onChange={handleSearchChange}
             placeholder="ابحث عن غرفة..."
-            className="w-full bg-surface-muted/50 border border-border rounded-xl py-2.5 ps-10 pe-4 text-text-primary placeholder-text-muted focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-all text-sm"
+            className="w-full bg-surface-muted border border-border rounded-md py-2.5 ps-10 pe-4 text-text-primary placeholder-text-muted focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-all text-sm"
           />
         </div>
 
@@ -111,7 +111,7 @@ function DiscoverPage() {
             <button
               key={opt.label}
               onClick={() => handleSort(i)}
-              className={`px-3.5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-3.5 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-all cursor-pointer ${
                 activeSort === i
                   ? "bg-brand-600 text-white shadow-sm"
                   : "border border-border text-text-secondary hover:bg-surface-muted hover:text-text-primary"
@@ -129,7 +129,7 @@ function DiscoverPage() {
             useRoomsStore.getState().toggleMyRooms(nextVal);
             if (nextVal) setSearchInput(""); // Clear search visually when switching
           }}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all shadow-sm cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-md text-sm font-bold transition-all cursor-pointer ${
             filters.myRoomsOnly
               ? "bg-brand-100 text-brand-700 border border-brand-200"
               : "bg-surface-elevated text-text-secondary border border-border hover:bg-surface-muted hover:text-text-primary"
@@ -154,7 +154,7 @@ function DiscoverPage() {
         {/* Create room button */}
         <Link
           to={ROUTES.CREATE_ROOM}
-          className="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm hover:shadow-md transition-all cursor-pointer ms-auto"
+          className="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-md text-sm font-bold flex items-center gap-2 transition-all cursor-pointer ms-auto"
         >
           <svg
             className="w-4.5 h-4.5"
@@ -196,7 +196,7 @@ function DiscoverPage() {
             {[...Array(8)].map((_, i) => (
               <div
                 key={i}
-                className="rounded-2xl overflow-hidden border border-border bg-surface-elevated animate-pulse h-[380px]"
+                className="rounded-lg overflow-hidden border border-border bg-surface-elevated animate-pulse h-[380px]"
               >
                 <div className="h-44 bg-surface-muted" />
                 <div className="p-4 space-y-3">
@@ -264,7 +264,7 @@ function DiscoverPage() {
             <button
               onClick={handlePrevPage}
               disabled={!meta.hasPreviousPage}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium border border-border text-text-secondary hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium border border-border text-text-secondary hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
               <svg
                 className="w-4 h-4 rotate-180"
@@ -289,7 +289,7 @@ function DiscoverPage() {
             <button
               onClick={handleNextPage}
               disabled={!meta.hasNextPage}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium border border-border text-text-secondary hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium border border-border text-text-secondary hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
               التالي
               <svg

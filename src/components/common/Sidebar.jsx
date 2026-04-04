@@ -18,13 +18,13 @@ function SidebarItem({ to, onClick, icon, label, isActive, badge }) {
         </span>
       )}
       {/* Tooltip */}
-      <span className="absolute start-full ms-3 px-2.5 py-1 rounded-lg bg-surface-elevated border border-border text-xs font-medium text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-elevated z-[100]">
+      <span className="absolute start-full ms-3 px-2.5 py-1 rounded-md bg-surface-elevated border border-border text-xs font-medium text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-elevated z-[100]">
         {label}
       </span>
     </>
   );
 
-  const classes = `relative group w-11 h-11 flex items-center justify-center rounded-xl transition-all ${isActive
+  const classes = `relative group w-11 h-11 flex items-center justify-center rounded-md transition-all ${isActive
       ? "bg-brand-600/15 text-brand-600 border border-brand-500/30"
       : "hover:bg-surface-muted text-text-muted hover:text-text-primary"
     }`;
@@ -123,7 +123,7 @@ function Sidebar() {
   ];
 
   return (
-    <aside className="hidden md:flex w-[72px] flex-shrink-0 flex-col items-center gap-5 py-5 bg-surface-elevated/80 backdrop-blur-xl border border-border rounded-2xl shadow-elevated z-40">
+    <aside className="hidden md:flex w-[72px] flex-shrink-0 flex-col items-center gap-5 py-5 bg-surface-elevated border border-border rounded-lg z-40">
       {/* Logo */}
       <Link
         to={ROUTES.HOME}
@@ -133,7 +133,7 @@ function Sidebar() {
         <img
           src="/pwa/StudyShell.png"
           alt={APP_NAME}
-          className="w-10 h-10 rounded-xl object-contain"
+          className="w-10 h-10 rounded-lg object-contain"
         />
       </Link>
 
@@ -165,7 +165,7 @@ function Sidebar() {
           <button
             onClick={promptInstall}
             title="تثبيت التطبيق"
-            className="group relative w-11 h-11 flex items-center justify-center rounded-xl text-text-muted hover:bg-brand-600/10 hover:text-brand-600 transition-all cursor-pointer"
+            className="group relative w-11 h-11 flex items-center justify-center rounded-md text-text-muted hover:bg-brand-600/10 hover:text-brand-600 transition-all cursor-pointer"
           >
             <svg
               className="w-5 h-5"
@@ -180,7 +180,7 @@ function Sidebar() {
                 d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
               />
             </svg>
-            <span className="absolute start-full ms-3 px-2.5 py-1 rounded-lg bg-surface-elevated border border-border text-xs font-medium text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-elevated z-[100]">
+            <span className="absolute start-full ms-3 px-2.5 py-1 rounded-md bg-surface-elevated border border-border text-xs font-medium text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-elevated z-[100]">
               تثبيت التطبيق
             </span>
           </button>
@@ -193,7 +193,7 @@ function Sidebar() {
         <button
           onClick={handleLogout}
           title="خروج"
-          className="group relative w-11 h-11 flex items-center justify-center rounded-xl text-text-muted hover:bg-error/10 hover:text-error transition-all cursor-pointer"
+          className="group relative w-11 h-11 flex items-center justify-center rounded-md text-text-muted hover:bg-error/10 hover:text-error transition-all cursor-pointer"
         >
           <svg
             className="w-5 h-5"
@@ -208,7 +208,7 @@ function Sidebar() {
               d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
             />
           </svg>
-          <span className="absolute start-full ms-3 px-2.5 py-1 rounded-lg bg-surface-elevated border border-border text-xs font-medium text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-elevated z-[100]">
+          <span className="absolute start-full ms-3 px-2.5 py-1 rounded-md bg-surface-elevated border border-border text-xs font-medium text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-elevated z-[100]">
             خروج
           </span>
         </button>
@@ -231,7 +231,7 @@ function Sidebar() {
               </span>
             </div>
           )}
-          <span className="absolute start-full ms-3 px-2.5 py-1 rounded-lg bg-surface-elevated border border-border text-xs font-medium text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-elevated z-[100]">
+          <span className="absolute start-full ms-3 px-2.5 py-1 rounded-md bg-surface-elevated border border-border text-xs font-medium text-text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-elevated z-[100]">
             {user?.nickName || user?.username || "المستخدم"}
           </span>
         </Link>

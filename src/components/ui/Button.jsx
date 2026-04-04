@@ -13,7 +13,7 @@ function Button({
   ...props
 }) {
   const baseStyles =
-    "inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus-ring cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
+    "inline-flex items-center justify-center font-medium rounded-md transition-all duration-200 focus-ring cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variants = {
     primary: "bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800",

@@ -112,12 +112,12 @@ function LeaderboardPage() {
 
         {/* ═══════ Period Tabs — Glass Pill ═══════ */}
         <nav className="flex justify-center">
-          <div className="bg-surface-elevated/60 backdrop-blur-xl border border-border p-1 rounded-xl flex gap-1 shadow-card">
+          <div className="bg-surface-elevated border border-border p-1 rounded-lg flex gap-1">
             {PERIODS.map((p) => (
               <button
                 key={p.key}
                 onClick={() => setPeriod(p.key)}
-                className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                className={`px-5 py-2 rounded-md text-sm font-semibold transition-all cursor-pointer ${
                   period === p.key
                     ? "bg-brand-600 text-white shadow-md"
                     : "text-text-secondary hover:bg-surface-muted hover:text-text-primary"
@@ -147,7 +147,7 @@ function LeaderboardPage() {
               {[...Array(6)].map((_, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-surface-elevated/60 backdrop-blur-xl border border-border animate-pulse"
+                  className="flex items-center gap-4 px-5 py-4 rounded-lg bg-surface-elevated border border-border animate-pulse"
                 >
                   <div className="w-8 h-8 rounded-lg bg-surface-muted" />
                   <div className="w-10 h-10 rounded-full bg-surface-muted" />
@@ -196,12 +196,12 @@ function LeaderboardPage() {
             return (
               <div
                 key={entry.rank}
-                className={`flex items-center px-3 md:px-5 gap-2 md:gap-0 rounded-2xl transition-all ${
+                className={`flex items-center px-3 md:px-5 gap-2 md:gap-0 rounded-lg transition-all ${
                   isMe
-                    ? "py-3 md:py-4 bg-brand-600/5 dark:bg-brand-600/10 border border-brand-500/20 scale-[1.02] shadow-elevated"
+                    ? "py-3 md:py-4 bg-brand-600/5 dark:bg-brand-600/10 border border-brand-500/20"
                     : isFirst
-                      ? "py-3 md:py-4 bg-surface-elevated/60 backdrop-blur-xl border border-brand-500/30 ring-2 ring-brand-500/20"
-                      : "py-2.5 md:py-3.5 bg-surface-elevated/60 backdrop-blur-xl border border-border"
+                      ? "py-3 md:py-4 bg-surface-elevated border border-brand-500/30"
+                      : "py-2.5 md:py-3.5 bg-surface-elevated border border-border"
                 }`}
               >
                 {/* Rank */}
@@ -289,7 +289,7 @@ function LeaderboardPage() {
             <div className="flex justify-center pt-4">
               <button
                 onClick={loadMore}
-                className="px-6 py-2.5 rounded-xl border border-border text-sm font-medium text-text-secondary hover:bg-surface-muted hover:text-text-primary transition-all cursor-pointer"
+                className="px-6 py-2.5 rounded-md border border-border text-sm font-medium text-text-secondary hover:bg-surface-muted hover:text-text-primary transition-all cursor-pointer"
               >
                 عرض المزيد
               </button>

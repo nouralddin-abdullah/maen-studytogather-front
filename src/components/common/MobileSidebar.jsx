@@ -74,7 +74,7 @@ function MobileSidebar() {
   return (
     <>
       {/* Fixed Bottom Navigation Bar */}
-      <div className="fixed bottom-0 start-0 w-full z-50 md:hidden bg-surface-elevated/95 backdrop-blur-3xl border-t border-border shadow-[0_-8px_30px_rgba(0,0,0,0.08)] pb-safe">
+      <div className="fixed bottom-0 start-0 w-full z-50 md:hidden bg-surface-elevated border-t border-border pb-safe">
         {/* Container spanning full width */}
         <div className="flex items-center justify-around px-2 pt-2 pb-1.5 w-full max-w-md mx-auto">
           
@@ -122,21 +122,20 @@ function MobileSidebar() {
           className={`fixed inset-0 z-50 md:hidden transition-opacity duration-300 ${isMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
         >
           {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+          <div className="absolute inset-0 bg-black/50"
             onClick={() => setIsMenuOpen(false)}
           />
           
           {/* Bottom Sheet */}
           <div 
-            className={`absolute bottom-0 left-0 right-0 bg-surface-elevated rounded-t-3xl border-t border-border shadow-2xl transition-transform duration-300 delay-75 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col pt-2 pb-safe ${isMenuOpen ? "translate-y-0" : "translate-y-full"}`}
+            className={`absolute bottom-0 left-0 right-0 bg-surface-elevated rounded-t-xl border-t border-border shadow-elevated transition-transform duration-300 delay-75 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col pt-2 pb-safe ${isMenuOpen ? "translate-y-0" : "translate-y-full"}`}
           >
             <div className="w-12 h-1.5 bg-border rounded-full mx-auto mb-6" />
             
             <div className="px-6 pb-8 flex flex-col gap-2">
               <h3 className="text-sm font-bold text-text-muted uppercase tracking-wider mb-2">إعدادات إضافية</h3>
               
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-surface-muted">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-surface-muted">
                 <span className="font-medium text-text-primary">المظهر</span>
                 <ThemeToggle />
               </div>
@@ -147,7 +146,7 @@ function MobileSidebar() {
                     promptInstall();
                     setIsMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 p-4 rounded-2xl bg-brand-500/10 text-brand-600 hover:bg-brand-500/20 transition-colors text-start"
+                  className="w-full flex items-center gap-3 p-4 rounded-lg bg-brand-500/10 text-brand-600 hover:bg-brand-500/20 transition-colors text-start"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25" />
@@ -161,7 +160,7 @@ function MobileSidebar() {
                   handleLogout();
                   setIsMenuOpen(false);
                 }}
-                className="w-full flex items-center gap-3 p-4 rounded-2xl bg-error/10 text-error hover:bg-error/20 transition-colors text-start mt-2"
+                className="w-full flex items-center gap-3 p-4 rounded-lg bg-error/10 text-error hover:bg-error/20 transition-colors text-start mt-2"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />

@@ -8,20 +8,14 @@ import MobileSidebar from "@/components/common/MobileSidebar";
  */
 function DiscoverLayout() {
   return (
-    <div className="h-screen w-screen overflow-hidden flex bg-surface relative">
-      {/* Background decorations */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[10%] -end-[10%] w-[35%] h-[35%] bg-brand-500/8 dark:bg-brand-500/5 blur-[100px] rounded-full" />
-        <div className="absolute -bottom-[10%] -start-[10%] w-[35%] h-[35%] bg-brand-400/6 dark:bg-brand-400/4 blur-[100px] rounded-full" />
-      </div>
-
+    <div className="h-screen w-screen overflow-hidden flex bg-surface">
       {/* Content layer */}
-      <div className="relative z-10 flex h-full w-full p-4 md:pb-4 pb-[84px] gap-4">
+      <div className="flex h-full w-full p-3 md:pb-3 pb-[84px] gap-3">
         {/* Sidebar (Desktop) */}
         <Sidebar />
 
         {/* Main content */}
-        <main className="flex-1 flex flex-col gap-4 overflow-hidden relative">
+        <main className="flex-1 flex flex-col gap-3 overflow-hidden">
           <Outlet />
         </main>
 

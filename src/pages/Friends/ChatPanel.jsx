@@ -201,7 +201,7 @@ const ChatBubble = memo(function ChatBubble({
                   className="w-9 h-9 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-full bg-brand-600 flex items-center justify-center">
                   <span className="text-xs font-bold text-white">
                     {(friend.nickName || friend.username || "?").charAt(0)}
                   </span>
@@ -230,7 +230,7 @@ const ChatBubble = memo(function ChatBubble({
           {/* Message bubble */}
           <div
             className={`
-              relative group/bubble px-3.5 py-2 rounded-2xl leading-relaxed shadow-sm max-w-[85vw] sm:max-w-md
+              relative group/bubble px-3.5 py-2 rounded-lg leading-relaxed max-w-[85vw] sm:max-w-md
               ${isMine
                 ? "bg-brand-600 text-white"
                 : "bg-surface-muted text-text-primary border border-border"}
@@ -313,7 +313,7 @@ function TypingIndicator({ friend }) {
           </div>
         )}
       </div>
-      <div className="flex items-center gap-1 h-7 bg-surface-muted/80 backdrop-blur-sm px-3 rounded-full border border-border/50">
+      <div className="flex items-center gap-1 h-7 bg-surface-muted px-3 rounded-full border border-border">
         <span className="w-1.5 h-1.5 rounded-full bg-text-muted typing-dot-1" />
         <span className="w-1.5 h-1.5 rounded-full bg-text-muted typing-dot-2" />
         <span className="w-1.5 h-1.5 rounded-full bg-text-muted typing-dot-3" />
@@ -508,8 +508,8 @@ export default function ChatPanel({
   /* ── No friend selected ── */
   if (!friend) {
     return (
-      <div className={`flex-1 flex flex-col items-center justify-center bg-surface-elevated/60 backdrop-blur-xl border border-border rounded-2xl shadow-card ${className}`}>
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-brand-500/20 to-brand-600/10 flex items-center justify-center mb-5">
+      <div className={`flex-1 flex flex-col items-center justify-center bg-surface-elevated border border-border rounded-lg ${className}`}>
+        <div className="w-20 h-20 rounded-full bg-surface-muted flex items-center justify-center mb-5">
           <svg
             className="w-10 h-10 text-brand-500/60"
             fill="none"
@@ -541,9 +541,9 @@ export default function ChatPanel({
   }
 
   return (
-    <div className={`flex-1 flex flex-col bg-surface-elevated/60 backdrop-blur-xl border border-border rounded-2xl shadow-card overflow-hidden ${className}`}>
+    <div className={`flex-1 flex flex-col bg-surface-elevated border border-border rounded-lg overflow-hidden ${className}`}>
       {/* ════════ Header ════════ */}
-      <div className="flex items-center gap-3 px-3 md:px-5 py-3 border-b border-border bg-surface-elevated/90 backdrop-blur-sm flex-shrink-0">
+      <div className="flex items-center gap-3 px-3 md:px-5 py-3 border-b border-border bg-surface-elevated flex-shrink-0">
         <button
           onClick={onBack}
           className="md:hidden flex items-center justify-center w-8 h-8 rounded-full text-text-muted hover:bg-surface-muted transition-colors cursor-pointer flex-shrink-0"
@@ -560,7 +560,7 @@ export default function ChatPanel({
               className="w-9 h-9 rounded-full object-cover ring-2 ring-border"
             />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center ring-2 ring-border">
+            <div className="w-9 h-9 rounded-full bg-brand-600 flex items-center justify-center ring-2 ring-border">
               <span className="text-xs font-bold text-white">
                 {(friend.nickName || friend.username || "?").charAt(0)}
               </span>
@@ -601,7 +601,7 @@ export default function ChatPanel({
                   className="w-24 h-24 rounded-full object-cover ring-4 ring-surface-muted"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center ring-4 ring-surface-muted">
+                <div className="w-24 h-24 rounded-full bg-brand-600 flex items-center justify-center ring-4 ring-surface-muted">
                   <span className="text-3xl font-bold text-white">
                     {(friend.nickName || friend.username || "?").charAt(0)}
                   </span>
@@ -696,7 +696,7 @@ export default function ChatPanel({
 
       {/* ════════ Input ════════ */}
       <div className="px-4 pb-3 pt-2 flex-shrink-0">
-        <div className="relative flex items-end bg-surface-muted/80 rounded-2xl border border-border focus-within:border-brand-500/40 focus-within:shadow-[0_0_0_3px_rgba(29,110,241,0.08)] transition-all">
+        <div className="relative flex items-end bg-surface-muted rounded-lg border border-border focus-within:border-brand-500/40 transition-all">
           <textarea
             ref={inputRef}
             value={input}
@@ -710,7 +710,7 @@ export default function ChatPanel({
           <button
             onClick={handleSend}
             disabled={!input.trim()}
-            className={`w-9 h-9 flex items-center justify-center rounded-xl mb-1 me-1 transition-all flex-shrink-0 cursor-pointer ${
+            className={`w-9 h-9 flex items-center justify-center rounded-md mb-1 me-1 transition-all flex-shrink-0 cursor-pointer ${
               input.trim()
                 ? "bg-brand-600 text-white shadow-sm hover:bg-brand-500 active:scale-95"
                 : "text-text-muted/30 cursor-not-allowed"

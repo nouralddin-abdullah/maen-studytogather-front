@@ -128,13 +128,13 @@ function RoomCard({ room, onJoin, onDeleteSuccess }) {
   };
 
   return (
-    <div className="group relative rounded-2xl overflow-hidden border border-border hover:border-brand-500/50 bg-surface-elevated transition-all duration-300 hover:shadow-card-hover flex flex-col h-[380px]">
+    <div className="group relative rounded-lg overflow-hidden border border-border hover:border-border-strong bg-surface-elevated transition-all duration-200 flex flex-col h-[380px]">
       {/* ── Wallpaper ── */}
       <div className="relative h-44 overflow-hidden">
         <img
           src={wallpaper}
           alt={name}
-          className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+          className="w-full h-full object-cover"
           loading="lazy"
         />
         {/* Gradient overlay */}
@@ -144,7 +144,7 @@ function RoomCard({ room, onJoin, onDeleteSuccess }) {
         {(() => {
           const phase = PHASE_CONFIG[currentPhase] || PHASE_CONFIG.IDLE;
           return (
-            <div className="absolute top-3 start-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
+            <div className="absolute top-3 start-3 flex items-center gap-1.5 bg-black/60 px-2.5 py-1 rounded-md border border-white/10">
               <span className="relative flex h-2 w-2">
                 {phase.ping && (
                   <span
@@ -165,7 +165,7 @@ function RoomCard({ room, onJoin, onDeleteSuccess }) {
         {/* Ambient sound badge */}
         {ambientSound && (
           <div
-            className={`absolute top-3 end-3 ${ambientBg} backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold text-white shadow-lg`}
+            className={`absolute top-3 end-3 bg-surface-muted/90 dark:bg-white/10 px-2.5 py-1 rounded-md text-[10px] font-bold text-text-secondary dark:text-white/80`}
           >
             {ambientLabel}
           </div>
@@ -175,7 +175,7 @@ function RoomCard({ room, onJoin, onDeleteSuccess }) {
       {/* ── Content ── */}
       <div className="p-4 flex flex-col flex-1">
         {/* Room name */}
-        <h3 className="font-display text-lg font-bold text-text-primary group-hover:text-brand-600 transition-colors mb-1 line-clamp-1">
+        <h3 className="font-display text-lg font-bold text-text-primary transition-colors mb-1 line-clamp-1">
           {name}
         </h3>
 
@@ -213,7 +213,7 @@ function RoomCard({ room, onJoin, onDeleteSuccess }) {
           </div>
 
           {/* Pomodoro config */}
-          <div className="flex items-center gap-1.5 text-success bg-success/10 border border-success/20 px-2.5 py-1 rounded-lg">
+          <div className="flex items-center gap-1.5 text-text-secondary bg-surface-muted px-2.5 py-1 rounded-md">
             <svg
               className="w-3.5 h-3.5"
               fill="none"
@@ -260,7 +260,7 @@ function RoomCard({ room, onJoin, onDeleteSuccess }) {
             {isHost && (
               <button
                 onClick={handleDelete}
-                className="p-1.5 rounded-xl text-error/70 hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
+                className="p-1.5 rounded-md text-error/70 hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
                 title="حذف الغرفة"
               >
                 <svg
@@ -280,7 +280,7 @@ function RoomCard({ room, onJoin, onDeleteSuccess }) {
             )}
             <button
               onClick={() => onJoin?.(room)}
-              className="flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white px-4 py-1.5 rounded-xl text-sm font-bold transition-colors shadow-sm hover:shadow-md cursor-pointer"
+              className="flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white px-4 py-1.5 rounded-md text-sm font-bold transition-colors cursor-pointer"
             >
               {hasPassCode && (
                 <svg

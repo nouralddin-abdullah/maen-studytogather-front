@@ -50,32 +50,32 @@
     0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
 
   /* Border Radius */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.25rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 0.75rem;
 }
 
 /* ===========================
    Dark Mode Overrides
    =========================== */
 .dark {
-  --color-surface: #0f1117;
-  --color-surface-elevated: #1a1d25;
-  --color-surface-muted: #23272f;
-  --color-border: #2e333d;
-  --color-border-strong: #3d4350;
-  --color-text-primary: #eef0f4;
-  --color-text-secondary: #9ba3b0;
-  --color-text-muted: #6b7280;
+  --color-surface: #0d1117;
+  --color-surface-elevated: #161b22;
+  --color-surface-muted: #21262d;
+  --color-border: #30363d;
+  --color-border-strong: #484f58;
+  --color-text-primary: #e6edf3;
+  --color-text-secondary: #8b949e;
+  --color-text-muted: #6e7681;
 
   --shadow-card:
-    0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+    0 1px 0 0 rgba(0, 0, 0, 0.4);
   --shadow-card-hover:
-    0 4px 12px 0 rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+    0 1px 0 0 rgba(0, 0, 0, 0.4);
   --shadow-elevated:
-    0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 /* ===========================
