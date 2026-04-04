@@ -465,39 +465,8 @@
   opacity: 0.5;
 }
 
-/* ===========================
-   Fullscreen Compact Layout
-   =========================== */
-
-/* Two-column split for fullscreen compact mode */
-.fs-compact-grid {
-  flex: 1;
-  width: 100%;
-  max-height: 50%;
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-}
-
-@media (min-width: 768px) {
-  .fs-compact-grid {
-    flex: 0 0 38%;
-    max-width: 38%;
-    max-height: none;
-    height: 100%;
-  }
-}
 
 
-.fs-compact-panels {
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  overflow-y: auto;
-}
 
 /* ── Compact tile variants ── */
 

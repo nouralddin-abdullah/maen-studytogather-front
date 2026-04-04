@@ -207,7 +207,8 @@ function RoomPageInner() {
     emitTyping,
   } = useRoomChat(room?.roomId, user?.avatar);
 
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile(1000);
+
   const [showVideoGrid, setShowVideoGrid] = useState(false);
   const [showPublishMenu, setShowPublishMenu] = useState(false);
   const [videoLayoutMode, setVideoLayoutMode] = useState("gallery");
@@ -243,9 +244,7 @@ function RoomPageInner() {
     prevTrackCount.current = trackCount;
   }, [trackCount]);
 
-  // ── Compact video layout (for 3+ streams opt-in) ──
-  const [compactVideoLayout, setCompactVideoLayout] = useState(false);
-  const [showFsGoals, setShowFsGoals] = useState(true);
+
   const [isNotifsCollapsed, setIsNotifsCollapsed] = useState(false);
 
   // ── Local state ──
@@ -647,7 +646,8 @@ function RoomPageInner() {
 
                   {/* Big timer */}
                   <div
-                    className={`font-mono font-bold text-white tabular-nums tracking-[0.1em] leading-none text-[5rem] ${phase === TIMER_PHASES.FOCUS
+                    style={{ fontSize: 'clamp(3rem, 12vw, 5rem)' }}
+                    className={`font-mono font-bold text-white tabular-nums tracking-[0.1em] leading-none ${phase === TIMER_PHASES.FOCUS
                       ? "drop-shadow-[0_0_20px_rgba(16,185,129,.35)]"
                       : phase === TIMER_PHASES.BREAK
                         ? "drop-shadow-[0_0_20px_rgba(245,158,11,.35)]"
@@ -2000,11 +2000,6 @@ function RoomPageInner() {
       {isFullscreen &&
         (() => {
           const fsGridActive = showVideoGrid;
-          // Compact mode: always for 1-2 streams, opt-in for 3+ (Desktop only)
-          const useCompactGrid =
-            !isMobile && fsGridActive &&
-            (trackCount <= 2 || (trackCount >= 3 && compactVideoLayout));
-          const useFullGrid = fsGridActive && !useCompactGrid;
 
           return (
             <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center animate-fade-in">
@@ -2020,7 +2015,7 @@ function RoomPageInner() {
               {/* Dark overlay for readability */}
               <div className="absolute inset-0 z-[1] bg-black/50 backdrop-blur-[2px]" />
 
-              {/* Top-start buttons — exit + video grid toggle + publish + compact toggle */}
+              {/* Top-start buttons — exit + video grid toggle + publish */}
               <div className="absolute top-6 start-6 z-[3] flex items-center gap-2">
                 <button
                   onClick={() => setIsFullscreen(false)}
@@ -2119,233 +2114,14 @@ function RoomPageInner() {
                   </svg>
                 </button>
 
-                {/* Compact layout toggle — only visible for 3+ streams on Desktop */}
-                {!isMobile && fsGridActive && trackCount >= 3 && (
-                  <button
-                    onClick={() => setCompactVideoLayout((v) => !v)}
-                    className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer border border-white/10 ${compactVideoLayout
-                      ? `${themeCfg.accent} text-white`
-                      : "bg-white/10 hover:bg-white/20 text-white/70 hover:text-white"
-                      }`}
-                    title={
-                      compactVideoLayout
-                        ? "عرض كامل الشاشة"
-                        : "عرض مصغّر مع المؤقت"
-                    }
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z"
-                      />
-                    </svg>
-                  </button>
-                )}
               </div>
 
-              {/* ═══════════════════════════════════
-             COMPACT LAYOUT — 1-2 streams, or 3+ opt-in
-             Video on the left (end in RTL), panels on the right (start in RTL)
-             ═══════════════════════════════════ */}
-              {useCompactGrid && (
-                <div className="absolute inset-0 z-[2] flex flex-col md:flex-row-reverse pt-16 md:pt-20 pb-[120px] md:pb-8 px-4 md:px-6 gap-4 md:gap-6 animate-fade-in">
-                  {/* Left side (end in RTL): Video grid — compact */}
-                  <div className="fs-compact-grid">
-                    <ResizableVideoWrapper>
-                      <VideoGrid
-                        layoutMode={videoLayoutMode}
-                        pinnedIndex={videoPinnedIndex}
-                        onPinnedIndexChange={setVideoPinnedIndex}
-                        gap={8}
-                        compact
-                        maxCapacity={room.maxCapacity || 6}
-                        participants={participants}
-                        localIdentity={user?.id}
-                        onPublishCamera={toggleCamera}
-                        onPublishScreen={toggleScreenShare}
-                        isCameraOn={isCameraOn}
-                        isScreenOn={isScreenOn}
-                      />
-                    </ResizableVideoWrapper>
-                  </div>
 
-                  {/* Right side (start in RTL): Timer + Goals */}
-                  <div
-                    className={`fs-compact-panels ${(!showFsGoals || isMobile) ? "justify-center md:justify-center" : ""}`}
-                  >
-                    {/* Timer */}
-                    <div className="flex flex-col items-center gap-3 py-4">
-                      {/* Timer + phase dot inline */}
-                      <div className="flex items-center gap-3">
-                        <span className="relative flex h-3.5 w-3.5">
-                          {phaseStyle.ping && (
-                            <span
-                              className={`animate-ping absolute inline-flex h-full w-full rounded-full ${phaseStyle.dot} opacity-75`}
-                            />
-                          )}
-                          <span
-                            className={`relative inline-flex rounded-full h-3.5 w-3.5 ${phaseStyle.dot}`}
-                          />
-                        </span>
-                        <div
-                          className={`font-mono font-bold text-white tabular-nums leading-none tracking-[0.12em] ${showFsGoals ? "text-6xl md:text-8xl" : "text-7xl md:text-[10rem]"
-                            } ${phase === TIMER_PHASES.FOCUS
-                              ? "drop-shadow-[0_0_16px_rgba(16,185,129,.3)]"
-                              : phase === TIMER_PHASES.BREAK
-                                ? "drop-shadow-[0_0_16px_rgba(245,158,11,.3)]"
-                                : ""
-                            }`}
-                        >
-                          {formatTime(timeLeft)}
-                        </div>
-                      </div>
-
-                      {/* Host controls */}
-                      <div className="flex items-center gap-3 mt-1">
-                        {isHost &&
-                          (phase === TIMER_PHASES.IDLE ||
-                            phase === TIMER_PHASES.PAUSED) && (
-                            <button
-                              onClick={
-                                phase === TIMER_PHASES.IDLE
-                                  ? startTimer
-                                  : resumeTimer
-                              }
-                              disabled={isTimerLoading}
-                              className="flex items-center justify-center text-emerald-400 hover:text-emerald-300 transition-all cursor-pointer disabled:opacity-50"
-                              title={
-                                phase === TIMER_PHASES.IDLE
-                                  ? "ابدأ الجلسة"
-                                  : "استئناف"
-                              }
-                            >
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"
-                                />
-                              </svg>
-                            </button>
-                          )}
-                        {isHost && phase === TIMER_PHASES.FOCUS && (
-                          <button
-                            onClick={pauseTimer}
-                            disabled={isTimerLoading}
-                            className="flex items-center justify-center text-orange-400 hover:text-orange-300 transition-all cursor-pointer disabled:opacity-50"
-                            title="إيقاف مؤقت"
-                          >
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M15.75 5.25v13.5m-7.5-13.5v13.5"
-                              />
-                            </svg>
-                          </button>
-                        )}
-                        {isHost && phase === TIMER_PHASES.PAUSED && (
-                          <button
-                            onClick={restartTimer}
-                            disabled={isTimerLoading}
-                            className="flex items-center justify-center text-white/60 hover:text-white transition-all cursor-pointer disabled:opacity-50"
-                            title="إعادة البدء"
-                          >
-                            <svg
-                              className="w-4.5 h-4.5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"
-                              />
-                            </svg>
-                          </button>
-                        )}
-                        {phase === TIMER_PHASES.BREAK && (
-                          <span className="text-yellow-300/80 text-lg">☕</span>
-                        )}
-                        {!isHost && phase === TIMER_PHASES.IDLE && (
-                          <p className="text-white/30 text-xs">
-                            في انتظار المضيف
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Goals panel — visible by default, toggleable */}
-                    {!isMobile && (
-                      <div className="flex items-center justify-between px-1">
-                        <button
-                          onClick={() => setShowFsGoals((v) => !v)}
-                          className="text-[11px] text-white/40 hover:text-white/70 transition-colors cursor-pointer flex items-center gap-1.5"
-                        >
-                          <svg
-                            className={`w-3 h-3 transition-transform ${showFsGoals ? "rotate-180" : ""}`}
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M4.5 15.75l7.5-7.5 7.5 7.5"
-                            />
-                          </svg>
-                          {showFsGoals ? "إخفاء الأهداف" : "عرض الأهداف"}
-                        </button>
-                      </div>
-                    )}
-
-                    {!isMobile && showFsGoals && (
-                      <div className="flex-1 min-h-0 animate-fade-in">
-                        <GoalsPanel
-                          glassClass={glassClass}
-                          themeCfg={themeCfg}
-                          userId={user?.id}
-                          participants={participants}
-                          roomGoals={roomGoals}
-                          isGoalsLoading={isGoalsLoading}
-                          createGoal={createGoal}
-                          toggleGoal={toggleGoal}
-                          updateGoalTitle={updateGoalTitle}
-                          deleteGoal={deleteGoal}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
 
               {/* ═══════════════════════════════════
-             FULL GRID LAYOUT — 3+ streams default
-             Unchanged from original behavior
+             VIDEO GRID LAYOUT
              ═══════════════════════════════════ */}
-              {useFullGrid && (
+              {fsGridActive && (
                 <div className="absolute inset-0 z-[2] p-6 pt-20 pb-28 animate-fade-in flex items-center justify-center">
                   <ResizableVideoWrapper>
                     <VideoGrid
@@ -2365,18 +2141,18 @@ function RoomPageInner() {
                 </div>
               )}
 
-              {/* Timer — centered when no grid, bottom pill when full grid */}
-              {!useCompactGrid && (
+              {/* Timer — centered when no grid, bottom pill when grid active */}
+              {
                 <div
                   className={
-                    useFullGrid
+                    fsGridActive
                       ? "absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-[3] flex flex-col md:flex-row items-center gap-2 md:gap-3 px-6 py-2 md:py-3 md:rounded-full bg-transparent md:bg-black/60 backdrop-blur-none md:backdrop-blur-md border-none md:border md:border-white/10 select-none w-full md:w-auto"
                       : "relative z-[2] flex flex-col md:flex-row items-center justify-center gap-4 select-none w-full"
                   }
                 >
                   {/* Phase dot */}
                   <span
-                    className={`relative flex ${useFullGrid ? "h-2.5 w-2.5" : "h-4 w-4"}`}
+                    className={`relative flex ${fsGridActive ? "h-2.5 w-2.5" : "h-4 w-4"}`}
                   >
                     {phaseStyle.ping && (
                       <span
@@ -2384,21 +2160,22 @@ function RoomPageInner() {
                       />
                     )}
                     <span
-                      className={`relative inline-flex rounded-full ${useFullGrid ? "h-2.5 w-2.5" : "h-4 w-4"} ${phaseStyle.dot}`}
+                      className={`relative inline-flex rounded-full ${fsGridActive ? "h-2.5 w-2.5" : "h-4 w-4"} ${phaseStyle.dot}`}
                     />
                   </span>
 
                   {/* Timer text */}
                   <div
-                    className={`font-mono font-bold text-white tabular-nums leading-none text-center ${useFullGrid
+                    style={{ fontSize: fsGridActive ? undefined : 'clamp(3.5rem, 18vw, 14rem)' }}
+                    className={`font-mono font-bold text-white tabular-nums leading-none text-center ${fsGridActive
                       ? "text-5xl md:text-3xl tracking-[0.1em] drop-shadow-[0_0_12px_rgba(0,0,0,0.8)] md:drop-shadow-none"
-                      : "text-6xl sm:text-7xl md:text-[14rem] tracking-[0.15em]"
+                      : "tracking-[0.15em]"
                       }`}
                   >
                     {formatTime(timeLeft)}
                   </div>
                 </div>
-              )}
+              }
             </div>
           );
         })()}
