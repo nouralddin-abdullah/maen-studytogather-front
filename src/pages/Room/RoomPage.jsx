@@ -19,7 +19,7 @@ import {
 import { LiveKitRoom } from "@livekit/components-react";
 import useAmbientSound from "@/hooks/useAmbientSound";
 import useLiveKit from "@/hooks/useLiveKit";
-import useRoomChat from "@/hooks/useRoomChat";
+
 import useIsMobile from "@/hooks/useIsMobile";
 
 /* ═══════════════════════════════════════════════════
@@ -185,6 +185,11 @@ function RoomPageInner() {
     updateGoalTitle,
     deleteGoal,
     livekitToken,
+    chatMessages,
+    isChatConnected,
+    typingUsers,
+    sendChatMessage,
+    emitTyping,
   } = useRoomStore();
 
   // ── LiveKit video ──
@@ -198,14 +203,8 @@ function RoomPageInner() {
     toggleScreenShare,
   } = useLiveKit();
 
-  // ── Room chat (Socket.IO) ──
-  const {
-    messages: chatMessages,
-    sendMessage,
-    isChatConnected,
-    typingUsers,
-    emitTyping,
-  } = useRoomChat(room?.roomId, user?.avatar);
+  // Chat send wrapper — attaches user avatar
+  const sendMessage = (text) => sendChatMessage(text, user?.avatar);
 
   const isMobile = useIsMobile(1000);
 
@@ -300,9 +299,9 @@ function RoomPageInner() {
 
   useEffect(() => {
     return () => {
-      // Disconnect SSE when navigating away.
-      // We do NOT call leave() — the backend handles disconnect via SSE close.
-      useRoomStore.getState().disconnectSSE();
+      // Disconnect WS when navigating away.
+      // We do NOT call leave() — the backend handles disconnect via WS close.
+      useRoomStore.getState().disconnectWS();
     };
   }, []);
 

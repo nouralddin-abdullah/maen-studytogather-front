@@ -1,10 +1,13 @@
 import { create } from "zustand";
-import { EventSourcePolyfill } from "event-source-polyfill";
+import { io } from "socket.io-client";
 import { roomService, goalService } from "@/services";
 
 /**
- * Active room store — manages the current study room session (join, SSE, leave).
- * Separate from useRoomsStore which handles the discover page listing.
+ * Active room store — manages the current study room session.
+ *
+ * Uses a single Socket.IO connection to `/api/room` for:
+ *  - Room events (USER_JOINED, PHASE_CHANGED, etc.)  — replaces SSE
+ *  - Chat messages & typing indicators               — replaces `/api/room-chat`
  */
 const useRoomStore = create((set, get) => ({
   // ── Room data ──
@@ -23,8 +26,16 @@ const useRoomStore = create((set, get) => ({
   error: null,
   passCodeRequired: false,
 
-  // ── Internal SSE reference ──
-  _eventSource: null,
+  // ── Chat state (merged from useRoomChat) ──
+  chatMessages: [],
+  isChatConnected: false,
+  typingUsers: [],
+  _typingMap: new Map(), // username → timeout-id (internal)
+
+  // ── Internal Socket.IO reference ──
+  _socket: null,
+  _typingDebounceTimer: null,
+  _isTypingEmitted: false,
 
   // ─────────────────────────────────────────────────
   // Join a room via invite code.
@@ -39,8 +50,8 @@ const useRoomStore = create((set, get) => ({
         livekitToken: data.livekitToken || null,
         isJoining: false,
       });
-      // Auto-connect to SSE
-      get().connectSSE(data.room.roomId);
+      // Auto-connect to WebSocket
+      get().connectWS(data.room.roomId);
       // Load room participants' goals
       get().loadRoomGoals(data.room.roomId);
       return data;
@@ -65,16 +76,21 @@ const useRoomStore = create((set, get) => ({
   leave: async () => {
     set({ isLeaving: true });
     try {
-      get().disconnectSSE();
+      const socket = get()._socket;
+      if (socket) socket.emit("leave_room");
+      get().disconnectWS();
       const data = await roomService.leave();
       set({
         room: null,
         participants: [],
         notifications: [],
         roomGoals: [],
+        chatMessages: [],
+        typingUsers: [],
         livekitToken: null,
         isLeaving: false,
         isConnected: false,
+        isChatConnected: false,
         error: null,
         passCodeRequired: false,
       });
@@ -86,15 +102,18 @@ const useRoomStore = create((set, get) => ({
         participants: [],
         notifications: [],
         roomGoals: [],
+        chatMessages: [],
+        typingUsers: [],
         livekitToken: null,
         isLeaving: false,
         isConnected: false,
+        isChatConnected: false,
       });
     }
   },
 
   // ─────────────────────────────────────────────────
-  // Timer controls (host only). The SSE PHASE_CHANGED
+  // Timer controls (host only). The PHASE_CHANGED
   // event updates the room state for ALL participants;
   // these actions just fire the API call.
   // ─────────────────────────────────────────────────
@@ -202,7 +221,7 @@ const useRoomStore = create((set, get) => ({
   createGoal: async (title, parentId = null) => {
     try {
       await goalService.create(title, parentId);
-      // The SSE event will update the goals list
+      // The room_event will update the goals list
     } catch (e) {
       console.error("createGoal failed:", e.response?.data?.message);
       throw e;
@@ -212,7 +231,7 @@ const useRoomStore = create((set, get) => ({
   toggleGoal: async (goalId, isCompleted) => {
     try {
       await goalService.update(goalId, { isCompleted });
-      // The SSE event will update the goals list
+      // The room_event will update the goals list
 
       // Auto-complete parent: if we just completed a sub-goal, check if all
       // siblings under the same parent are now complete.
@@ -259,7 +278,7 @@ const useRoomStore = create((set, get) => ({
   updateGoalTitle: async (goalId, title) => {
     try {
       await goalService.update(goalId, { title });
-      // The SSE event will update the goals list
+      // The room_event will update the goals list
     } catch (e) {
       console.error("updateGoalTitle failed:", e.response?.data?.message);
       throw e;
@@ -269,7 +288,7 @@ const useRoomStore = create((set, get) => ({
   deleteGoal: async (goalId) => {
     try {
       await goalService.delete(goalId);
-      // No SSE event for deletion, so remove locally
+      // No event for deletion, so remove locally
       set((state) => ({
         roomGoals: state.roomGoals.map((pg) => ({
           ...pg,
@@ -290,51 +309,180 @@ const useRoomStore = create((set, get) => ({
   },
 
   // ─────────────────────────────────────────────────
-  // SSE connection management.
+  // Chat helpers (emit to the unified room socket).
   // ─────────────────────────────────────────────────
-  connectSSE: (roomId) => {
-    // Close existing connection if any
-    const existing = get()._eventSource;
-    if (existing) existing.close();
+  sendChatMessage: (text, avatar) => {
+    const socket = get()._socket;
+    if (!socket || !text?.trim()) return;
+    socket.emit("send_message", {
+      text: text.trim(),
+      avatar: avatar || undefined,
+    });
+    // Immediately stop typing indicator when message is sent
+    if (get()._isTypingEmitted) {
+      socket.emit("typing", { isTyping: false });
+      set({ _isTypingEmitted: false });
+    }
+    clearTimeout(get()._typingDebounceTimer);
+  },
 
-    const url = roomService.getSSEUrl(roomId);
+  /**
+   * emitTyping — call on every keystroke in the chat input.
+   *
+   * Emits `typing: true` once, then debounces — after 2s of no keystrokes,
+   * emits `typing: false`. This avoids spamming the server on every key.
+   */
+  emitTyping: () => {
+    const socket = get()._socket;
+    if (!socket) return;
+
+    // Emit "started typing" only once per burst
+    if (!get()._isTypingEmitted) {
+      socket.emit("typing", { isTyping: true });
+      set({ _isTypingEmitted: true });
+    }
+
+    // Reset the stop-typing debounce
+    clearTimeout(get()._typingDebounceTimer);
+    const timer = setTimeout(() => {
+      const s = get()._socket;
+      if (s) s.emit("typing", { isTyping: false });
+      set({ _isTypingEmitted: false });
+    }, 2000);
+    set({ _typingDebounceTimer: timer });
+  },
+
+  // ─────────────────────────────────────────────────
+  // WebSocket connection management (replaces SSE).
+  // ─────────────────────────────────────────────────
+  connectWS: (roomId) => {
+    // Close existing connection if any
+    const existing = get()._socket;
+    if (existing) existing.disconnect();
+
     const token = localStorage.getItem("access_token");
-    const es = new EventSourcePolyfill(url, {
-      headers: { Authorization: `Bearer ${token}` },
-      heartbeatTimeout: 200 * 60 * 1000, // 5 min — backend doesn't send heartbeats
+    if (!token) return;
+
+    // Derive Socket.IO server URL from VITE_API_BASE_URL
+    // e.g. "http://localhost:3000/api" → "http://localhost:3000"
+    const apiBase =
+      import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+    const serverUrl = apiBase.replace(/\/api\/?$/, "");
+
+    const socket = io(`${serverUrl}/api/room`, {
+      auth: { token },
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      randomizationFactor: 0.5,
     });
 
-    es.onopen = () => {
-      set({ isConnected: true });
-    };
+    socket.on("connect", () => {
+      set({ isConnected: true, isChatConnected: true });
+      socket.emit("join_room", { roomId });
+    });
 
-    es.onmessage = (event) => {
+    socket.on("disconnect", () => {
+      set({ isConnected: false, isChatConnected: false });
+      // Clear typing indicators on disconnect
+      const map = get()._typingMap;
+      map.forEach((tid) => clearTimeout(tid));
+      map.clear();
+      set({ typingUsers: [] });
+    });
+
+    // Initial connection confirmation from gateway
+    socket.on("connected", () => {
+      set({ isConnected: true, isChatConnected: true });
+    });
+
+    // ── Room events (replaces SSE onmessage) ──
+    socket.on("room_event", (data) => {
       try {
-        const data = JSON.parse(event.data);
-        get()._handleSSEEvent(data);
+        get()._handleRoomEvent(data);
       } catch {
-        // Silently ignore parse errors
+        // Silently ignore
       }
-    };
+    });
 
-    es.onerror = () => {
-      set({ isConnected: false });
-      // EventSource auto-reconnects; we just update state
-    };
+    // ── Chat events ──
+    socket.on("chat_history", (history) => {
+      set({ chatMessages: history || [] });
+    });
 
-    set({ _eventSource: es });
+    socket.on("new_message", (msg) => {
+      set((state) => ({ chatMessages: [...state.chatMessages, msg] }));
+      // When someone sends a message, they're no longer "typing"
+      if (msg.username) {
+        const map = get()._typingMap;
+        if (map.has(msg.username)) {
+          clearTimeout(map.get(msg.username));
+          map.delete(msg.username);
+          set({ typingUsers: Array.from(map.keys()) });
+        }
+      }
+    });
+
+    socket.on("user_typing", ({ username, isTyping }) => {
+      if (!username) return;
+      const map = get()._typingMap;
+
+      // Clear any existing timeout for this user
+      if (map.has(username)) {
+        clearTimeout(map.get(username));
+      }
+
+      if (isTyping) {
+        // Auto-expire after 4s in case we never get isTyping=false
+        const tid = setTimeout(() => {
+          map.delete(username);
+          set({ typingUsers: Array.from(map.keys()) });
+        }, 4000);
+        map.set(username, tid);
+      } else {
+        map.delete(username);
+      }
+
+      set({ typingUsers: Array.from(map.keys()) });
+    });
+
+    // ── Error from gateway ──
+    socket.on("room_error", ({ message }) => {
+      console.error("[RoomGateway] Error:", message);
+    });
+
+    // Re-join room on reconnection (socket.io auto-reconnects,
+    // but the server-side socket loses the room membership)
+    socket.io.on("reconnect", () => {
+      socket.emit("join_room", { roomId });
+    });
+
+    set({ _socket: socket });
   },
 
-  disconnectSSE: () => {
-    const es = get()._eventSource;
-    if (es) es.close();
-    set({ _eventSource: null, isConnected: false });
+  disconnectWS: () => {
+    const socket = get()._socket;
+    if (socket) socket.disconnect();
+    // Clear typing map
+    const map = get()._typingMap;
+    map.forEach((tid) => clearTimeout(tid));
+    map.clear();
+    set({
+      _socket: null,
+      isConnected: false,
+      isChatConnected: false,
+      chatMessages: [],
+      typingUsers: [],
+    });
   },
 
   // ─────────────────────────────────────────────────
-  // SSE event handler — processes room events.
+  // Room event handler — processes room events
+  // (same logic as the old _handleSSEEvent).
   // ─────────────────────────────────────────────────
-  _handleSSEEvent: (event) => {
+  _handleRoomEvent: (event) => {
     const { type, payload } = event;
 
     switch (type) {
@@ -528,16 +676,19 @@ const useRoomStore = create((set, get) => ({
   // Full reset — call on page unmount / navigation away.
   // ─────────────────────────────────────────────────
   reset: () => {
-    get().disconnectSSE();
+    get().disconnectWS();
     set({
       room: null,
       participants: [],
       notifications: [],
       roomGoals: [],
+      chatMessages: [],
+      typingUsers: [],
       livekitToken: null,
       isJoining: false,
       isLeaving: false,
       isConnected: false,
+      isChatConnected: false,
       isGoalsLoading: false,
       isTimerLoading: false,
       error: null,

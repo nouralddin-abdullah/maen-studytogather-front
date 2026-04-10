@@ -55,6 +55,16 @@ function GoalsPanel({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [showUserPicker]);
 
+  // Auto-switch back to own tab if the currently viewed participant leaves
+  useEffect(() => {
+    if (activeTab !== userId) {
+      const isStillInRoom = participants.some((p) => p.id === activeTab);
+      if (!isStillInRoom) {
+        setActiveTab(userId);
+      }
+    }
+  }, [activeTab, participants, userId]);
+
   // Get goals for the active tab
   const activeEntry = roomGoals.find((pg) => pg.id === activeTab);
   const activeGoals = activeEntry?.goals || [];

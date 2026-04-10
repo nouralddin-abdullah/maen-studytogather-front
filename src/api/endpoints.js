@@ -21,7 +21,7 @@ const ENDPOINTS = {
     DETAIL: (id) => `/rooms/${id}`,
     JOIN: (inviteCode) => `/rooms/join/${inviteCode}`,
     LEAVE: "/rooms/leave",
-    SSE: (roomId) => `/rooms/sse/${roomId}`,
+
     START_TIMER: (roomId) => `/rooms/${roomId}/start-timer`,
     PAUSE_TIMER: (roomId) => `/rooms/${roomId}/pause-timer`,
     RESUME_TIMER: (roomId) => `/rooms/${roomId}/resume-timer`,

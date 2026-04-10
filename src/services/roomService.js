@@ -129,16 +129,7 @@ const roomService = {
     return response.data;
   },
 
-  /**
-   * Build the full SSE URL for the given room (no token in query).
-   * @param {string} roomId
-   * @returns {string}
-   */
-  getSSEUrl(roomId) {
-    const base =
-      import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
-    return `${base}${ENDPOINTS.ROOMS.SSE(roomId)}`;
-  },
+
 
   // ── Host-only settings (includes passCode) ──
 
